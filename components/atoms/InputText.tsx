@@ -14,7 +14,7 @@ export default function InputText({ style, variant = 'form', ...props }: InputTe
   return (
     <TextInput
       style={[inputStyle, style]}
-      placeholderTextColor={variant === 'login' ? "#A0A0A0" : "#A67A7A"}
+      placeholderTextColor="#A0A0A0"
       {...props}
     />
   );
