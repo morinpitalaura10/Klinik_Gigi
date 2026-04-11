@@ -16,7 +16,7 @@ export default function TopBarAdmin({ title, role, customLeftTitle, customRightT
       {/* BAGIAN KIRI: LOGO + NAMA KLINIK + ALAMAT */}
       <View style={styles.leftSection}>
         <View style={styles.logoBadge}>
-          <MaterialCommunityIcons name="tooth-outline" size={32} color={Colors.primary} />
+          <MaterialCommunityIcons name="tooth-outline" size={32} color={Colors.black} />
         </View>
         <View>
           {customLeftTitle ? (

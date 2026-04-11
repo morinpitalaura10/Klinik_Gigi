@@ -9,7 +9,7 @@ export const Colors = {
   white: '#FFFFFF',
   black: '#000000',
   gray: '#888888',
-  text: '#333333',
+  text: '#555555', // Diubah menjadi Abu-abu sesuai permintaan
   placeholder: '#A0A0A0',
   formInputBg: '#FFFFFF', // Diubah menjadi Putih sesuai permintaan
 };
@@ -77,7 +77,7 @@ export const GlobalStyles = StyleSheet.create({
   title: {
     fontSize: 32,
     fontWeight: '900',
-    color: Colors.primary,
+    color: Colors.black, // Diubah menjadi hitam
     textAlign: 'center',
   },
   label: {
@@ -118,7 +118,7 @@ export const GlobalStyles = StyleSheet.create({
   },
   formInput: {
     borderWidth: 1.5,
-    borderColor: Colors.primary,
+    borderColor: Colors.black, // Diubah menjadi hitam
     borderRadius: 25,
     height: 50,
     backgroundColor: Colors.formInputBg,

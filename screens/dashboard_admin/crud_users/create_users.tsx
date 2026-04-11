@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { 
-  View, 
-  Text, 
-  StyleSheet, 
-  ScrollView, 
-  Alert, 
+import {
+  View,
+  Text,
+  StyleSheet,
+  ScrollView,
+  Alert,
   TouchableOpacity,
   KeyboardAvoidingView,
   Platform
@@ -57,13 +57,11 @@ export default function CreateUsers({ navigation, route }: any) {
   const roleOptions = [
     { label: 'Admin', value: 'admin' },
     { label: 'Dokter', value: 'dokter' },
-    { label: 'Perawat', value: 'perawat' },
-    { label: 'Resepsionis', value: 'resepsionis' },
   ];
 
   const spesialisasiOptions = [
     { label: 'Dokter Umum', value: 'umum' },
-    { label: 'Dokter Ortodonti', value: 'ortodonti' },
+    { label: 'Dokter Ortodental', value: 'ortodonti' },
   ];
 
   const handleSave = async () => {
@@ -160,13 +158,13 @@ export default function CreateUsers({ navigation, route }: any) {
   };
 
   return (
-    <AdminLayout 
-      activeTab="beranda" 
+    <AdminLayout
+      activeTab="beranda"
       customLeftTitle={isEditing ? 'Ubah Pengguna' : 'Tambah Pengguna'}
       customRightTitle="Manajemen User"
       noScroll={true}
     >
-      <KeyboardAvoidingView 
+      <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         style={{ flex: 1 }}
       >
@@ -232,7 +230,7 @@ export default function CreateUsers({ navigation, route }: any) {
             )}
 
             <View style={{ flexDirection: 'row', justifyContent: 'flex-end', marginTop: 20 }}>
-              <TouchableOpacity 
+              <TouchableOpacity
                 style={GlobalStyles.btnBatal}
                 onPress={() => navigation.goBack()}
               >

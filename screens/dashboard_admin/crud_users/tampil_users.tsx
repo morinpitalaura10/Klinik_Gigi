@@ -137,7 +137,7 @@ export default function TampilUsers({ navigation }: any) {
   return (
     <AdminLayout activeTab="beranda" noScroll={true}>
       {loading && !refreshing ? (
-        <ActivityIndicator size="large" color={Colors.primary} style={{ marginTop: 50 }} />
+        <ActivityIndicator size="large" color={Colors.black} style={{ marginTop: 50 }} />
       ) : (
         <FlatList
           data={filteredUsers}
@@ -242,7 +242,7 @@ const styles = StyleSheet.create({
     padding: 15,
     marginBottom: 12,
     borderLeftWidth: 5,
-    borderLeftColor: Colors.primary,
+    borderLeftColor: Colors.black,
   },
   userInfo: {
     flexDirection: 'row',
@@ -253,7 +253,7 @@ const styles = StyleSheet.create({
     width: 45,
     height: 45,
     borderRadius: 22.5,
-    backgroundColor: '#F2E3E3',
+    backgroundColor: '#E0E0E0', 
     alignItems: 'center',
     justifyContent: 'center',
     marginRight: 15,
@@ -261,7 +261,7 @@ const styles = StyleSheet.create({
   avatarText: {
     fontSize: 18,
     fontWeight: 'bold',
-    color: Colors.primary,
+    color: Colors.black, 
   },
   textDetails: {
     flex: 1,
@@ -269,7 +269,7 @@ const styles = StyleSheet.create({
   userName: {
     fontSize: 16,
     fontWeight: 'bold',
-    color: '#333',
+    color: Colors.text,
   },
   userRole: {
     fontSize: 12,
