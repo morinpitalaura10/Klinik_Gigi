@@ -88,6 +88,7 @@ export default function Login({ navigation }: any) {
         placeholder="Masukkan password Anda"
         value={password}
         onChangeText={setPassword}
+        variant="login"
       />
 
       <CaptchaBox

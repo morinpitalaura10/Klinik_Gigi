@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import {
   View,
   Text,
@@ -16,43 +16,21 @@ import LabeledInput from '../../../components/molecules/LabeledInput';
 import PasswordInput from '../../../components/molecules/PasswordInput';
 import DropdownInput from '../../../components/molecules/DropdownInput';
 import PrimaryButton from '../../../components/atoms/PrimaryButton';
-import Header from '../../../components/atoms/Header';
+import { useNavigation } from '@react-navigation/native';
 
-export default function CreateUsers({ navigation, route }: any) {
-  const editUser = route.params?.editUser;
-  const isEditing = !!editUser;
+export function CreateUser() {
+  const navigation = useNavigation<any>();
 
   // Form States
-  const [namaUsers, setNamaUsers] = useState(editUser?.nama_users || '');
-  const [us, setUs] = useState(editUser?.us || '');
-  const [pw, setPw] = useState(editUser?.pw || '');
-  const [confirmPw, setConfirmPw] = useState(editUser?.pw || '');
-  const [emailUsers, setEmailUsers] = useState(editUser?.email_users || '');
-  const [role, setRole] = useState(editUser?.role || '');
-  const [spesialisasi, setSpesialisasi] = useState(''); // Untuk tb_dokter
+  const [namaUsers, setNamaUsers] = useState('');
+  const [us, setUs] = useState('');
+  const [pw, setPw] = useState('');
+  const [confirmPw, setConfirmPw] = useState('');
+  const [emailUsers, setEmailUsers] = useState('');
+  const [role, setRole] = useState('');
+  const [spesialisasi, setSpesialisasi] = useState('');
 
   const [loading, setLoading] = useState(false);
-
-  // Fetch doctor data if editing a doctor
-  useEffect(() => {
-    if (isEditing && editUser.role.toLowerCase() === 'dokter') {
-      fetchDoctorInfo();
-    }
-  }, [editUser]);
-
-  const fetchDoctorInfo = async () => {
-    try {
-      const { data, error } = await supabase
-        .from('tb_dokter')
-        .select('spesialisasi')
-        .eq('user_id', editUser.id_users)
-        .single();
-
-      if (data) setSpesialisasi(data.spesialisasi);
-    } catch (e) {
-      console.log("Not a doctor or no doctor info found");
-    }
-  };
 
   const roleOptions = [
     { label: 'Admin', value: 'admin' },
@@ -65,7 +43,6 @@ export default function CreateUsers({ navigation, route }: any) {
   ];
 
   const handleSave = async () => {
-    // 1. Validasi
     if (!namaUsers || !us || !pw || !emailUsers || !role) {
       Alert.alert('Peringatan', 'Harap isi semua kolom yang wajib!');
       return;
@@ -84,72 +61,35 @@ export default function CreateUsers({ navigation, route }: any) {
     setLoading(true);
 
     try {
-      if (isEditing) {
-        // UPDATE MODE
-        const { error: userError } = await supabase
-          .from('tb_users')
-          .update({
-            nama_users: namaUsers,
-            us: us,
-            pw: pw,
-            email_users: emailUsers,
-            role: role
-          })
-          .eq('id_users', editUser.id_users);
+      const { data: newUser, error: userError } = await supabase
+        .from('tb_users')
+        .insert({
+          nama_users: namaUsers,
+          us: us,
+          pw: pw,
+          email_users: emailUsers,
+          role: role
+        })
+        .select()
+        .single();
 
-        if (userError) throw userError;
+      if (userError) throw userError;
 
-        // Handle tb_dokter
-        if (role === 'dokter') {
-          // Upsert doctor info
-          const { error: docError } = await supabase
-            .from('tb_dokter')
-            .upsert({
-              user_id: editUser.id_users,
-              nama: namaUsers,
-              email_users: emailUsers,
-              spesialisasi: spesialisasi
-            }, { onConflict: 'user_id' });
-          if (docError) throw docError;
-        } else if (editUser.role === 'dokter' && role !== 'dokter') {
-          // If was doctor but now not, delete doctor record
-          await supabase.from('tb_dokter').delete().eq('user_id', editUser.id_users);
-        }
-
-        Alert.alert('Berhasil', 'Data pengguna berhasil diperbarui.');
-        navigation.goBack();
-      } else {
-        // CREATE MODE
-        const { data: newUser, error: userError } = await supabase
-          .from('tb_users')
+      // Handle tb_dokter if role is dokter
+      if (role === 'dokter' && newUser) {
+        const { error: docError } = await supabase
+          .from('tb_dokter')
           .insert({
-            nama_users: namaUsers,
-            us: us,
-            pw: pw,
+            user_id: newUser.id_users,
+            nama: namaUsers,
             email_users: emailUsers,
-            role: role
-          })
-          .select()
-          .single();
-
-        if (userError) throw userError;
-
-        // Handle tb_dokter if role is dokter
-        if (role === 'dokter' && newUser) {
-          const { error: docError } = await supabase
-            .from('tb_dokter')
-            .insert({
-              user_id: newUser.id_users,
-              nama: namaUsers,
-              email_users: emailUsers,
-              spesialisasi: spesialisasi
-            });
-          if (docError) throw docError;
-        }
-
-        Alert.alert('Berhasil', 'Pengguna baru berhasil ditambahkan.');
-        navigation.goBack();
+            spesialisasi: spesialisasi
+          });
+        if (docError) throw docError;
       }
+
+      Alert.alert('Berhasil', 'Pengguna baru berhasil ditambahkan.');
+      navigation.goBack();
     } catch (error: any) {
       Alert.alert('Gagal Menyimpan', error.message);
     } finally {
@@ -160,7 +100,7 @@ export default function CreateUsers({ navigation, route }: any) {
   return (
     <AdminLayout
       activeTab="beranda"
-      customLeftTitle={isEditing ? 'Ubah Pengguna' : 'Tambah Pengguna'}
+      customLeftTitle="Tambah Pengguna"
       customRightTitle="Manajemen User"
       noScroll={true}
     >
@@ -170,7 +110,7 @@ export default function CreateUsers({ navigation, route }: any) {
       >
         <ScrollView contentContainerStyle={LayoutStyles.scrollContent}>
           <View style={GlobalStyles.formCard}>
-            <Text style={GlobalStyles.formSectionTitle}>INFORMASI AKUN</Text>
+            <Text style={GlobalStyles.formSectionTitle}>TAMBAH INFORMASI AKUN</Text>
             <View style={GlobalStyles.formDivider} />
 
             <LabeledInput
@@ -238,7 +178,7 @@ export default function CreateUsers({ navigation, route }: any) {
               </TouchableOpacity>
 
               <PrimaryButton
-                title={loading ? "Menyimpan..." : "Simpan"}
+                title={loading ? "Menyimpan..." : "Tambah"}
                 onPress={handleSave}
                 style={GlobalStyles.btnSimpan}
                 disabled={loading}

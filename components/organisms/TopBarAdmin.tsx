@@ -1,7 +1,7 @@
 import React from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import { View, Text } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-import { Colors, LayoutStyles } from '../../styles/GlobalStyles';
+import { Colors, LayoutStyles, GlobalStyles } from '../../styles/GlobalStyles';
 
 interface Props {
   title: string;
@@ -12,56 +12,29 @@ interface Props {
 
 export default function TopBarAdmin({ title, role, customLeftTitle, customRightTitle }: Props) {
   return (
-    <View style={styles.container}>
-      {/* BAGIAN KIRI: LOGO + NAMA KLINIK + ALAMAT */}
-      <View style={styles.leftSection}>
-        <View style={styles.logoBadge}>
+    <View style={GlobalStyles.topBarContainer}>
+      {/* BAGIAN KIRI: LOGO + NAMA KLINIK + ALAMAT (SELALU MUNCUL) */}
+      <View style={GlobalStyles.topBarLeft}>
+        <View style={GlobalStyles.topBarLogoBadge}>
           <MaterialCommunityIcons name="tooth-outline" size={32} color={Colors.black} />
         </View>
         <View>
-          {customLeftTitle ? (
-            <Text style={LayoutStyles.clinicName}>{customLeftTitle}</Text>
-          ) : (
-            <>
-              <Text style={LayoutStyles.clinicName}>Galeri Ortodental</Text>
-              <Text style={LayoutStyles.clinicAddress}>Cipto Park Jl. Dr. Cipto Mangunkusumo No. 54 Cirebon</Text>
-            </>
-          )}
+          <Text style={LayoutStyles.clinicName}>Galeri Ortodental</Text>
+          <Text style={LayoutStyles.clinicAddress}>Cipto Park Jl. Dr. Cipto Mangunkusumo No. 54 Cirebon</Text>
         </View>
       </View>
 
-      {/* BAGIAN KANAN: NAMA USER */}
-      <Text style={styles.role}>{customRightTitle || title}</Text>
+      {/* BAGIAN KANAN: JUDUL HALAMAN + NAMA USER */}
+      <View style={{ alignItems: 'flex-end' }}>
+        {customRightTitle && (
+          <Text style={[GlobalStyles.topBarTextRight, { fontSize: 16, marginBottom: 2, fontWeight: 'bold' }]}>
+            {customRightTitle}
+          </Text>
+        )}
+        <Text style={[GlobalStyles.topBarTextRight, { fontSize: 15, fontWeight: '500' }]}>
+          {title}
+        </Text>
+      </View>
     </View>
   );
 }
-
-
-const styles = StyleSheet.create({
-  container: {
-    backgroundColor: Colors.primary,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: 20,
-    paddingVertical: 15, // Disesuaikan sedikit
-  },
-  leftSection: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  logoBadge: {
-    backgroundColor: Colors.white,
-    width: 55,
-    height: 55,
-    borderRadius: 27.5,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginRight: 15,
-  },
-  role: {
-    color: Colors.white,
-    fontSize: 14,
-    fontWeight: '600',
-  },
-});

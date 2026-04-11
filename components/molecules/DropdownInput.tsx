@@ -2,14 +2,13 @@ import React, { useState } from 'react';
 import { 
   View, 
   Text, 
-  StyleSheet, 
   TouchableOpacity, 
   Modal, 
   FlatList, 
   TouchableWithoutFeedback 
 } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-import { Colors } from '../../styles/GlobalStyles';
+import { Colors, GlobalStyles } from '../../styles/GlobalStyles';
 import TextLabel from '../atoms/TextLabel';
 
 interface Option {
@@ -36,15 +35,15 @@ export default function DropdownInput({ label, options, selectedValue, onValueCh
   };
 
   return (
-    <View style={styles.container}>
-      <TextLabel style={styles.label}>{label}</TextLabel>
+    <View style={GlobalStyles.inputWrapper}>
+      <TextLabel style={GlobalStyles.inputLabel}>{label}</TextLabel>
       
       <TouchableOpacity 
-        style={styles.pickerButton} 
+        style={GlobalStyles.pickerButton} 
         onPress={() => setModalVisible(true)}
         activeOpacity={0.7}
       >
-        <Text style={[styles.selectedText, !selectedOption && { color: '#A0A0A0' }]}>
+        <Text style={[GlobalStyles.pickerText, !selectedOption && { color: '#A0A0A0' }]}>
           {selectedOption ? selectedOption.label : placeholder}
         </Text>
         <MaterialCommunityIcons name="chevron-down" size={24} color={Colors.primary} />
@@ -57,10 +56,10 @@ export default function DropdownInput({ label, options, selectedValue, onValueCh
         onRequestClose={() => setModalVisible(false)}
       >
         <TouchableWithoutFeedback onPress={() => setModalVisible(false)}>
-          <View style={styles.modalOverlay}>
-            <View style={styles.modalContent}>
-              <View style={styles.modalHeader}>
-                <Text style={styles.modalTitle}>{label}</Text>
+          <View style={GlobalStyles.selectionModalOverlay}>
+            <View style={GlobalStyles.selectionModalContent}>
+              <View style={GlobalStyles.selectionModalHeader}>
+                <Text style={GlobalStyles.selectionModalTitle}>{label}</Text>
                 <TouchableOpacity onPress={() => setModalVisible(false)}>
                   <MaterialCommunityIcons name="close" size={24} color={Colors.black} />
                 </TouchableOpacity>
@@ -72,14 +71,14 @@ export default function DropdownInput({ label, options, selectedValue, onValueCh
                 renderItem={({ item }) => (
                   <TouchableOpacity 
                     style={[
-                      styles.optionItem, 
-                      selectedValue === item.value && styles.optionItemActive
+                      GlobalStyles.selectionOptionItem, 
+                      selectedValue === item.value && GlobalStyles.selectionOptionItemActive
                     ]}
                     onPress={() => handleSelect(item.value)}
                   >
                     <Text style={[
-                      styles.optionText, 
-                      selectedValue === item.value && styles.optionTextActive
+                      GlobalStyles.selectionOptionText, 
+                      selectedValue === item.value && GlobalStyles.selectionOptionTextActive
                     ]}>
                       {item.label}
                     </Text>
@@ -96,75 +95,3 @@ export default function DropdownInput({ label, options, selectedValue, onValueCh
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    marginBottom: 20,
-  },
-  label: {
-    marginBottom: 8,
-    marginLeft: 6,
-    fontWeight: 'bold',
-  },
-  pickerButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    borderWidth: 1.5,
-    borderColor: Colors.primary,
-    borderRadius: 25,
-    height: 50,
-    backgroundColor: '#F2E3E3', // Matching formInputBg
-    paddingHorizontal: 20,
-  },
-  selectedText: {
-    fontSize: 14,
-    color: Colors.black,
-  },
-  modalOverlay: {
-    flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.5)',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  modalContent: {
-    width: '80%',
-    backgroundColor: Colors.white,
-    borderRadius: 20,
-    padding: 20,
-    maxHeight: '60%',
-  },
-  modalHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 15,
-    borderBottomWidth: 1,
-    borderBottomColor: '#EEE',
-    paddingBottom: 10,
-  },
-  modalTitle: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: Colors.primary,
-  },
-  optionItem: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingVertical: 15,
-    borderBottomWidth: 0.5,
-    borderBottomColor: '#EEE',
-  },
-  optionItemActive: {
-    backgroundColor: '#F9F9F9',
-  },
-  optionText: {
-    fontSize: 16,
-    color: '#333',
-  },
-  optionTextActive: {
-    color: Colors.primary,
-    fontWeight: 'bold',
-  },
-});

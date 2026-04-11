@@ -6,16 +6,32 @@ import { AuthContext } from '../context/AuthContext';
 // Import Layar-layar Aplikasi
 import Login from '../screens/Login';
 import MainAdmin from '../screens/dashboard_admin/main_admin';
-import TampilUsers from '../screens/dashboard_admin/crud_users/tampil_users';
-import CreateUser from '../screens/dashboard_admin/crud_users/create_users';
+import { TampilUsers } from '../screens/dashboard_admin/crud_users/tampil_users';
+import { CreateUser } from '../screens/dashboard_admin/crud_users/create_users';
+import { ReadUser } from '../screens/dashboard_admin/crud_users/read_users';
+import { UpdateUser } from '../screens/dashboard_admin/crud_users/update_users';
+import { DeleteUser } from '../screens/dashboard_admin/crud_users/delete_users';
 
-// Mendefinisikan tipe rute (Strict Type aman untuk TypeScript) - optional now since we split stacks, but good to have
+// Tindakan Screens
+import { TampilTindakan } from '../screens/dashboard_admin/crud_tindakan/tampil_tindakan';
+import { CreateTindakan } from '../screens/dashboard_admin/crud_tindakan/create_tindakan';
+import { UpdateTindakan } from '../screens/dashboard_admin/crud_tindakan/update_tindakan';
+import { DeleteTindakan } from '../screens/dashboard_admin/crud_tindakan/delete_tindakan';
+
+// Mendefinisikan tipe rute
 export type RootStackParamList = {
   Login: undefined;
   MainAdmin: undefined;
   TampilUsers: undefined;
-  CreateUser: { editUser?: any } | undefined;
-  // Tambahkan layar dokter/umum nanti di sini
+  CreateUser: undefined;
+  UpdateUser: { editUser: any };
+  ReadUser: { id: string | number };
+  DeleteUser: { id: string | number, name: string };
+  // Tindakan
+  TampilTindakan: undefined;
+  CreateTindakan: undefined;
+  UpdateTindakan: { editItem: any };
+  DeleteTindakan: { id: string | number, name: string };
 };
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
@@ -42,6 +58,29 @@ export default function AppNavigator() {
           <Stack.Screen name="MainAdmin" component={MainAdmin} />
           <Stack.Screen name="TampilUsers" component={TampilUsers} />
           <Stack.Screen name="CreateUser" component={CreateUser} />
+          <Stack.Screen name="ReadUser" component={ReadUser} />
+          <Stack.Screen name="UpdateUser" component={UpdateUser} />
+          <Stack.Screen 
+            name="DeleteUser" 
+            component={DeleteUser} 
+            options={{ 
+              presentation: 'transparentModal',
+              animation: 'fade',
+            }}
+          />
+
+          {/* Tindakan Routes */}
+          <Stack.Screen name="TampilTindakan" component={TampilTindakan} />
+          <Stack.Screen name="CreateTindakan" component={CreateTindakan} />
+          <Stack.Screen name="UpdateTindakan" component={UpdateTindakan} />
+          <Stack.Screen 
+            name="DeleteTindakan" 
+            component={DeleteTindakan} 
+            options={{ 
+              presentation: 'transparentModal',
+              animation: 'fade',
+            }}
+          />
         </Stack.Navigator>
       ) : (
         // BISA DITAMBAHKAN UNTUK DOKTER ATAU ROLE LAIN NANTINYA

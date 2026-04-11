@@ -1,14 +1,15 @@
 import React from 'react';
 import { 
   View, 
-  StyleSheet, 
-  SafeAreaView, 
+  ScrollView,
   KeyboardAvoidingView, 
   Platform, 
   TouchableWithoutFeedback, 
   Keyboard 
 } from 'react-native';
-import { Colors } from '../../styles/GlobalStyles';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { AuthStyles } from '../../styles/GlobalStyles';
+
 
 interface Props {
   children: React.ReactNode;
@@ -16,19 +17,29 @@ interface Props {
 
 export default function AuthTemplate({ children }: Props) {
   return (
-    <SafeAreaView style={styles.safeArea}>
+    <SafeAreaView style={AuthStyles.safeArea}>
       <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-        style={styles.keyboardView}
+        style={AuthStyles.keyboardView}
       >
         <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-          <View style={styles.container}>
+          <View style={AuthStyles.container}>
             {/* Bagian Merah Atas (Spacer) */}
-            <View style={styles.topSection} />
+            <View style={AuthStyles.topSection} />
 
-            {/* Bagian Kartu Putih Melengkung Tempat Form Berada */}
-            <View style={styles.bottomCard}>
-              {children}
+            {/* Arch sempit di atas - ada maroon di sisi kiri kanan */}
+            <View style={AuthStyles.archTop} />
+
+            {/* Bagian putih penuh di bawah */}
+            <View style={AuthStyles.bottomFull}>
+              <ScrollView
+                style={{ width: '100%' }}
+                contentContainerStyle={AuthStyles.formContent}
+                showsVerticalScrollIndicator={false}
+                keyboardShouldPersistTaps="handled"
+              >
+                {children}
+              </ScrollView>
             </View>
           </View>
         </TouchableWithoutFeedback>
@@ -36,28 +47,3 @@ export default function AuthTemplate({ children }: Props) {
     </SafeAreaView>
   );
 }
-
-const styles = StyleSheet.create({
-  safeArea: {
-    flex: 1,
-    backgroundColor: Colors.primary,
-  },
-  keyboardView: {
-    flex: 1,
-  },
-  container: {
-    flex: 1,
-    backgroundColor: Colors.primary,
-  },
-  topSection: {
-    height: 100,
-  },
-  bottomCard: {
-    flex: 1,
-    backgroundColor: '#FFFFFF',
-    borderTopLeftRadius: 40,
-    borderTopRightRadius: 40,
-    paddingHorizontal: 40,
-    paddingTop: 50,
-  },
-});

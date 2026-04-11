@@ -69,6 +69,7 @@ export default function MainAdmin({ navigation }: any) {
           style={LayoutStyles.dashboardCardBottom} 
           orientation="horizontal"
           textStyle={LayoutStyles.textMedium}
+          onPress={() => navigation.navigate('TampilTindakan')}
         />
 
       </View>
