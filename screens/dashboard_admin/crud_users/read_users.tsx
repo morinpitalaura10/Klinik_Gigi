@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { View, Text, ActivityIndicator, TouchableOpacity, Alert } from 'react-native';
 import { supabase } from '../../../utils/supabase';
 import AdminLayout from '../../../components/templates/AdminLayout';
-import { Colors, GlobalStyles } from '../../../styles/GlobalStyles';
+import { Colors, GlobalStyles, LayoutStyles } from '../../../styles/GlobalStyles';
 import { useNavigation, useRoute } from '@react-navigation/native';
 
 export function ReadUser() {
@@ -48,8 +48,8 @@ export function ReadUser() {
 
   if (loading) {
     return (
-      <AdminLayout activeTab="beranda" customLeftTitle="Detail Pengguna" customRightTitle="Manajemen User">
-        <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+      <AdminLayout customLeftTitle="Detail Pengguna" customRightTitle="Manajemen User">
+        <View style={LayoutStyles.scrollContent}>
           <ActivityIndicator size="large" color={Colors.primary} />
         </View>
       </AdminLayout>
@@ -58,7 +58,6 @@ export function ReadUser() {
 
   return (
     <AdminLayout 
-      activeTab="beranda" 
       customLeftTitle="Detail Pengguna" 
       customRightTitle="Manajemen User"
     >

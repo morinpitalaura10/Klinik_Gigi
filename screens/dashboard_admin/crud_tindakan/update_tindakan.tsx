@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import {
   View,
   Text,
@@ -12,6 +12,7 @@ import { supabase } from '../../../utils/supabase';
 import { Colors, GlobalStyles, LayoutStyles } from '../../../styles/GlobalStyles';
 import AdminLayout from '../../../components/templates/AdminLayout';
 import LabeledInput from '../../../components/molecules/LabeledInput';
+import DropdownInput from '../../../components/molecules/DropdownInput';
 import PrimaryButton from '../../../components/atoms/PrimaryButton';
 import { useNavigation, useRoute } from '@react-navigation/native';
 
@@ -21,11 +22,17 @@ export function UpdateTindakan() {
   const { editItem } = route.params as { editItem: any };
 
   const [namaTindakan, setNamaTindakan] = useState(editItem?.nama_tindakan || '');
+  const [layanan, setLayanan] = useState(editItem?.layanan || '');
   const [loading, setLoading] = useState(false);
 
+  const layananOptions = [
+    { label: 'Umum', value: 'Umum' },
+    { label: 'Ortodental', value: 'Ortodental' },
+  ];
+
   const handleUpdate = async () => {
-    if (!namaTindakan) {
-      Alert.alert('Peringatan', 'Harap isi nama tindakan!');
+    if (!namaTindakan || !layanan) {
+      Alert.alert('Peringatan', 'Harap isi nama tindakan dan pilih kategori!');
       return;
     }
 
@@ -35,7 +42,8 @@ export function UpdateTindakan() {
       const { error } = await supabase
         .from('tb_tindakan')
         .update({
-          nama_tindakan: namaTindakan
+          nama_tindakan: namaTindakan,
+          layanan: layanan
         })
         .eq('id_tindakan', editItem.id_tindakan);
 
@@ -52,13 +60,12 @@ export function UpdateTindakan() {
 
   return (
     <AdminLayout
-      activeTab="beranda"
       noScroll={true}
       customRightTitle="Manajemen Tindakan"
     >
       <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-        style={{ flex: 1 }}
+        style={LayoutStyles.flex1}
       >
         <ScrollView contentContainerStyle={LayoutStyles.scrollContent}>
           <View style={GlobalStyles.formCard}>
@@ -72,7 +79,15 @@ export function UpdateTindakan() {
               onChangeText={setNamaTindakan}
             />
 
-            <View style={{ flexDirection: 'row', justifyContent: 'flex-end', marginTop: 20 }}>
+            <DropdownInput
+              label="Kategori Perawatan"
+              placeholder="Pilih (Umum / Ortodental)..."
+              options={layananOptions}
+              selectedValue={layanan}
+              onValueChange={setLayanan}
+            />
+
+            <View style={[LayoutStyles.rowEnd, LayoutStyles.mt20]}>
               <TouchableOpacity
                 style={GlobalStyles.btnBatal}
                 onPress={() => navigation.goBack()}

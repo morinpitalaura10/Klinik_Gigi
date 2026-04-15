@@ -15,39 +15,34 @@ import { Colors, GlobalStyles, LayoutStyles } from '../../../styles/GlobalStyles
 import AdminLayout from '../../../components/templates/AdminLayout';
 import { useFocusEffect, useNavigation } from '@react-navigation/native';
 
-interface User {
-  id_users: string | number;
-  nama_users: string;
-  us: string;
-  role: string;
-  email_users: string;
-  tb_dokter?: {
-    spesialisasi: string;
-  }[];
+interface Pasien {
+  id_pasien: number;
+  nama_pasien: string;
+  tgl_lahir: string;
+  jk: string;
+  alamat: string;
+  pekerjaan: string;
+  nope: string;
+  alergi_obat: string;
 }
 
-export function TampilUsers() {
+export function TampilPasien() {
   const navigation = useNavigation<any>();
-  const [users, setUsers] = useState<User[]>([]);
+  const [pasien, setPasien] = useState<Pasien[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [refreshing, setRefreshing] = useState(false);
 
-  const fetchUsers = async () => {
+  const fetchPasien = async () => {
     try {
       setLoading(true);
       const { data, error } = await supabase
-        .from('tb_users')
-        .select(`
-          *,
-          tb_dokter (
-            spesialisasi
-          )
-        `)
-        .order('id_users', { ascending: false });
+        .from('tb_pasien')
+        .select('*')
+        .order('id_pasien', { ascending: false });
 
       if (error) throw error;
-      setUsers(data || []);
+      setPasien(data || []);
     } catch (error: any) {
       Alert.alert('Error', error.message);
     } finally {
@@ -58,17 +53,20 @@ export function TampilUsers() {
 
   useFocusEffect(
     useCallback(() => {
-      fetchUsers();
+      fetchPasien();
     }, [])
   );
 
-  const filteredUsers = users.filter(user => 
-    user.nama_users.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    user.us.toLowerCase().includes(searchQuery.toLowerCase())
+  const filteredData = pasien.filter(item =>
+    item.nama_pasien.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    item.nope.includes(searchQuery)
   );
 
   return (
-    <AdminLayout noScroll={true} customRightTitle="Manajemen Pengguna">
+    <AdminLayout
+      noScroll={true}
+      customRightTitle="Manajemen Pasien"
+    >
       {loading && !refreshing ? (
         <ActivityIndicator size="large" color={Colors.black} style={LayoutStyles.mt50} />
       ) : (
@@ -80,7 +78,7 @@ export function TampilUsers() {
                   <Feather name="search" size={20} color="#888" style={GlobalStyles.inputIcon} />
                   <TextInput
                     style={GlobalStyles.listSearchInput}
-                    placeholder="Cari nama atau username..."
+                    placeholder="Cari nama atau nomor HP..."
                     value={searchQuery}
                     onChangeText={setSearchQuery}
                   />
@@ -88,34 +86,45 @@ export function TampilUsers() {
               </View>
 
               <View style={GlobalStyles.listAddButtonContainer}>
-                <TouchableOpacity 
-                   style={GlobalStyles.listAddButton}
-                  onPress={() => navigation.navigate('CreateUser')}
+                <TouchableOpacity
+                  style={GlobalStyles.listAddButton}
+                  onPress={() => navigation.navigate('CreatePasien')}
                 >
                   <MaterialCommunityIcons name="plus" size={24} color="white" />
-                  <Text style={GlobalStyles.listAddButtonText}>Tambah</Text>
+                  <Text style={GlobalStyles.listAddButtonText}>Pasien</Text>
                 </TouchableOpacity>
               </View>
             </View>
+
             <View style={[GlobalStyles.listHeader, LayoutStyles.ph20, LayoutStyles.mt0, LayoutStyles.mb15]}>
-              <Text style={GlobalStyles.listTitle}>Daftar Pengguna</Text>
+              <Text style={GlobalStyles.listTitle}>Daftar Pasien</Text>
             </View>
           </View>
+
           <View style={[GlobalStyles.tableContainer, LayoutStyles.mh20]}>
             <ScrollView horizontal={true} showsHorizontalScrollIndicator={false}>
-              <View style={[GlobalStyles.tableContentWrapper, LayoutStyles.tableFixed700]}>
+              <View style={[GlobalStyles.tableContentWrapper, LayoutStyles.tableFixed1000]}>
                 <View style={GlobalStyles.tableHeader}>
                   <View style={[GlobalStyles.tableHeaderCell, GlobalStyles.tableCellNo]}>
                     <Text style={GlobalStyles.tableHeaderText}>No</Text>
                   </View>
                   <View style={[GlobalStyles.tableHeaderCell, GlobalStyles.tableCellName]}>
-                    <Text style={GlobalStyles.tableHeaderText}>Nama Pengguna</Text>
+                    <Text style={GlobalStyles.tableHeaderText}>Nama Pasien</Text>
                   </View>
-                  <View style={[GlobalStyles.tableHeaderCell, GlobalStyles.tableCellRole]}>
-                    <Text style={GlobalStyles.tableHeaderText}>Role</Text>
+                  <View style={[GlobalStyles.tableHeaderCell, GlobalStyles.tableCellTglLahir]}>
+                    <Text style={GlobalStyles.tableHeaderText}>Tgl Lahir</Text>
                   </View>
-                  <View style={[GlobalStyles.tableHeaderCell, GlobalStyles.tableCellSpec]}>
-                    <Text style={GlobalStyles.tableHeaderText}>Spesialisasi</Text>
+                  <View style={[GlobalStyles.tableHeaderCell, GlobalStyles.tableCellJK]}>
+                    <Text style={GlobalStyles.tableHeaderText}>JK</Text>
+                  </View>
+                  <View style={[GlobalStyles.tableHeaderCell, GlobalStyles.tableCellNope]}>
+                    <Text style={GlobalStyles.tableHeaderText}>Nomor HP</Text>
+                  </View>
+                  <View style={[GlobalStyles.tableHeaderCell, GlobalStyles.tableCellAlamat]}>
+                    <Text style={GlobalStyles.tableHeaderText}>Alamat</Text>
+                  </View>
+                  <View style={[GlobalStyles.tableHeaderCell, GlobalStyles.tableCellAlergi]}>
+                    <Text style={GlobalStyles.tableHeaderText}>Alergi</Text>
                   </View>
                   <View style={[GlobalStyles.tableHeaderCell, GlobalStyles.tableCellAction]}>
                     <Text style={GlobalStyles.tableHeaderText}>Aksi</Text>
@@ -123,15 +132,15 @@ export function TampilUsers() {
                 </View>
 
                 <FlatList
-                  data={filteredUsers}
-                  keyExtractor={(item) => item.id_users.toString()}
+                  data={filteredData}
+                  keyExtractor={(item) => item.id_pasien.toString()}
                   refreshing={refreshing}
                   onRefresh={() => {
                     setRefreshing(true);
-                    fetchUsers();
+                    fetchPasien();
                   }}
                   renderItem={({ item, index }) => {
-                    const isLast = index === filteredUsers.length - 1;
+                    const isLast = index === filteredData.length - 1;
                     return (
                       <View style={[
                         GlobalStyles.tableRow,
@@ -141,43 +150,39 @@ export function TampilUsers() {
                           <Text style={GlobalStyles.tableRowText}>{index + 1}</Text>
                         </View>
                         <View style={[GlobalStyles.tableCell, GlobalStyles.tableCellName]}>
-                          <View>
-                            <Text style={GlobalStyles.tableRowText}>{item.nama_users}</Text>
-                            <Text style={GlobalStyles.userRole}>@{item.us}</Text>
-                          </View>
+                          <Text style={GlobalStyles.tableRowText}>{item.nama_pasien}</Text>
                         </View>
-                        <View style={[GlobalStyles.tableCell, GlobalStyles.tableCellRole]}>
-                          <Text style={[
-                            GlobalStyles.tableRowText, 
-                            LayoutStyles.textBold, 
-                            item.role === 'admin' && LayoutStyles.textPrimary
-                          ]}>
-                            {item.role === 'admin' ? 'Admin' : 'Dokter'}
-                          </Text>
+                        <View style={[GlobalStyles.tableCell, GlobalStyles.tableCellTglLahir]}>
+                          <Text style={GlobalStyles.tableRowText}>{item.tgl_lahir}</Text>
                         </View>
-                        <View style={[GlobalStyles.tableCell, GlobalStyles.tableCellSpec]}>
-                          <Text style={GlobalStyles.tableRowText}>
-                            {item.role === 'dokter' 
-                              ? (item.tb_dokter && item.tb_dokter[0]?.spesialisasi) || 'Umum' 
-                              : '-'}
-                          </Text>
+                        <View style={[GlobalStyles.tableCell, GlobalStyles.tableCellJK]}>
+                          <Text style={GlobalStyles.tableRowText}>{item.jk}</Text>
+                        </View>
+                        <View style={[GlobalStyles.tableCell, GlobalStyles.tableCellNope]}>
+                          <Text style={GlobalStyles.tableRowText}>{item.nope}</Text>
+                        </View>
+                        <View style={[GlobalStyles.tableCell, GlobalStyles.tableCellAlamat]}>
+                          <Text style={GlobalStyles.tableRowText}>{item.alamat}</Text>
+                        </View>
+                        <View style={[GlobalStyles.tableCell, GlobalStyles.tableCellAlergi]}>
+                          <Text style={GlobalStyles.tableRowText}>{item.alergi_obat || '-'}</Text>
                         </View>
                         <View style={[GlobalStyles.tableCell, GlobalStyles.tableCellAction]}>
-                          <TouchableOpacity 
+                          <TouchableOpacity
                             style={GlobalStyles.cardActionBtn}
-                            onPress={() => navigation.navigate('ReadUser', { id: item.id_users })}
+                            onPress={() => navigation.navigate('ReadPasien', { id: item.id_pasien })}
                           >
-                            <MaterialCommunityIcons name="eye-outline" size={24} color="#2E50D4" />
+                            <MaterialCommunityIcons name="eye-outline" size={24} color="#4A90E2" />
                           </TouchableOpacity>
-                          <TouchableOpacity 
+                          <TouchableOpacity
                             style={GlobalStyles.cardActionBtn}
-                            onPress={() => navigation.navigate('UpdateUser', { editUser: item })}
+                            onPress={() => navigation.navigate('UpdatePasien', { editItem: item })}
                           >
                             <MaterialCommunityIcons name="square-edit-outline" size={24} color="#EBC112" />
                           </TouchableOpacity>
-                          <TouchableOpacity 
+                          <TouchableOpacity
                             style={GlobalStyles.cardActionBtn}
-                            onPress={() => navigation.navigate('DeleteUser', { id: item.id_users, name: item.nama_users })}
+                            onPress={() => navigation.navigate('DeletePasien', { id: item.id_pasien, name: item.nama_pasien })}
                           >
                             <MaterialCommunityIcons name="trash-can-outline" size={24} color={Colors.primary} />
                           </TouchableOpacity>
@@ -187,7 +192,7 @@ export function TampilUsers() {
                   }}
                   ListEmptyComponent={
                     <View style={GlobalStyles.emptyContent}>
-                      <Text style={GlobalStyles.emptyText}>Data tidak ditemukan</Text>
+                      <Text style={GlobalStyles.emptyText}>Data pasien tidak ditemukan</Text>
                     </View>
                   }
                 />

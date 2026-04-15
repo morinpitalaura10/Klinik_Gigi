@@ -30,7 +30,7 @@ export function UpdateUser() {
   const [confirmPw, setConfirmPw] = useState(editUser?.pw || '');
   const [emailUsers, setEmailUsers] = useState(editUser?.email_users || '');
   const [role, setRole] = useState(editUser?.role || '');
-  const [spesialisasi, setSpesialisasi] = useState('');
+  const [spesialisasi, setSpesialisasi] = useState(editUser?.spesialisasi || '');
 
   const [loading, setLoading] = useState(false);
 
@@ -60,8 +60,8 @@ export function UpdateUser() {
   ];
 
   const spesialisasiOptions = [
-    { label: 'Dokter Umum', value: 'umum' },
-    { label: 'Dokter Ortodental', value: 'ortodonti' },
+    { label: 'Umum', value: 'Umum' },
+    { label: 'Ortodental', value: 'Ortodental' },
   ];
 
   const handleUpdate = async () => {
@@ -83,14 +83,15 @@ export function UpdateUser() {
     setLoading(true);
 
     try {
-      const { error: userError } = await supabase
+       const { error: userError } = await supabase
         .from('tb_users')
         .update({
           nama_users: namaUsers,
           us: us,
           pw: pw,
           email_users: emailUsers,
-          role: role
+          role: role,
+          spesialisasi: role === 'dokter' ? spesialisasi : null
         })
         .eq('id_users', editUser.id_users);
 
@@ -133,14 +134,13 @@ export function UpdateUser() {
 
   return (
     <AdminLayout
-      activeTab="beranda"
       customLeftTitle="Ubah Pengguna"
       customRightTitle="Manajemen User"
       noScroll={true}
     >
       <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-        style={{ flex: 1 }}
+        style={LayoutStyles.flex1}
       >
         <ScrollView contentContainerStyle={LayoutStyles.scrollContent}>
           <View style={GlobalStyles.formCard}>
@@ -203,7 +203,7 @@ export function UpdateUser() {
               />
             )}
 
-            <View style={{ flexDirection: 'row', justifyContent: 'flex-end', marginTop: 20 }}>
+            <View style={[LayoutStyles.rowEnd, LayoutStyles.mt20]}>
               <TouchableOpacity
                 style={GlobalStyles.btnBatal}
                 onPress={() => navigation.goBack()}

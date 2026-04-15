@@ -38,8 +38,8 @@ export function CreateUser() {
   ];
 
   const spesialisasiOptions = [
-    { label: 'Dokter Umum', value: 'umum' },
-    { label: 'Dokter Ortodental', value: 'ortodonti' },
+    { label: 'Umum', value: 'Umum' },
+    { label: 'Ortodental', value: 'Ortodental' },
   ];
 
   const handleSave = async () => {
@@ -68,7 +68,8 @@ export function CreateUser() {
           us: us,
           pw: pw,
           email_users: emailUsers,
-          role: role
+          role: role,
+          spesialisasi: role === 'dokter' ? spesialisasi : null
         })
         .select()
         .single();
@@ -99,14 +100,13 @@ export function CreateUser() {
 
   return (
     <AdminLayout
-      activeTab="beranda"
       customLeftTitle="Tambah Pengguna"
       customRightTitle="Manajemen User"
       noScroll={true}
     >
       <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-        style={{ flex: 1 }}
+        style={LayoutStyles.flex1}
       >
         <ScrollView contentContainerStyle={LayoutStyles.scrollContent}>
           <View style={GlobalStyles.formCard}>
@@ -169,7 +169,7 @@ export function CreateUser() {
               />
             )}
 
-            <View style={{ flexDirection: 'row', justifyContent: 'flex-end', marginTop: 20 }}>
+            <View style={[LayoutStyles.rowEnd, LayoutStyles.mt20]}>
               <TouchableOpacity
                 style={GlobalStyles.btnBatal}
                 onPress={() => navigation.goBack()}

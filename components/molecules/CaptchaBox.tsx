@@ -1,60 +1,54 @@
-import React from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, ViewStyle, StyleProp } from 'react-native';
-import { MaterialCommunityIcons } from '@expo/vector-icons';
-import { Colors } from '../../styles/GlobalStyles';
+import React, { useState, useEffect } from 'react';
+import { View, Text, TextInput, StyleProp, ViewStyle } from 'react-native';
+import { GlobalStyles } from '../../styles/GlobalStyles';
 
 interface Props {
   isChecked: boolean;
-  onPress: () => void;
+  onValidChange: (isValid: boolean) => void;
   containerStyle?: StyleProp<ViewStyle>;
 }
 
-export default function CaptchaBox({ isChecked, onPress, containerStyle }: Props) {
+export default function CaptchaBox({ isChecked, onValidChange, containerStyle }: Props) {
+  const [num1, setNum1] = useState(0);
+  const [num2, setNum2] = useState(0);
+  const [answer, setAnswer] = useState('');
+
+  useEffect(() => {
+    generateCaptcha();
+  }, []);
+
+  const generateCaptcha = () => {
+    setNum1(Math.floor(Math.random() * 10) + 1);
+    setNum2(Math.floor(Math.random() * 10) + 1);
+    setAnswer('');
+    onValidChange(false);
+  };
+
+  const handleAnswerChange = (val: string) => {
+    setAnswer(val);
+    if (parseInt(val) === num1 + num2) {
+      onValidChange(true);
+    } else {
+      onValidChange(false);
+    }
+  };
+
   return (
-    <View style={[styles.section, containerStyle]}>
-      <TouchableOpacity
-        style={styles.box}
-        onPress={onPress}
-        activeOpacity={0.8}
-      >
-        <MaterialCommunityIcons
-          name={isChecked ? "checkbox-marked" : "checkbox-blank-outline"}
-          size={24}
-          color={isChecked ? Colors.primary : "gray"}
-        />
-        <Text style={styles.text}>Saya bukan robot</Text>
-      </TouchableOpacity>
-      <Text style={styles.hint}>
-        *Centang captcha di atas untuk melengkapi validasi
+    <View style={[GlobalStyles.captchaSection, containerStyle]}>
+      <Text style={GlobalStyles.captchaText}>Verifikasi Keamanan:</Text>
+      <View style={[GlobalStyles.captchaMathBox, { marginTop: 8 }]}>
+         <Text style={GlobalStyles.captchaMathQuestion}>Berapa {num1} + {num2} = ?</Text>
+         <TextInput 
+            style={GlobalStyles.captchaMathInput}
+            value={answer}
+            onChangeText={handleAnswerChange}
+            keyboardType="numeric"
+            placeholder="..."
+         />
+      </View>
+      <Text style={GlobalStyles.captchaHint}>
+        {isChecked ? "✅ Verifikasi berhasil" : "*Jawaban harus benar untuk melanjutkan"}
       </Text>
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  section: {
-    marginTop: 10,
-    marginBottom: 35,
-  },
-  box: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    borderWidth: 1,
-    borderColor: '#888888',
-    borderRadius: 8,
-    paddingHorizontal: 15,
-    paddingVertical: 12,
-  },
-  text: {
-    marginLeft: 10,
-    fontSize: 14,
-    color: '#333333',
-  },
-  hint: {
-    fontSize: 10,
-    color: Colors.primary,
-    marginTop: 8,
-    fontStyle: 'italic',
-    marginLeft: 4,
-  },
-});

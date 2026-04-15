@@ -5,6 +5,7 @@ import {
   TouchableOpacity, 
   Modal, 
   FlatList, 
+  TextInput,
   TouchableWithoutFeedback 
 } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
@@ -22,15 +23,29 @@ interface Props {
   selectedValue: string;
   onValueChange: (value: string) => void;
   placeholder?: string;
+  disabled?: boolean;
 }
 
-export default function DropdownInput({ label, options, selectedValue, onValueChange, placeholder = "Pilih..." }: Props) {
+export default function DropdownInput({ 
+  label, 
+  options, 
+  selectedValue, 
+  onValueChange, 
+  placeholder = "Pilih...",
+  disabled = false 
+}: Props) {
   const [modalVisible, setModalVisible] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
 
   const selectedOption = options.find(opt => opt.value === selectedValue);
 
+  const filteredOptions = options.filter(opt => 
+    opt.label.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
   const handleSelect = (value: string) => {
     onValueChange(value);
+    setSearchQuery('');
     setModalVisible(false);
   };
 
@@ -39,14 +54,14 @@ export default function DropdownInput({ label, options, selectedValue, onValueCh
       <TextLabel style={GlobalStyles.inputLabel}>{label}</TextLabel>
       
       <TouchableOpacity 
-        style={GlobalStyles.pickerButton} 
-        onPress={() => setModalVisible(true)}
-        activeOpacity={0.7}
+        style={[GlobalStyles.pickerButton, disabled && { opacity: 0.5, backgroundColor: '#EEE' }]} 
+        onPress={() => !disabled && setModalVisible(true)}
+        activeOpacity={disabled ? 1 : 0.7}
       >
-        <Text style={[GlobalStyles.pickerText, !selectedOption && { color: '#A0A0A0' }]}>
+        <Text style={[GlobalStyles.pickerText, !selectedOption && GlobalStyles.pickerPlaceholder]}>
           {selectedOption ? selectedOption.label : placeholder}
         </Text>
-        <MaterialCommunityIcons name="chevron-down" size={24} color={Colors.primary} />
+        <MaterialCommunityIcons name="chevron-down" size={24} color={disabled ? '#888' : Colors.primary} />
       </TouchableOpacity>
 
       <Modal
@@ -64,9 +79,28 @@ export default function DropdownInput({ label, options, selectedValue, onValueCh
                   <MaterialCommunityIcons name="close" size={24} color={Colors.black} />
                 </TouchableOpacity>
               </View>
+
+              <View style={{ 
+                flexDirection: 'row', 
+                alignItems: 'center', 
+                backgroundColor: '#F5F5F5', 
+                borderRadius: 10, 
+                paddingHorizontal: 10, 
+                marginBottom: 15,
+                borderWidth: 1,
+                borderColor: '#DDD'
+              }}>
+                <MaterialCommunityIcons name="magnify" size={20} color="#888" />
+                <TextInput 
+                  style={{ flex: 1, height: 40, marginLeft: 5, color: '#333' }}
+                  placeholder="Cari..."
+                  value={searchQuery}
+                  onChangeText={setSearchQuery}
+                />
+              </View>
               
               <FlatList
-                data={options}
+                data={filteredOptions}
                 keyExtractor={(item) => item.value}
                 renderItem={({ item }) => (
                   <TouchableOpacity 

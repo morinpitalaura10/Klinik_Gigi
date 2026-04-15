@@ -3,9 +3,11 @@ import React, { createContext, useState, ReactNode } from 'react';
 type UserRole = 'admin' | 'dokter' | 'tamu' | null;
 
 export interface User {
+  id_users: number;
   username: string;
   nama: string;
   role: UserRole;
+  spesialisasi?: string; // Menampung info 'Umum' atau 'Ortodental'
 }
 
 interface AuthContextProps {

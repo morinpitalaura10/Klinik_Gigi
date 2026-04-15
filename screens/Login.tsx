@@ -9,6 +9,8 @@ import LabeledInput from '../components/molecules/LabeledInput';
 import PasswordInput from '../components/molecules/PasswordInput';
 import CaptchaBox from '../components/molecules/CaptchaBox';
 import AuthTemplate from '../components/templates/AuthTemplate';
+import CryptoJS from 'crypto-js';
+import { LayoutStyles } from '../styles/GlobalStyles';
 
 export default function Login({ navigation }: any) {
   const [username, setUsername] = useState('');
@@ -31,12 +33,26 @@ export default function Login({ navigation }: any) {
 
     console.log("Mencoba login untuk:", username);
 
-    // 2. Panggil RPC ke Supabase (Menuju tb_users)
-    const { data, error } = await supabase
+    const hashedPassword = CryptoJS.MD5(password).toString();
+
+    // 2. Panggil RPC ke Supabase dengan password ter-hash (MD5)
+    let { data, error } = await supabase
       .rpc('check_custom_login', {
         input_us: username,
-        input_pw: password
+        input_pw: hashedPassword
       });
+
+    // Fallback: Jika pengguna belum di-hash di database, coba dengan plaintext 
+    // agar tidak 'gagal login terus'
+    if (!data || data.length === 0) {
+      const fallback = await supabase
+        .rpc('check_custom_login', {
+          input_us: username,
+          input_pw: password
+        });
+      data = fallback.data;
+      if (fallback.error) error = fallback.error;
+    }
 
     // 3. Tangani Error Query/Koneksi
     if (error) {
@@ -52,16 +68,38 @@ export default function Login({ navigation }: any) {
     }
 
     // 5. Ambil data dari baris pertama hasil query
-    const userData = data[0];
-    const userRole = userData.role.toLowerCase(); // Pastikan huruf kecil semua
+    const rawData = data[0];
+    const userId = rawData.id || rawData.id_users; // Handle both 'id' and 'id_users'
 
-    console.log("Login Berhasil! Data:", userData);
+    // 6. JEMPUT DATA LENGKAP (Termasuk Spesialisasi dari tb_dokter)
+    const { data: fullUserData, error: profileError } = await supabase
+      .from('tb_users')
+      .select(`
+        *,
+        tb_dokter (spesialisasi)
+      `)
+      .eq('id_users', userId)
+      .single();
 
-    // 6. Simpan ke Global State (AuthContext)
+    if (profileError || !fullUserData) {
+      console.log("Gagal ambil profil lengkap, pakai data login saja");
+    }
+
+    const userData = fullUserData || rawData;
+    const userRole = userData.role.toLowerCase();
+    
+    // Ambil spesialisasi dari nested object tb_dokter
+    const spesialisasi = userData.spesialisasi || (userData.tb_dokter && userData.tb_dokter[0]?.spesialisasi) || (userData.tb_dokter?.spesialisasi);
+
+    console.log("Profil Lengkap Berhasil Dimuat:", { ...userData, spesialisasi });
+
+    // 7. Simpan ke Global State (AuthContext)
     login({
+      id_users: userId,
       username: username,
       nama: userData.nama_users || "User",
-      role: userRole as any
+      role: userRole as any,
+      spesialisasi: spesialisasi 
     });
 
     // Notifikasi khusus jika bukan admin
@@ -72,7 +110,7 @@ export default function Login({ navigation }: any) {
 
   return (
     <AuthTemplate>
-      <Header style={{ marginBottom: 40 }}>LOGIN PENGGUNA</Header>
+      <Header style={LayoutStyles.mb40}>LOGIN PENGGUNA</Header>
 
       <LabeledInput
         label="Username"
@@ -93,13 +131,13 @@ export default function Login({ navigation }: any) {
 
       <CaptchaBox
         isChecked={isCaptchaChecked}
-        onPress={() => setIsCaptchaChecked(!isCaptchaChecked)}
+        onValidChange={setIsCaptchaChecked}
       />
 
       <PrimaryButton
         title="Masuk"
         onPress={handleLogin}
-        style={{ width: '50%', alignSelf: 'center' }}
+        style={[LayoutStyles.w50p, LayoutStyles.alignSelfCenter]}
       />
     </AuthTemplate>
   );

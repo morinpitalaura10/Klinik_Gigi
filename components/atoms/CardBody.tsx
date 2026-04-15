@@ -1,6 +1,6 @@
 import React from 'react';
-import { View, ViewProps, StyleSheet, StyleProp, ViewStyle } from 'react-native';
-import { Colors } from '../../styles/GlobalStyles';
+import { View, ViewProps, StyleProp, ViewStyle } from 'react-native';
+import { Colors, GlobalStyles } from '../../styles/GlobalStyles';
 
 interface Props extends ViewProps {
   children: React.ReactNode;
@@ -12,7 +12,7 @@ export default function CardBody({ children, style, backgroundColor, ...props }:
   return (
     <View 
       style={[
-        styles.card, 
+        GlobalStyles.baseCardBody, 
         { backgroundColor: backgroundColor || Colors.white },
         style
       ]} 
@@ -22,18 +22,3 @@ export default function CardBody({ children, style, backgroundColor, ...props }:
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  card: {
-    borderRadius: 15,
-    padding: 15,
-    // Efek Shadow Standar
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
-    borderWidth: 1,
-    borderColor: '#EEE', // Border halus default
-  },
-});

@@ -1,17 +1,17 @@
 import { StyleSheet, Platform } from 'react-native';
 
 export const Colors = {
-  primary: '#801919', // Diperbarui sesuai permintaan
-  secondary: '#A45D5D', // Warna merah pudar (Menu Dashboard)
-  cardRed: '#A35D5D', // Merah agak pudar untuk card di dashboard
-  cardBorder: '#3A1515', // Warna garis tepi gelap untuk kartu
-  background: '#F5F5F5', // Latar belakang abu-abu terang
+  primary: '#801919',
+  secondary: '#A45D5D',
+  cardRed: '#A35D5D',
+  cardBorder: '#3A1515',
+  background: '#F5F5F5',
   white: '#FFFFFF',
   black: '#000000',
   gray: '#888888',
-  text: '#555555', // Diubah menjadi Abu-abu sesuai permintaan
+  text: '#555555',
   placeholder: '#A0A0A0',
-  formInputBg: '#F2E3E3', // Dikembalikan ke Pink sesuai gambar
+  formInputBg: '#F2E3E3',
 };
 
 // --- Auth Template Styles ---
@@ -30,7 +30,6 @@ export const AuthStyles = StyleSheet.create({
   topSection: {
     height: 80,
   },
-  // Arch sempit dengan margin lebih lebar — maroon lebih terlihat di sisi
   archTop: {
     marginHorizontal: 80,
     backgroundColor: '#FFFFFF',
@@ -55,7 +54,7 @@ export const AuthStyles = StyleSheet.create({
   },
 });
 
-// --- Layout Utilities (Dipindahkan ke atas agar aman saat diimpor) ---
+// --- Layout Utilities ---
 export const LayoutStyles = StyleSheet.create({
   safeArea: {
     flex: 1,
@@ -63,13 +62,16 @@ export const LayoutStyles = StyleSheet.create({
   },
   container: {
     flex: 1,
-    backgroundColor: '#FAFAFA',
+    backgroundColor: Colors.white,
     justifyContent: 'space-between',
   },
   scrollContent: {
     padding: 25,
     flexGrow: 1,
     justifyContent: 'center',
+  },
+  scrollHorizontalContent: {
+    flexGrow: 1,
   },
   gridContainer: {
     width: '100%',
@@ -110,15 +112,53 @@ export const LayoutStyles = StyleSheet.create({
     fontSize: 16,
     opacity: 0.8,
     marginTop: 2,
-  }
+  },
+  rowBetween: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  rowEnd: {
+    flexDirection: 'row',
+    justifyContent: 'flex-end',
+    alignItems: 'center',
+  },
+  mt10: { marginTop: 10 },
+  mt15: { marginTop: 15 },
+  mt20: { marginTop: 20 },
+  mt50: { marginTop: 50 },
+  mv10: { marginVertical: 10 },
+  mr10: { marginRight: 10 },
+  ml10: { marginLeft: 10 },
+  ph20: { paddingHorizontal: 20 },
+  pt10: { paddingTop: 10 },
+  mb40: { marginBottom: 40 },
+  w50p: { width: '50%' },
+  alignSelfCenter: { alignSelf: 'center' },
+  textPlaceholder: { color: Colors.placeholder },
+  mt0: { marginTop: 0 },
+  mb15: { marginBottom: 15 },
+  h50: { height: 50 },
+  mh20: { marginHorizontal: 20 },
+  tableFixed700: { minWidth: '100%', width: 700 },
+  tableFixed1000: { minWidth: '100%', width: 1000 },
+  mh25: { marginHorizontal: 25 },
+  mh30: { marginHorizontal: 30 },
+  ph25: { paddingHorizontal: 25 },
+  ph30: { paddingHorizontal: 30 },
+  textBold: { fontWeight: 'bold' },
+  textPrimary: { color: Colors.primary },
+  bgPrimary: { backgroundColor: Colors.primary },
+  row: { flexDirection: 'row' },
+  mb20: { marginBottom: 20 },
+  mb30: { marginBottom: 30 },
 });
 
 export const GlobalStyles = StyleSheet.create({
-  // --- Teks ---
   title: {
     fontSize: 32,
     fontWeight: '900',
-    color: Colors.black, // Diubah menjadi hitam
+    color: Colors.black,
     textAlign: 'center',
   },
   label: {
@@ -126,8 +166,6 @@ export const GlobalStyles = StyleSheet.create({
     color: Colors.text,
     fontWeight: '500',
   },
-
-  // --- Header Dashboard ---
   headerContainer: {
     backgroundColor: Colors.primary,
     flexDirection: 'row',
@@ -146,8 +184,6 @@ export const GlobalStyles = StyleSheet.create({
     color: Colors.white,
     fontSize: 16,
   },
-
-  // --- Header/TopBar Styles ---
   topBarContainer: {
     backgroundColor: Colors.primary,
     flexDirection: 'row',
@@ -174,8 +210,15 @@ export const GlobalStyles = StyleSheet.create({
     fontSize: 14,
     fontWeight: '600',
   },
-
-  // --- Standardized Input Styles ---
+  topBarTextRightBold: {
+    color: Colors.white,
+    fontSize: 16,
+    marginBottom: 2,
+    fontWeight: 'bold',
+  },
+  alignEnd: {
+    alignItems: 'flex-end',
+  },
   inputWrapper: {
     marginBottom: 20,
     width: '100%',
@@ -207,25 +250,24 @@ export const GlobalStyles = StyleSheet.create({
   inputRightIcon: {
     marginLeft: 10,
   },
-
-  // --- Dropdown & Picker Styles ---
   pickerButton: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    borderWidth: 2,
-    borderColor: Colors.primary, // Disamakan dengan input lain
-    borderRadius: 25,
-    height: 50,
-    backgroundColor: Colors.formInputBg,
-    paddingHorizontal: 20,
+    backgroundColor: '#F2E3E3',
+    borderWidth: 1.5,
+    borderColor: Colors.black,
+    borderRadius: 12,
+    paddingHorizontal: 15,
+    height: 55,
   },
   pickerText: {
     fontSize: 16,
     color: Colors.black,
   },
-
-  // --- Selection Modal Styles ---
+  pickerPlaceholder: {
+    color: Colors.placeholder,
+  },
   selectionModalOverlay: {
     flex: 1,
     backgroundColor: 'rgba(0,0,0,0.5)',
@@ -235,7 +277,7 @@ export const GlobalStyles = StyleSheet.create({
   selectionModalContent: {
     width: '85%',
     backgroundColor: Colors.white,
-    borderRadius: 30, // Bulend sesuai permintaan
+    borderRadius: 30,
     padding: 25,
     maxHeight: '70%',
     borderWidth: 2,
@@ -274,11 +316,9 @@ export const GlobalStyles = StyleSheet.create({
     color: Colors.primary,
     fontWeight: 'bold',
   },
-
-  // --- Input & Tombol ---
   pillInput: {
     borderWidth: 2,
-    borderColor: Colors.black, // Hitam untuk halaman Login
+    borderColor: Colors.black,
     borderRadius: 25,
     height: 50,
     backgroundColor: Colors.white,
@@ -307,8 +347,6 @@ export const GlobalStyles = StyleSheet.create({
     fontSize: 18,
     fontWeight: 'bold',
   },
-
-  // --- Kartu/Menu Dashboard ---
   dashboardCard: {
     backgroundColor: Colors.secondary,
     borderWidth: 1.2,
@@ -338,18 +376,16 @@ export const GlobalStyles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-
-  // --- Format Teks Dokumen Cetak ---
   docHeader: {
     fontFamily: Platform.OS === 'ios' ? 'Times New Roman' : 'serif',
-    fontWeight: 'bold',
+    fontWeight: 'bold' as any,
     fontSize: 22,
     textAlign: 'center',
     color: Colors.black,
   },
   docTitle: {
     fontFamily: Platform.OS === 'ios' ? 'Times New Roman' : 'serif',
-    fontWeight: 'bold',
+    fontWeight: 'bold' as any,
     fontSize: 18,
     textAlign: 'center',
     color: Colors.black,
@@ -364,11 +400,9 @@ export const GlobalStyles = StyleSheet.create({
     fontFamily: Platform.OS === 'ios' ? 'Times New Roman' : 'serif',
     fontStyle: 'italic',
     fontSize: 14,
-    fontWeight: '600',
+    fontWeight: '600' as any,
     color: Colors.black,
   },
-
-  // --- Navigasi Bawah ---
   bottomNavContainer: {
     flexDirection: 'row',
     backgroundColor: Colors.primary,
@@ -393,20 +427,18 @@ export const GlobalStyles = StyleSheet.create({
     opacity: 1,
     fontWeight: 'bold',
   },
-
-  // --- CRUD Form Styles (Standardized) ---
   formCard: {
     backgroundColor: Colors.white,
     marginHorizontal: 20,
-    borderRadius: 25, // Diubah menjadi lebih bulend
-    padding: 30, // Diperbesar dari 25 agar lebih lega
+    borderRadius: 25,
+    padding: 30,
     borderWidth: 2,
     borderColor: Colors.black,
     elevation: 3,
   },
   formSectionTitle: {
-    fontSize: 16, // Diperbesar dari 12
-    fontWeight: '800', // Dibuat lebih tebal
+    fontSize: 16,
+    fontWeight: '800',
     color: '#333',
     marginBottom: 8,
     letterSpacing: 1.2,
@@ -418,8 +450,8 @@ export const GlobalStyles = StyleSheet.create({
     opacity: 0.3,
   },
   btnBatal: {
-    backgroundColor: '#B3AFAF', // Diperbarui sesuai permintaan
-    width: 140, // Disamakan dengan btnSimpan
+    backgroundColor: '#B3AFAF',
+    width: 140,
     height: 50,
     borderRadius: 12,
     justifyContent: 'center',
@@ -429,18 +461,36 @@ export const GlobalStyles = StyleSheet.create({
   btnBatalText: {
     color: Colors.white,
     fontWeight: 'bold',
-    fontSize: 16, // Diseragamkan ke 16
+    fontSize: 16,
   },
   btnSimpan: {
-    backgroundColor: '#2E50D4', // Diperbarui sesuai permintaan
+    backgroundColor: '#2E50D4',
     width: 140,
-    height: 50, // Disamakan dengan btnBatal agar simetris
-    justifyContent: 'center', // Agar teks di tengah
+    height: 50,
+    justifyContent: 'center',
     alignItems: 'center',
     borderRadius: 12,
   },
-
-  // --- List & User Card Styles ---
+  btnActionUpdate: {
+    backgroundColor: '#EBC112',
+    padding: 8,
+    borderRadius: 8,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  btnActionDelete: {
+    backgroundColor: Colors.primary,
+    padding: 8,
+    borderRadius: 8,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  backButton: {
+    marginRight: 10,
+    backgroundColor: 'rgba(255,255,255,0.2)',
+    padding: 5,
+    borderRadius: 10,
+  },
   userCard: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -483,8 +533,6 @@ export const GlobalStyles = StyleSheet.create({
     color: '#888',
     marginTop: 2,
   },
-
-  // --- Detail View Styles (Read Mode) ---
   detailRow: {
     flexDirection: 'row',
     marginBottom: 20,
@@ -495,33 +543,33 @@ export const GlobalStyles = StyleSheet.create({
     paddingRight: 10,
   },
   detailLabel: {
-    fontSize: 18, // Diperbesar dari 16
-    fontWeight: 'bold',
+    fontSize: 18,
+    fontWeight: '800',
     color: Colors.black,
     marginBottom: 8,
+    letterSpacing: 0.5,
   },
   detailValue: {
-    fontSize: 16, // Diperbesar dari 14
+    fontSize: 16,
+    color: '#666',
     fontStyle: 'italic',
-    color: Colors.text,
+    lineHeight: 22,
   },
   detailFooter: {
     marginTop: 20,
     alignItems: 'flex-end',
   },
   btnBack: {
-    backgroundColor: '#2E50D4', // Disamakan dengan tombol aksi biru
+    backgroundColor: '#2E50D4',
     paddingHorizontal: 30,
     paddingVertical: 10,
     borderRadius: 20,
   },
-  btnBackText: { // Menambahkan ini agar seragam
+  btnBackText: {
     color: Colors.white,
     fontWeight: 'bold',
     fontSize: 16,
   },
-
-  // --- Common List Header & Search Styles ---
   listHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -539,12 +587,12 @@ export const GlobalStyles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: Colors.white,
-    borderRadius: 12,
+    borderRadius: 15,
     paddingHorizontal: 15,
     borderWidth: 2,
     borderColor: Colors.black,
-    height: 50,
-    flex: 1, // Agar fleksibel mengisi ruang
+    height: 60,
+    flex: 1,
   },
   listSearchInput: {
     flex: 1,
@@ -552,19 +600,19 @@ export const GlobalStyles = StyleSheet.create({
     color: '#333',
   },
   listAddButton: {
-    backgroundColor: '#2E50D4', // Disamakan dengan tombol Tambah/Simpan
+    backgroundColor: '#2E50D4',
     flexDirection: 'row',
     alignItems: 'center',
     paddingHorizontal: 15,
-    paddingVertical: 8,
-    borderRadius: 8,
+    height: 60,
+    borderRadius: 12,
+    justifyContent: 'center',
   },
   listAddButtonText: {
     color: 'white',
     fontWeight: 'bold',
     marginLeft: 5,
   },
-  // --- Kombinasi Baris Pencarian & Tambah ---
   searchRow: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -574,7 +622,8 @@ export const GlobalStyles = StyleSheet.create({
     marginBottom: 5,
   },
   searchWrapper: {
-    width: '55%', // Meluas dari kiri sampai tengah layar
+    flex: 1,
+    marginRight: 10,
     justifyContent: 'center',
     alignItems: 'flex-start',
   },
@@ -598,8 +647,6 @@ export const GlobalStyles = StyleSheet.create({
     color: '#888',
     fontSize: 16,
   },
-
-  // --- Card Action Styles ---
   cardActions: {
     flexDirection: 'row',
   },
@@ -609,8 +656,6 @@ export const GlobalStyles = StyleSheet.create({
     justifyContent: 'center',
     marginLeft: 8,
   },
-
-  // --- Custom Modal Styles (Gini Saja Pop) ---
   modalBackdrop: {
     flex: 1,
     backgroundColor: 'rgba(0,0,0,0.5)',
@@ -619,10 +664,10 @@ export const GlobalStyles = StyleSheet.create({
     padding: 20,
   },
   modalBox: {
-    width: '85%', // Diperkecil lebarnya
+    width: '85%',
     backgroundColor: Colors.white,
-    borderRadius: 40, // Lebih bulend lagi untuk modal
-    paddingVertical: 25, // Diperpendek tingginya
+    borderRadius: 40,
+    paddingVertical: 25,
     paddingHorizontal: 25,
     alignItems: 'center',
     borderWidth: 2,
@@ -633,7 +678,7 @@ export const GlobalStyles = StyleSheet.create({
     fontWeight: 'bold',
     color: Colors.black,
     textAlign: 'center',
-    marginBottom: 20, // Dikurangi jaraknya
+    marginBottom: 20,
   },
   modalActionRow: {
     flexDirection: 'row',
@@ -641,7 +686,7 @@ export const GlobalStyles = StyleSheet.create({
     width: '100%',
   },
   btnModalBatal: {
-    backgroundColor: '#B3AFAF', // Diperbarui sesuai permintaan
+    backgroundColor: '#B3AFAF',
     flex: 1,
     height: 50,
     borderRadius: 25,
@@ -663,9 +708,11 @@ export const GlobalStyles = StyleSheet.create({
     fontWeight: 'bold',
     fontSize: 16,
   },
-
-  // --- Table Grid Styles (Sesuai Gambar Referensi) ---
   tableContainer: {
+    flex: 1,
+    marginBottom: 20,
+  },
+  tableContentWrapper: {
     backgroundColor: Colors.white,
     borderBottomLeftRadius: 15,
     borderBottomRightRadius: 15,
@@ -674,47 +721,105 @@ export const GlobalStyles = StyleSheet.create({
     borderWidth: 2,
     borderColor: Colors.black,
     overflow: 'hidden',
-    marginHorizontal: 0,
-    marginBottom: 20,
   },
   tableHeader: {
     flexDirection: 'row',
     backgroundColor: Colors.white,
     borderBottomWidth: 2,
     borderBottomColor: Colors.black,
+    width: '100%',
   },
   tableRow: {
     flexDirection: 'row',
-    borderBottomWidth: 1.5,
+    borderBottomWidth: 2,
     borderBottomColor: Colors.black,
+    width: '100%',
   },
   tableRowLast: {
-    borderBottomWidth: 0,
+    borderBottomWidth: 2,
   },
   tableHeaderCell: {
     paddingVertical: 12,
     justifyContent: 'center',
     alignItems: 'center',
-    borderRightWidth: 1.5,
+    borderRightWidth: 2,
     borderRightColor: Colors.black,
   },
   tableCell: {
     paddingVertical: 15,
     justifyContent: 'center',
     alignItems: 'center',
-    borderRightWidth: 1.5,
+    borderRightWidth: 2,
     borderRightColor: Colors.black,
   },
   tableCellNo: {
-    width: 60, // Sedikit lebih lebar agar muat nomor
+    width: 50,
   },
   tableCellName: {
     flex: 1,
-    paddingHorizontal: 15,
-    alignItems: 'flex-start', // Nama miring kiri
+    paddingHorizontal: 12,
+    alignItems: 'flex-start',
+  },
+  tableCellRole: {
+    width: 100,
+  },
+  tableCellSpec: {
+    width: 130,
+  },
+  tableCellTglLahir: {
+    width: 110,
+  },
+  tableCellJK: {
+    width: 110,
+  },
+  tableCellAlamat: {
+    width: 200,
+  },
+  tableCellPekerjaan: {
+    width: 120,
+  },
+  tableCellNope: {
+    width: 120,
+  },
+  tableCellAlergi: {
+    width: 120,
+  },
+  tableCellDokter: {
+    width: 150,
+  },
+
+  // Detail View Styles (Read Pasien)
+  detailMainCard: {
+    backgroundColor: Colors.white,
+    borderWidth: 1,
+    borderColor: '#000',
+    borderRadius: 50,
+    padding: 40,
+    marginTop: 30,
+    marginHorizontal: 35, // Increased from 25
+    // Soft Premium Shadow
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 10 },
+    shadowOpacity: 0.05,
+    shadowRadius: 20,
+    elevation: 5,
+  },
+  // Form Picker Utilities
+  // Form Picker Utilities
+  btnKembaliLink: {
+    backgroundColor: '#2D58D1', // Nicer blue
+    paddingVertical: 15,
+    paddingHorizontal: 50,
+    borderRadius: 35,
+  },
+  btnKembaliText: {
+    color: Colors.white,
+    fontWeight: 'bold',
+    fontSize: 16,
+    textTransform: 'none',
   },
   tableCellAction: {
-    width: 100,
+    width: 140,
     flexDirection: 'row',
     justifyContent: 'space-around',
     borderRightWidth: 0,
@@ -727,5 +832,127 @@ export const GlobalStyles = StyleSheet.create({
   tableRowText: {
     fontSize: 14,
     color: Colors.black,
+  },
+  captchaSection: {
+    marginTop: 10,
+    marginBottom: 35,
+  },
+  captchaBox: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: '#888888',
+    borderRadius: 8,
+    paddingHorizontal: 15,
+    paddingVertical: 12,
+  },
+  captchaText: {
+    marginLeft: 10,
+    fontSize: 14,
+    color: '#333333',
+  },
+  captchaHint: {
+    fontSize: 10,
+    color: Colors.primary,
+    marginTop: 8,
+    fontStyle: 'italic',
+    marginLeft: 4,
+  },
+  captchaMathBox: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    width: '100%',
+  },
+  captchaMathQuestion: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: '#333333',
+    backgroundColor: '#F5F5F5',
+    paddingHorizontal: 15,
+    paddingVertical: 10,
+    borderRadius: 8,
+    overflow: 'hidden' as any,
+    borderWidth: 1,
+    borderColor: '#DDDDDD'
+  },
+  captchaMathInput: {
+    borderWidth: 1,
+    borderColor: '#888888',
+    borderRadius: 8,
+    paddingHorizontal: 15,
+    paddingVertical: 8,
+    fontSize: 16,
+    width: 100,
+    textAlign: 'center',
+    backgroundColor: '#FFFFFF',
+    color: '#333333'
+  },
+  cardWrapper: {
+    backgroundColor: Colors.cardRed,
+    borderRadius: 15,
+    padding: 15,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
+    elevation: 4,
+    borderWidth: 1,
+    borderColor: '#984B4B',
+  },
+  cardVertical: {
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  cardHorizontal: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  cardText: {
+    color: Colors.white,
+    fontWeight: 'bold',
+    marginTop: 10,
+    textAlign: 'center',
+  },
+  cardTextHorizontal: {
+    marginLeft: 15,
+    marginTop: 0,
+  },
+  infoCardContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: 15,
+  },
+  infoCardIconContainer: {
+    width: 45,
+    height: 45,
+    borderRadius: 12,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: 15,
+  },
+  infoCardTextContainer: {
+    flex: 1,
+  },
+  infoCardLabel: {
+    fontSize: 12,
+    color: '#888',
+    marginBottom: 2,
+  },
+  infoCardValue: {
+    fontSize: 18,
+    fontWeight: 'bold',
+  },
+  baseCardBody: {
+    borderRadius: 15,
+    padding: 15,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+    borderWidth: 1,
+    borderColor: '#EEE',
   },
 });
