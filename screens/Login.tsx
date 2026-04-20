@@ -1,8 +1,9 @@
 import React, { useState, useContext } from 'react';
+import { useAlert } from '../context/AlertContext';
 import { supabase } from '../utils/supabase';
 import { AuthContext } from '../context/AuthContext';
 
-// Meng-import semua komponen atomic
+
 import Header from '../components/atoms/Header';
 import PrimaryButton from '../components/atoms/PrimaryButton';
 import LabeledInput from '../components/molecules/LabeledInput';
@@ -17,17 +18,18 @@ export default function Login({ navigation }: any) {
   const [password, setPassword] = useState('');
   const [isCaptchaChecked, setIsCaptchaChecked] = useState(false);
 
-  // Ambil fungsi login dari AuthContext
+
   const { login } = useContext(AuthContext);
+  const { showAlert } = useAlert();
 
   const handleLogin = async () => {
-    // 1. Validasi Input Dasar
+
     if (!username || !password) {
-      alert("Tolong isi username dan password!");
+      showAlert({ title: 'Peringatan', message: 'Tolong isi username dan password!', type: 'warning' });
       return;
     }
     if (!isCaptchaChecked) {
-      alert("Jangan lupa centang captcha 'Saya bukan robot'!");
+      showAlert({ title: 'Captcha', message: "Jangan lupa centang captcha 'Saya bukan robot'!", type: 'warning' });
       return;
     }
 
@@ -35,15 +37,15 @@ export default function Login({ navigation }: any) {
 
     const hashedPassword = CryptoJS.MD5(password).toString();
 
-    // 2. Panggil RPC ke Supabase dengan password ter-hash (MD5)
+
     let { data, error } = await supabase
       .rpc('check_custom_login', {
         input_us: username,
         input_pw: hashedPassword
       });
 
-    // Fallback: Jika pengguna belum di-hash di database, coba dengan plaintext 
-    // agar tidak 'gagal login terus'
+
+
     if (!data || data.length === 0) {
       const fallback = await supabase
         .rpc('check_custom_login', {
@@ -54,24 +56,24 @@ export default function Login({ navigation }: any) {
       if (fallback.error) error = fallback.error;
     }
 
-    // 3. Tangani Error Query/Koneksi
+
     if (error) {
       console.error("Supabase Error:", error);
-      alert(`Gagal: ${error.message}\n(Pastikan Tabel & RPC sesuai di Supabase)`);
+      showAlert({ title: 'Gagal Login', message: `Gagal: ${error.message}\n(Pastikan Tabel & RPC sesuai di Supabase)`, type: 'error' });
       return;
     }
 
-    // 4. Cek apakah data ditemukan
+
     if (!data || data.length === 0) {
-      alert("Login Gagal: Username atau password salah!");
+      showAlert({ title: 'Gagal', message: 'Login Gagal: Username atau password salah!', type: 'error' });
       return;
     }
 
-    // 5. Ambil data dari baris pertama hasil query
-    const rawData = data[0];
-    const userId = rawData.id || rawData.id_users; // Handle both 'id' and 'id_users'
 
-    // 6. JEMPUT DATA LENGKAP (Termasuk Spesialisasi dari tb_dokter)
+    const rawData = data[0];
+    const userId = rawData.id || rawData.id_users;
+
+
     const { data: fullUserData, error: profileError } = await supabase
       .from('tb_users')
       .select(`
@@ -88,12 +90,12 @@ export default function Login({ navigation }: any) {
     const userData = fullUserData || rawData;
     const userRole = userData.role.toLowerCase();
     
-    // Ambil spesialisasi dari nested object tb_dokter
+
     const spesialisasi = userData.spesialisasi || (userData.tb_dokter && userData.tb_dokter[0]?.spesialisasi) || (userData.tb_dokter?.spesialisasi);
 
     console.log("Profil Lengkap Berhasil Dimuat:", { ...userData, spesialisasi });
 
-    // 7. Simpan ke Global State (AuthContext)
+
     login({
       id_users: userId,
       username: username,
@@ -102,9 +104,9 @@ export default function Login({ navigation }: any) {
       spesialisasi: spesialisasi 
     });
 
-    // Notifikasi khusus jika bukan admin
+
     if (userRole !== 'admin') {
-      alert(`Selamat datang, ${userData.nama || 'User'} (${userRole})`);
+      showAlert({ title: 'Login Berhasil', message: `Selamat datang, ${userData.nama || 'User'} (${userRole})`, type: 'success' });
     }
   };
 

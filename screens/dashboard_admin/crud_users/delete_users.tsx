@@ -20,7 +20,7 @@ export function DeleteUser() {
   const handleDelete = async () => {
     setLoading(true);
     try {
-      // 1. Ambil data user untuk cek apakah dia dokter
+
       const { data: user, error: userFetchError } = await supabase
         .from('tb_users')
         .select('role')
@@ -29,12 +29,12 @@ export function DeleteUser() {
       
       if (userFetchError) throw userFetchError;
 
-      // 2. Jika dokter, hapus dari tb_dokter dulu
+
       if (user?.role.toLowerCase() === 'dokter') {
         await supabase.from('tb_dokter').delete().eq('user_id', id);
       }
 
-      // 3. Hapus dari tb_users
+
       const { error } = await supabase
         .from('tb_users')
         .delete()
@@ -42,10 +42,10 @@ export function DeleteUser() {
 
       if (error) throw error;
 
-      // Keberhasilan
+
       navigation.goBack();
-      // Optional: Kita bisa gunakan callback atau event listener untuk refresh list
-      // Tapi karena TampilUsers pakai useFocusEffect, navigation.goBack() sudah cukup.
+
+
     } catch (error: any) {
       Alert.alert('Gagal Hapus', error.message);
       navigation.goBack();

@@ -58,9 +58,14 @@ export default function DropdownInput({
         onPress={() => !disabled && setModalVisible(true)}
         activeOpacity={disabled ? 1 : 0.7}
       >
-        <Text style={[GlobalStyles.pickerText, !selectedOption && GlobalStyles.pickerPlaceholder]}>
-          {selectedOption ? selectedOption.label : placeholder}
-        </Text>
+        <View style={{ flex: 1, justifyContent: 'center' }}>
+          <Text 
+            style={[GlobalStyles.pickerText, !selectedOption && GlobalStyles.pickerPlaceholder]}
+            numberOfLines={1}
+          >
+            {selectedOption ? selectedOption.label : placeholder}
+          </Text>
+        </View>
         <MaterialCommunityIcons name="chevron-down" size={24} color={disabled ? '#888' : Colors.primary} />
       </TouchableOpacity>
 
@@ -92,7 +97,7 @@ export default function DropdownInput({
               }}>
                 <MaterialCommunityIcons name="magnify" size={20} color="#888" />
                 <TextInput 
-                  style={{ flex: 1, height: 40, marginLeft: 5, color: '#333' }}
+                  style={{ flex: 1, minHeight: 40, marginLeft: 5, color: '#333', paddingVertical: 5 }}
                   placeholder="Cari..."
                   value={searchQuery}
                   onChangeText={setSearchQuery}

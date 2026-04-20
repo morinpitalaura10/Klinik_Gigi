@@ -17,9 +17,11 @@ import LabeledInput from '../../components/molecules/LabeledInput';
 import PrimaryButton from '../../components/atoms/PrimaryButton';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import { AuthContext } from '../../context/AuthContext';
+import { useAlert } from '../../context/AlertContext';
 
 export function IsiRekamMedis() {
     const navigation = useNavigation<any>();
+    const { showAlert } = useAlert();
     const route = useRoute();
     const { user } = useContext(AuthContext);
     const { record } = route.params as { record: any };
@@ -28,7 +30,7 @@ export function IsiRekamMedis() {
     const [fetchingTindakan, setFetchingTindakan] = useState(true);
     const [tindakanList, setTindakanList] = useState<any[]>([]);
 
-    // Form States
+
     const [diagnosa, setDiagnosa] = useState(record?.diagnosa || '');
     const [selectedTindakanId, setSelectedTindakanId] = useState<string>(record?.id_tindakan?.toString() || '');
     const [keterangan, setKeterangan] = useState(record?.keterangan || '');
@@ -47,7 +49,7 @@ export function IsiRekamMedis() {
             if (error) throw error;
             setTindakanList(data || []);
         } catch (error: any) {
-            Alert.alert('Error', 'Gagal memuat daftar tindakan');
+            showAlert({ title: 'Error', message: 'Gagal memuat daftar tindakan', type: 'error' });
         } finally {
             setFetchingTindakan(false);
         }
@@ -55,13 +57,13 @@ export function IsiRekamMedis() {
 
     const handleSave = async () => {
         if (!diagnosa || !selectedTindakanId) {
-            Alert.alert('Peringatan', 'Harap isi diagnosa dan pilih tindakan!');
+            showAlert({ title: 'Peringatan', message: 'Harap isi diagnosa dan pilih tindakan!', type: 'warning' });
             return;
         }
 
-        // VALIDASI ID DOKTER (Agar tidak NULL di DB)
+
         if (!user?.id_users) {
-            Alert.alert('Gagal', 'Sesi login dokter tidak valid. Silakan Logout dan Login kembali untuk melanjutkan.');
+            showAlert({ title: 'Gagal', message: 'Sesi login dokter tidak valid. Silakan Logout dan Login kembali untuk melanjutkan.', type: 'error' });
             return;
         }
 
@@ -73,17 +75,15 @@ export function IsiRekamMedis() {
                     diagnosa: diagnosa,
                     id_tindakan: parseInt(selectedTindakanId),
                     keterangan: keterangan,
-                    doctor_id: user?.id_users, // Pastikan ini terisi (Wajib re-login jika null)
+                    doctor_id: user?.id_users,
                     status: 'Selesai' 
                 })
                 .eq('id_record', record.id_record);
 
             if (error) throw error;
-
-            Alert.alert('Berhasil', 'Rekam medis pasien berhasil disimpan.');
-            navigation.popToTop(); // Kembali ke daftar antrean
+            showAlert({ title: 'Berhasil', message: 'Rekam medis pasien berhasil disimpan.', type: 'success', onConfirm: () => navigation.popToTop() });
         } catch (error: any) {
-            Alert.alert('Gagal', error.message);
+            showAlert({ title: 'Gagal', message: error.message, type: 'error' });
         } finally {
             setLoading(false);
         }
@@ -105,7 +105,7 @@ export function IsiRekamMedis() {
                 <ScrollView contentContainerStyle={LayoutStyles.scrollContent}>
                     <View style={GlobalStyles.formCard}>
                         <Text style={GlobalStyles.formSectionTitle}>MEDICAL RECORD</Text>
-                        <Text style={{ textAlign: 'center', marginBottom: 15, color: '#666' }}>
+                        <Text style={LayoutStyles.textCenterGray}>
                             Pasien: {record.tb_pasien?.nama_pasien}
                         </Text>
                         <View style={GlobalStyles.formDivider} />

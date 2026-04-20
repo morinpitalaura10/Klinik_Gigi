@@ -7,7 +7,7 @@ import TextLabel from '../atoms/TextLabel';
 
 interface Props {
   label: string;
-  value: string; // YYYY-MM-DD
+  value: string;
   onChange: (date: string) => void;
   placeholder?: string;
 }
@@ -15,7 +15,7 @@ interface Props {
 export default function DatePickerInput({ label, value, onChange, placeholder = "Pilih tanggal..." }: Props) {
   const [show, setShow] = useState(false);
 
-  // Convert string YYYY-MM-DD to Date object
+
   const getDateObject = (dateString: string) => {
     if (!dateString) return new Date();
     const [year, month, day] = dateString.split('-').map(Number);
@@ -23,7 +23,7 @@ export default function DatePickerInput({ label, value, onChange, placeholder = 
   };
 
   const handleDateChange = (event: any, selectedDate?: Date) => {
-    setShow(Platform.OS === 'ios'); // Keep showing on iOS, hide on Android after pick
+    setShow(Platform.OS === 'ios');
     
     if (selectedDate) {
       const year = selectedDate.getFullYear();
@@ -55,7 +55,7 @@ export default function DatePickerInput({ label, value, onChange, placeholder = 
           mode="date"
           display={Platform.OS === 'ios' ? 'spinner' : 'default'}
           onChange={handleDateChange}
-          maximumDate={new Date()} // Prevent picking future dates for birth date
+          maximumDate={new Date()}
         />
       )}
     </View>

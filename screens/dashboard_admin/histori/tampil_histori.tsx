@@ -5,14 +5,17 @@ import {
     ScrollView,
     Alert,
     ActivityIndicator,
-    StyleSheet,
     TouchableOpacity,
 } from 'react-native';
 import { supabase } from '../../../utils/supabase';
-import { Colors, LayoutStyles } from '../../../styles/GlobalStyles';
+import { Colors, GlobalStyles, LayoutStyles } from '../../../styles/GlobalStyles';
 import AdminLayout from '../../../components/templates/AdminLayout';
-import { useFocusEffect } from '@react-navigation/native';
-import { Picker } from '@react-native-picker/picker';
+import { useNavigation, useFocusEffect } from '@react-navigation/native';
+import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { useAlert } from '../../../context/AlertContext';
+import DropdownInput from '../../../components/molecules/DropdownInput';
+import * as Print from 'expo-print';
+import * as Sharing from 'expo-sharing';
 
 const BULAN_OPTIONS = [
     { label: 'Semua Bulan', value: '' },
@@ -37,14 +40,16 @@ const LAYANAN_OPTIONS = [
 ];
 
 export function TampilHistori() {
+    const { showAlert } = useAlert();
     const [loading, setLoading] = useState(true);
     const [records, setRecords] = useState<any[]>([]);
     const [filtered, setFiltered] = useState<any[]>([]);
     const [tindakanList, setTindakanList] = useState<any[]>([]);
     const [diagnosaList, setDiagnosaList] = useState<string[]>([]);
     const [doctorMap, setDoctorMap] = useState<Record<number, string> >({});
+    const [isExporting, setIsExporting] = useState(false);
 
-    // Filter states
+
     const [filterBulan, setFilterBulan] = useState('');
     const [filterLayanan, setFilterLayanan] = useState('');
     const [filterTindakan, setFilterTindakan] = useState('');
@@ -79,7 +84,7 @@ export function TampilHistori() {
                 .select(`
                     id_record,
                     tanggal,
-                    keluhan,
+                    gigi,
                     diagnosa,
                     keterangan,
                     layanan,
@@ -91,6 +96,7 @@ export function TampilHistori() {
                         nama_pasien
                     ),
                     tb_tindakan (
+                        id_tindakan,
                         nama_tindakan
                     )
                 `)
@@ -103,16 +109,16 @@ export function TampilHistori() {
             setRecords(allRecords);
             setFiltered(allRecords);
 
-            // Build tindakan filter options (unique)
-            const tindakanSet = new Map<string, string>();
+
+            const tindakanMap = new Map<number, string>();
             allRecords.forEach((r: any) => {
                 if (r.id_tindakan && r.tb_tindakan?.nama_tindakan) {
-                    tindakanSet.set(r.id_tindakan.toString(), r.tb_tindakan.nama_tindakan);
+                    tindakanMap.set(r.id_tindakan, r.tb_tindakan.nama_tindakan);
                 }
             });
-            setTindakanList(Array.from(tindakanSet.entries()).map(([val, label]) => ({ label, value: val })));
+            setTindakanList(Array.from(tindakanMap.entries()).map(([id_tindakan, nama_tindakan]) => ({ id_tindakan, nama_tindakan })));
 
-            // Build diagnosa filter options (unique)
+
             const diagnosaSet = new Set<string>();
             allRecords.forEach((r: any) => {
                 if (r.diagnosa) diagnosaSet.add(r.diagnosa);
@@ -120,7 +126,7 @@ export function TampilHistori() {
             setDiagnosaList(Array.from(diagnosaSet));
 
         } catch (e: any) {
-            Alert.alert('Error', e.message);
+            showAlert({ title: 'Error', message: e.message, type: 'error' });
         } finally {
             setLoading(false);
         }
@@ -166,156 +172,210 @@ export function TampilHistori() {
     const formatTanggal = (tgl: string) => {
         if (!tgl) return '-';
         const d = new Date(tgl);
-        return d.toLocaleDateString('id-ID', { day: '2-digit', month: '2-digit', year: '2-digit' });
+        return d.toLocaleDateString('id-ID', { day: '2-digit', month: '2-digit', year: 'numeric' });
+    };
+
+    const handleExport = async () => {
+        if (isExporting || filtered.length === 0) return;
+        setIsExporting(true);
+        try {
+            const trs = filtered.map(r => `
+                <tr>
+                    <td>${formatTanggal(r.tanggal)}</td>
+                    <td>${r.tb_pasien?.nama_pasien || '-'}</td>
+                    <td>${r.doctor_id ? doctorMap[r.doctor_id] || '-' : '-'}</td>
+                    <td>${r.layanan || '-'}</td>
+                    <td>${r.gigi || '-'}</td>
+                    <td>${r.diagnosa || '-'}</td>
+                    <td>${r.tb_tindakan?.nama_tindakan || '-'}</td>
+                    <td>${r.keterangan || '-'}</td>
+                </tr>
+            `).join('');
+
+            const htmlContent = `
+                <html>
+                    <head>
+                        <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no" />
+                        <style>
+                            body { font-family: sans-serif; padding: 20px; }
+                            h2 { text-align: center; }
+                            table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+                            th, td { border: 1px solid black; padding: 8px; text-align: center; font-size: 12px; }
+                            th { background-color: #f2f2f2; }
+                        </style>
+                    </head>
+                    <body>
+                        <h2>Histori Medis Keseluruhan</h2>
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Tgl</th>
+                                    <th>Nama Pasien</th>
+                                    <th>Dokter</th>
+                                    <th>Layanan</th>
+                                    <th>Gigi</th>
+                                    <th>Diagnosa</th>
+                                    <th>Perawatan</th>
+                                    <th>Keterangan</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${trs}
+                            </tbody>
+                        </table>
+                    </body>
+                </html>
+            `;
+
+            const { uri } = await Print.printToFileAsync({ html: htmlContent });
+            await Sharing.shareAsync(uri, { UTI: '.pdf', mimeType: 'application/pdf', dialogTitle: 'Ekspor Riwayat Medis' });
+        } catch (e: any) {
+            showAlert({ title: 'Gagal Ekspor', message: e.message, type: 'error' });
+        } finally {
+            setIsExporting(false);
+        }
     };
 
     return (
         <AdminLayout noScroll={true} customRightTitle="Histori">
-            <View style={{ flex: 1 }}>
+            <View style={LayoutStyles.flex1}>
 
-                {/* Filter Section */}
-                <View style={styles.filterCard}>
-                    <View style={styles.filterRow}>
-                        {/* Bulan */}
-                        <View style={styles.filterItem}>
-                            <Text style={styles.filterLabel}>Bulan :</Text>
-                            <View style={styles.pickerBox}>
-                                <Picker
-                                    selectedValue={filterBulan}
-                                    onValueChange={(val) => onFilterChange('bulan', val)}
-                                    style={styles.picker}
-                                    dropdownIconColor={Colors.primary}
-                                    mode="dropdown"
-                                >
-                                    {BULAN_OPTIONS.map(o => (
-                                        <Picker.Item key={o.value} label={o.label} value={o.value} />
-                                    ))}
-                                </Picker>
-                            </View>
+                
+                <View style={GlobalStyles.historyFilterCard}>
+                    <View style={GlobalStyles.historyFilterRow}>
+                        
+                        <View style={GlobalStyles.historyFilterItem}>
+                            <DropdownInput
+                                label="Bulan"
+                                options={[
+                                    { label: 'Semua Bulan', value: '' },
+                                    { label: 'Januari', value: '01' },
+                                    { label: 'Februari', value: '02' },
+                                    { label: 'Maret', value: '03' },
+                                    { label: 'April', value: '04' },
+                                    { label: 'Mei', value: '05' },
+                                    { label: 'Juni', value: '06' },
+                                    { label: 'Juli', value: '07' },
+                                    { label: 'Agustus', value: '08' },
+                                    { label: 'September', value: '09' },
+                                    { label: 'Oktober', value: '10' },
+                                    { label: 'November', value: '11' },
+                                    { label: 'Desember', value: '12' }
+                                ]}
+                                selectedValue={filterBulan}
+                                onValueChange={(val) => onFilterChange('bulan', val)}
+                            />
                         </View>
-
-                        {/* Perawatan */}
-                        <View style={styles.filterItem}>
-                            <Text style={styles.filterLabel}>Perawatan :</Text>
-                            <View style={styles.pickerBox}>
-                                <Picker
-                                    selectedValue={filterTindakan}
-                                    onValueChange={(val) => onFilterChange('tindakan', val)}
-                                    style={styles.picker}
-                                    dropdownIconColor={Colors.primary}
-                                    mode="dropdown"
-                                >
-                                    <Picker.Item label="Semua Perawatan" value="" />
-                                    {tindakanList.map(o => (
-                                        <Picker.Item key={o.value} label={o.label} value={o.value} />
-                                    ))}
-                                </Picker>
-                            </View>
+                        
+                        <View style={GlobalStyles.historyFilterItem}>
+                            <DropdownInput
+                                label="Layanan"
+                                options={[
+                                    { label: 'Semua Layanan', value: '' },
+                                    { label: 'Umum', value: 'Umum' },
+                                    { label: 'Ortodental', value: 'Ortodental' }
+                                ]}
+                                selectedValue={filterLayanan}
+                                onValueChange={(val) => onFilterChange('layanan', val)}
+                            />
                         </View>
                     </View>
-
-                    <View style={styles.filterRow}>
-                        {/* Pelayanan */}
-                        <View style={styles.filterItem}>
-                            <Text style={styles.filterLabel}>Pelayanan :</Text>
-                            <View style={styles.pickerBox}>
-                                <Picker
-                                    selectedValue={filterLayanan}
-                                    onValueChange={(val) => onFilterChange('layanan', val)}
-                                    style={styles.picker}
-                                    dropdownIconColor={Colors.primary}
-                                    mode="dropdown"
-                                >
-                                    {LAYANAN_OPTIONS.map(o => (
-                                        <Picker.Item key={o.value} label={o.label} value={o.value} />
-                                    ))}
-                                </Picker>
-                            </View>
+                    <View style={GlobalStyles.historyFilterRow}>
+                        
+                        <View style={GlobalStyles.historyFilterItem}>
+                            <DropdownInput
+                                label="Perawatan"
+                                options={[
+                                    { label: 'Semua Perawatan', value: '' },
+                                    ...tindakanList.map(t => ({ label: t.nama_tindakan, value: t.id_tindakan.toString() }))
+                                ]}
+                                selectedValue={filterTindakan}
+                                onValueChange={(val) => onFilterChange('tindakan', val)}
+                            />
                         </View>
-
-                        {/* Diagnosa */}
-                        <View style={styles.filterItem}>
-                            <Text style={styles.filterLabel}>Diagnosa :</Text>
-                            <View style={styles.pickerBox}>
-                                <Picker
-                                    selectedValue={filterDiagnosa}
-                                    onValueChange={(val) => onFilterChange('diagnosa', val)}
-                                    style={styles.picker}
-                                    dropdownIconColor={Colors.primary}
-                                    mode="dropdown"
-                                >
-                                    <Picker.Item label="Semua Diagnosa" value="" />
-                                    {diagnosaList.map(d => (
-                                        <Picker.Item key={d} label={d} value={d} />
-                                    ))}
-                                </Picker>
-                            </View>
+                        
+                        <View style={GlobalStyles.historyFilterItem}>
+                            <DropdownInput
+                                label="Diagnosa"
+                                options={[
+                                    { label: 'Semua Diagnosa', value: '' },
+                                    ...diagnosaList.map(d => ({ label: d, value: d }))
+                                ]}
+                                selectedValue={filterDiagnosa}
+                                onValueChange={(val) => onFilterChange('diagnosa', val)}
+                            />
                         </View>
                     </View>
                 </View>
 
-                {/* Table */}
+                <View style={[LayoutStyles.rowBetween, LayoutStyles.ph20, LayoutStyles.mb15]}>
+                    <Text style={GlobalStyles.formSectionTitle}>DATA REKAM MEDIS</Text>
+                    <TouchableOpacity 
+                        style={[GlobalStyles.listAddButton, { height: 45, paddingHorizontal: 20 }]}
+                        onPress={handleExport}
+                        disabled={isExporting}
+                    >
+                        {isExporting ? (
+                            <ActivityIndicator size="small" color="white" />
+                        ) : (
+                            <MaterialCommunityIcons name="file-export-outline" size={20} color="white" />
+                        )}
+                        <Text style={[GlobalStyles.exportBtnText, { fontSize: 14, marginLeft: 10 }]}>
+                            {isExporting ? 'Mengekspor...' : 'Export File'}
+                        </Text>
+                    </TouchableOpacity>
+                </View>
+
+                
                 {loading ? (
-                    <ActivityIndicator size="large" color={Colors.primary} style={{ marginTop: 30 }} />
+                    <ActivityIndicator size="large" color={Colors.primary} style={LayoutStyles.mt50} />
                 ) : (
                     <>
-                    <View style={{ marginHorizontal: 6 }}>
+                    <View style={GlobalStyles.historyTableContainer}>
                     <ScrollView horizontal showsHorizontalScrollIndicator={true}>
-                        <View>
-                            {/* Table Header */}
-                            <View style={styles.tableHeader}>
-                                <Text style={[styles.th, { width: 85 }]}>Tgl</Text>
-                                <Text style={[styles.th, { width: 150 }]}>Nama</Text>
-                                <Text style={[styles.th, { width: 150 }]}>Dokter</Text>
-                                <Text style={[styles.th, { width: 100 }]}>Layanan</Text>
-                                <Text style={[styles.th, { width: 160 }]}>Keluhan</Text>
-                                <Text style={[styles.th, { width: 160 }]}>Diagnosa</Text>
-                                <Text style={[styles.th, { width: 160 }]}>Perawatan</Text>
-                                <Text style={[styles.th, { width: 150 }]}>Ket</Text>
+                        <View style={LayoutStyles.w1100}>
+                            
+                            <View style={GlobalStyles.tableHeaderAtomic}>
+                                <View style={[GlobalStyles.tableCellAtomic, GlobalStyles.tableCellFirst, LayoutStyles.w90]}><Text style={GlobalStyles.tableThText}>Tgl</Text></View>
+                                <View style={[GlobalStyles.tableCellAtomic, LayoutStyles.w150]}><Text style={GlobalStyles.tableThText}>Nama</Text></View>
+                                <View style={[GlobalStyles.tableCellAtomic, LayoutStyles.w140]}><Text style={GlobalStyles.tableThText}>Dokter</Text></View>
+                                <View style={[GlobalStyles.tableCellAtomic, LayoutStyles.w100]}><Text style={GlobalStyles.tableThText}>Layanan</Text></View>
+                                <View style={[GlobalStyles.tableCellAtomic, LayoutStyles.w150]}><Text style={GlobalStyles.tableThText}>Gigi</Text></View>
+                                <View style={[GlobalStyles.tableCellAtomic, LayoutStyles.w150]}><Text style={GlobalStyles.tableThText}>Diagnosa</Text></View>
+                                <View style={[GlobalStyles.tableCellAtomic, LayoutStyles.w160]}><Text style={GlobalStyles.tableThText}>Perawatan</Text></View>
+                                <View style={[GlobalStyles.tableCellAtomic, LayoutStyles.w160]}><Text style={GlobalStyles.tableThText}>Ket</Text></View>
                             </View>
-
-                            {/* Table Rows */}
-                            <ScrollView 
-                                showsVerticalScrollIndicator={true}
-                                nestedScrollEnabled={true}
-                                style={{ maxHeight: 500 }}
-                            >
+                            
+                            <View style={GlobalStyles.tableBodyWrapperAtomic}>
                                 {filtered.length === 0 ? (
-                                    <View style={styles.emptyRow}>
-                                        <Text style={styles.emptyText}>Tidak ada data ditemukan</Text>
+                                    <View style={GlobalStyles.emptyContent}>
+                                        <Text style={GlobalStyles.emptyText}>Tidak ada data ditemukan</Text>
                                     </View>
                                 ) : (
                                     filtered.map((item, index) => (
-                                        <View
-                                            key={item.id_record}
-                                            style={[styles.tableRow, index % 2 === 1 && styles.tableRowAlt]}
-                                        >
-                                            <Text style={[styles.td, { width: 85 }]}>{formatTanggal(item.tanggal)}</Text>
-                                            <Text style={[styles.td, { width: 150 }]}>{item.tb_pasien?.nama_pasien || '-'}</Text>
-                                            <Text style={[styles.td, { width: 150 }]}>{item.doctor_id ? (doctorMap[item.doctor_id] || '-') : '-'}</Text>
-                                            <Text style={[styles.td, { width: 100 }]}>{item.layanan || '-'}</Text>
-                                            <Text style={[styles.td, { width: 160 }]} numberOfLines={2}>{item.keluhan || '-'}</Text>
-                                            <Text style={[styles.td, { width: 160 }]} numberOfLines={2}>{item.diagnosa || '-'}</Text>
-                                            <Text style={[styles.td, { width: 160 }]} numberOfLines={2}>{item.tb_tindakan?.nama_tindakan || '-'}</Text>
-                                            <Text style={[styles.td, { width: 150 }]} numberOfLines={2}>{item.keterangan || '-'}</Text>
+                                        <View key={item.id_record} style={[GlobalStyles.tableRowAtomic, index % 2 === 1 && GlobalStyles.historyTableRowAlt]}>
+                                            <View style={[GlobalStyles.tableCellAtomic, GlobalStyles.tableCellFirst, LayoutStyles.w90]}><Text style={GlobalStyles.tableTdText}>{formatTanggal(item.tanggal)}</Text></View>
+                                            <View style={[GlobalStyles.tableCellAtomic, LayoutStyles.w150]}><Text style={GlobalStyles.tableTdText}>{item.tb_pasien?.nama_pasien || '-'}</Text></View>
+                                            <View style={[GlobalStyles.tableCellAtomic, LayoutStyles.w140]}><Text style={GlobalStyles.tableTdText}>{item.doctor_id ? (doctorMap[item.doctor_id] || '-') : '-'}</Text></View>
+                                            <View style={[GlobalStyles.tableCellAtomic, LayoutStyles.w100]}><Text style={GlobalStyles.tableTdText}>{item.layanan || '-'}</Text></View>
+                                            <View style={[GlobalStyles.tableCellAtomic, LayoutStyles.w150]}><Text style={GlobalStyles.tableTdText} numberOfLines={2}>{item.gigi || '-'}</Text></View>
+                                            <View style={[GlobalStyles.tableCellAtomic, LayoutStyles.w150]}><Text style={GlobalStyles.tableTdText} numberOfLines={2}>{item.diagnosa || '-'}</Text></View>
+                                            <View style={[GlobalStyles.tableCellAtomic, LayoutStyles.w160]}><Text style={GlobalStyles.tableTdText} numberOfLines={2}>{item.tb_tindakan?.nama_tindakan || '-'}</Text></View>
+                                            <View style={[GlobalStyles.tableCellAtomic, LayoutStyles.w160]}><Text style={GlobalStyles.tableTdText} numberOfLines={2}>{item.keterangan || '-'}</Text></View>
                                         </View>
                                     ))
                                 )}
-                            </ScrollView>
-                        </View>
-                    </ScrollView>
+                                </View>
+                            </View>
+                        </ScrollView>
                     </View>
-                    {/* Swipe hint */}
-                    <Text style={{ textAlign: 'center', fontSize: 11, color: '#aaa', marginTop: 4, marginBottom: 2 }}>
-                        {'<'} Geser untuk melihat lebih {'>'}
-                    </Text>
                     </>
                 )}
 
-                {/* Footer count */}
+                
                 {!loading && (
-                    <View style={styles.footerCount}>
-                        <Text style={styles.footerText}>Menampilkan {filtered.length} dari {records.length} data</Text>
+                    <View style={GlobalStyles.historyFooterCount}>
+                        <Text style={GlobalStyles.historyFooterText}>Menampilkan {filtered.length} dari {records.length} data</Text>
                         {(filterBulan || filterLayanan || filterTindakan || filterDiagnosa) && (
                             <TouchableOpacity onPress={() => {
                                 setFilterBulan('');
@@ -324,7 +384,7 @@ export function TampilHistori() {
                                 setFilterDiagnosa('');
                                 setFiltered(records);
                             }}>
-                                <Text style={styles.resetText}>Reset Filter</Text>
+                                <Text style={GlobalStyles.historyResetText}>Reset Filter</Text>
                             </TouchableOpacity>
                         )}
                     </View>
@@ -334,132 +394,3 @@ export function TampilHistori() {
     );
 }
 
-const styles = StyleSheet.create({
-    clinicHeader: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        backgroundColor: Colors.primary,
-        paddingHorizontal: 16,
-        paddingVertical: 12,
-    },
-    logo: {
-        width: 48,
-        height: 48,
-        borderRadius: 24,
-        borderWidth: 2,
-        borderColor: 'white',
-    },
-    clinicName: {
-        color: 'white',
-        fontSize: 18,
-        fontWeight: 'bold',
-    },
-    clinicAddress: {
-        color: 'rgba(255,255,255,0.85)',
-        fontSize: 11,
-        marginTop: 2,
-    },
-
-    filterCard: {
-        marginHorizontal: 6,
-        marginVertical: 6,
-        backgroundColor: 'white',
-        borderRadius: 10,
-        borderWidth: 1.5,
-        borderColor: Colors.primary,
-        padding: 8,
-        elevation: 2,
-    },
-    filterRow: {
-        flexDirection: 'row',
-        marginBottom: 4,
-    },
-    filterItem: {
-        flex: 1,
-        flexDirection: 'row',
-        alignItems: 'center',
-        paddingHorizontal: 4,
-    },
-    filterLabel: {
-        fontSize: 13,
-        fontWeight: '600',
-        color: '#333',
-        width: 75,
-    },
-    pickerBox: {
-        flex: 1,
-        borderWidth: 1,
-        borderColor: '#ccc',
-        borderRadius: 6,
-        backgroundColor: 'white',
-        justifyContent: 'center',
-    },
-    picker: {
-        color: '#000',
-        fontSize: 13,
-    },
-
-    tableHeader: {
-        flexDirection: 'row',
-        backgroundColor: Colors.primary,
-        paddingVertical: 8,
-        paddingHorizontal: 4,
-    },
-    th: {
-        color: 'white',
-        fontWeight: 'bold',
-        fontSize: 12,
-        textAlign: 'center',
-        borderRightWidth: 1,
-        borderRightColor: 'rgba(255,255,255,0.4)',
-        paddingHorizontal: 4,
-    },
-    tableRow: {
-        flexDirection: 'row',
-        paddingVertical: 8,
-        paddingHorizontal: 4,
-        borderBottomWidth: 1,
-        borderBottomColor: '#eee',
-        backgroundColor: 'white',
-        minHeight: 45,
-    },
-    tableRowAlt: {
-        backgroundColor: '#fdf5f5',
-    },
-    td: {
-        fontSize: 11,
-        color: '#333',
-        textAlign: 'center',
-        paddingHorizontal: 4,
-        borderRightWidth: 1,
-        borderRightColor: '#e0e0e0',
-        flexWrap: 'wrap',
-    },
-    emptyRow: {
-        padding: 30,
-        alignItems: 'center',
-    },
-    emptyText: {
-        color: '#888',
-        fontStyle: 'italic',
-    },
-    footerCount: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        paddingHorizontal: 16,
-        paddingVertical: 8,
-        backgroundColor: '#f8f8f8',
-        borderTopWidth: 1,
-        borderTopColor: '#e0e0e0',
-    },
-    footerText: {
-        fontSize: 12,
-        color: '#666',
-    },
-    resetText: {
-        fontSize: 12,
-        color: Colors.primary,
-        fontWeight: 'bold',
-    },
-});

@@ -1,99 +1,108 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, FlatList, TouchableOpacity, Alert, ActivityIndicator, StyleSheet } from 'react-native';
+import { View, Text, FlatList, TouchableOpacity, Alert, ActivityIndicator } from 'react-native';
 import { supabase } from '../../../utils/supabase';
 import { GlobalStyles, LayoutStyles, Colors } from '../../../styles/GlobalStyles';
 import AdminLayout from '../../../components/templates/AdminLayout';
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { useAlert } from '../../../context/AlertContext';
 
 export function TampilRujukan() {
   const [records, setRecords] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const navigation = useNavigation<any>();
+  const { showAlert } = useAlert();
 
   useFocusEffect(
     React.useCallback(() => {
-        fetchRecords();
+      fetchRecords();
     }, [])
   );
 
   const fetchRecords = async () => {
     try {
       setLoading(true);
-      // Fetch rekam medis yang sudah Selesai (siap dicetak rujukannya)
+
       const { data, error } = await supabase
-        .from('tb_rekam_medis')
+        .from('tb_rujukan')
         .select(`
-          id_record,
-          tanggal,
-          diagnosa,
-          keluhan,
-          keterangan,
-          layanan,
-          id_tindakan,
-          id_pasien,
-          tb_pasien (
-            id_pasien,
-            nama_pasien,
-            alamat,
-            tgl_lahir,
-            jk,
-            nope
-          ),
-          tb_tindakan (
-            nama_tindakan
-          )
+          *,
+          tb_pasien (nama_pasien),
+          tb_rekam_medis (layanan, gigi, diagnosa, tanggal)
         `)
-        .eq('status', 'Selesai')
-        .order('tanggal', { ascending: false });
+        .order('tgl', { ascending: false });
 
-      if (error) {
-        throw error;
-      }
-
+      if (error) throw error;
       setRecords(data || []);
     } catch (error: any) {
-      Alert.alert('Error', error.message);
+      showAlert({ title: 'Error', message: error.message, type: 'error' });
     } finally {
       setLoading(false);
     }
   };
 
   const renderItem = ({ item }: { item: any }) => (
-    <View style={styles.card}>
-      <View style={{ flex: 1 }}>
-        <Text style={styles.cardTitle}>{item.tb_pasien?.nama_pasien || 'Nama tidak tersedia'}</Text>
-        <Text style={styles.cardSubtitle}>Tanggal: {item.tanggal}</Text>
-        <Text style={styles.cardSubtitle}>Perawatan: {item.tb_tindakan?.nama_tindakan || item.layanan}</Text>
+    <View style={[GlobalStyles.rujukanCard, LayoutStyles.shadowCard]}>
+      <View style={LayoutStyles.flex1}>
+        <Text style={GlobalStyles.rujukanCardTitle}>{item.tb_pasien?.nama_pasien || 'Pasien'}</Text>
+        <Text style={GlobalStyles.rujukanCardSubtitle}>Tgl Rujukan: {item.tgl}</Text>
+        <Text style={GlobalStyles.rujukanCardSubtitle}>Tujuan: {item.ditujukan}</Text>
       </View>
-      <TouchableOpacity 
-        style={styles.actionBtn}
-        onPress={() => navigation.navigate('CreateRujukan', { record: item })}
+      <TouchableOpacity
+        style={[GlobalStyles.rujukanActionBtn, { backgroundColor: '#2E50D4' }]}
+        onPress={() => {
+
+          const previewItem = {
+            ...item,
+            detail_pasien: {
+              nama_pasien: item.tb_pasien?.nama_pasien,
+
+            },
+            detail_medis: {
+              keluhan_rujukan: item.keluhan,
+              diagnosa: item.tb_rekam_medis?.diagnosa
+            },
+            isOrto: item.tb_rekam_medis?.layanan === 'Ortodental'
+          };
+          navigation.navigate('PreviewRujukan', { item: previewItem });
+        }}
       >
-        <MaterialCommunityIcons name="file-export" size={24} color="white" />
-        <Text style={styles.actionBtnText}>Buat Rujukan</Text>
+        <MaterialCommunityIcons name="printer-eye" size={24} color="white" />
+        <Text style={GlobalStyles.rujukanActionBtnText}>Lihat/Cetak</Text>
       </TouchableOpacity>
     </View>
   );
 
   return (
-    <AdminLayout noScroll={true} customRightTitle="Antrian Rujukan">
-      <View style={{ flex: 1, padding: 20 }}>
-        <Text style={[GlobalStyles.formSectionTitle, LayoutStyles.mb20]}>DAFTAR ANTRIAN RUJUKAN</Text>
-        <Text style={{marginBottom: 10, fontStyle: 'italic', color: '#555'}}>
-            Pilih record pasien di bawah ini untuk membuat Surat Rujukan.
+    <AdminLayout noScroll={true} customRightTitle="Arsip Rujukan">
+      <View style={[LayoutStyles.flex1, LayoutStyles.ph20, LayoutStyles.pt10]}>
+        <View style={[LayoutStyles.rowBetween, LayoutStyles.mb15]}>
+          <Text style={GlobalStyles.formSectionTitle}>ARSIP RUJUKAN</Text>
+          <TouchableOpacity
+            style={[GlobalStyles.listAddButton, { height: 45, paddingHorizontal: 15 }]}
+            onPress={() => navigation.navigate('CreateRujukan')}
+          >
+            <MaterialCommunityIcons name="plus-circle-outline" size={20} color="white" />
+            <Text style={GlobalStyles.listAddButtonText}>Tambah Rujukan</Text>
+          </TouchableOpacity>
+        </View>
+
+        <Text style={[LayoutStyles.mb10, LayoutStyles.italicText]}>
+          Berikut adalah daftar surat rujukan yang telah dibuat sebelumnya.
         </Text>
-        
+
         {loading ? (
           <ActivityIndicator size="large" color={Colors.primary} style={LayoutStyles.mt20} />
         ) : records.length === 0 ? (
-          <Text style={{ textAlign: 'center', marginTop: 20 }}>Tidak ada data rekam medis selesai.</Text>
+          <View style={GlobalStyles.emptyContent}>
+            <Text style={GlobalStyles.emptyText}>Belum ada histori rujukan.</Text>
+          </View>
         ) : (
           <FlatList
             data={records}
-            keyExtractor={(item) => item.id_record.toString()}
+            keyExtractor={(item) => item.id_rujukan.toString()}
             renderItem={renderItem}
-            contentContainerStyle={{ paddingBottom: 20 }}
+            contentContainerStyle={{ paddingBottom: 25, paddingTop: 5 }}
             showsVerticalScrollIndicator={false}
           />
         )}
@@ -103,45 +112,4 @@ export function TampilRujukan() {
   );
 }
 
-const styles = StyleSheet.create({
-  card: {
-    backgroundColor: 'white',
-    padding: 15,
-    borderRadius: 15,
-    borderWidth: 1.5,
-    borderColor: Colors.primary,
-    marginBottom: 15,
-    flexDirection: 'row',
-    alignItems: 'center',
-    elevation: 2,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 3,
-  },
-  cardTitle: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    color: '#333',
-    marginBottom: 4,
-  },
-  cardSubtitle: {
-    fontSize: 13,
-    color: '#666',
-  },
-  actionBtn: {
-    backgroundColor: Colors.primary,
-    paddingVertical: 10,
-    paddingHorizontal: 15,
-    borderRadius: 10,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginLeft: 10,
-  },
-  actionBtnText: {
-    color: 'white',
-    fontSize: 12,
-    fontWeight: 'bold',
-    marginTop: 2,
-  }
-});
+

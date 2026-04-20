@@ -14,7 +14,7 @@ export const Colors = {
   formInputBg: '#F2E3E3',
 };
 
-// --- Auth Template Styles ---
+
 export const AuthStyles = StyleSheet.create({
   safeArea: {
     flex: 1,
@@ -54,7 +54,7 @@ export const AuthStyles = StyleSheet.create({
   },
 });
 
-// --- Layout Utilities ---
+
 export const LayoutStyles = StyleSheet.create({
   safeArea: {
     flex: 1,
@@ -123,6 +123,7 @@ export const LayoutStyles = StyleSheet.create({
     justifyContent: 'flex-end',
     alignItems: 'center',
   },
+  mt0: { marginTop: 0 },
   mt10: { marginTop: 10 },
   mt15: { marginTop: 15 },
   mt20: { marginTop: 20 },
@@ -131,27 +132,109 @@ export const LayoutStyles = StyleSheet.create({
   mr10: { marginRight: 10 },
   ml10: { marginLeft: 10 },
   ph20: { paddingHorizontal: 20 },
-  pt10: { paddingTop: 10 },
-  mb40: { marginBottom: 40 },
-  w50p: { width: '50%' },
-  alignSelfCenter: { alignSelf: 'center' },
-  textPlaceholder: { color: Colors.placeholder },
-  mt0: { marginTop: 0 },
-  mb15: { marginBottom: 15 },
-  h50: { height: 50 },
-  mh20: { marginHorizontal: 20 },
-  tableFixed700: { minWidth: '100%', width: 700 },
-  tableFixed1000: { minWidth: '100%', width: 1000 },
-  mh25: { marginHorizontal: 25 },
-  mh30: { marginHorizontal: 30 },
   ph25: { paddingHorizontal: 25 },
   ph30: { paddingHorizontal: 30 },
+  pt10: { paddingTop: 10 },
+  p20: { padding: 20 },
+  mb5: { marginBottom: 5 },
+  mb10: { marginBottom: 10 },
+  mt30: { marginTop: 30 },
+  mb15: { marginBottom: 15 },
+  mb20: { marginBottom: 20 },
+  mb25: { marginBottom: 25 },
+  mb30: { marginBottom: 30 },
+  mb40: { marginBottom: 40 },
+  mh20: { marginHorizontal: 20 },
+  mh25: { marginHorizontal: 25 },
+  mh30: { marginHorizontal: 30 },
+  h50: { height: 50 },
+  h35: { height: 35 },
+  w50p: { width: '50%' },
+  w50: { width: 50 },
+  w60: { width: 60 },
+  w70: { width: 70 },
+  w80: { width: 80 },
+  w90: { width: 90 },
+  w100: { width: 100 },
+  w130: { width: 130 },
+  w140: { width: 140 },
+  w150: { width: 150 },
+  w160: { width: 160 },
+  w170: { width: 170 },
+  w180: { width: 180 },
+  w200: { width: 200 },
+  w220: { width: 220 },
+  w250: { width: 250 },
+  w270: { width: 270 },
+  w280: { width: 280 },
+  w300: { width: 300 },
+  w700: { width: 700 },
+  w900: { width: 900 },
+  w1100: { width: 1100 },
+  minW250: { minWidth: 250 },
+  alignSelfCenter: { alignSelf: 'center' },
+  textPlaceholder: { color: Colors.placeholder },
   textBold: { fontWeight: 'bold' },
   textPrimary: { color: Colors.primary },
   bgPrimary: { backgroundColor: Colors.primary },
+  bgWhite: { backgroundColor: Colors.white },
+  tableFixed700: { minWidth: '100%', width: 700 },
+  tableFixed1000: { minWidth: '100%', width: 1000 },
   row: { flexDirection: 'row' },
-  mb20: { marginBottom: 20 },
-  mb30: { marginBottom: 30 },
+  flexRow: { flexDirection: 'row' },
+  flexWrap: { flexWrap: 'wrap' },
+  alignCenter: { alignItems: 'center' },
+  justifyEnd: { justifyContent: 'flex-end' },
+  stretch: { alignItems: 'stretch' },
+  shadowCard: {
+    elevation: 3,
+    shadowColor: Colors.black,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+  },
+  italicText: {
+    fontStyle: 'italic',
+    color: '#555',
+  },
+  centerText: {
+    textAlign: 'center',
+  },
+  textGray: {
+    color: '#888',
+  },
+  textGrayDark: {
+     color: '#555',
+  },
+  textDark: {
+     color: '#333',
+  },
+  textBoldHuge: {
+    fontSize: 20,
+    fontWeight: 'bold',
+  },
+  textSmallPrimary: {
+    fontSize: 12,
+    color: Colors.primary,
+    fontWeight: 'bold',
+  },
+  textCenterGray: {
+    textAlign: 'center',
+    marginBottom: 15,
+    color: '#666',
+  },
+  justifyCenter: {
+    justifyContent: 'center',
+  },
+  flex0: {
+    flex: 0,
+  },
+  textJustify: {
+    textAlign: 'justify',
+  },
+  lineHeight22: {
+    lineHeight: 22,
+  },
 });
 
 export const GlobalStyles = StyleSheet.create({
@@ -229,6 +312,10 @@ export const GlobalStyles = StyleSheet.create({
     fontWeight: 'bold',
     marginBottom: 8,
   },
+  inputLabelSmall: {
+    fontSize: 13,
+    color: '#666',
+  },
   inputContainer: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -264,6 +351,8 @@ export const GlobalStyles = StyleSheet.create({
   pickerText: {
     fontSize: 16,
     color: Colors.black,
+    includeFontPadding: false,
+    lineHeight: 22,
   },
   pickerPlaceholder: {
     color: Colors.placeholder,
@@ -277,7 +366,7 @@ export const GlobalStyles = StyleSheet.create({
   selectionModalContent: {
     width: '85%',
     backgroundColor: Colors.white,
-    borderRadius: 30,
+    borderRadius: 20,
     padding: 25,
     maxHeight: '70%',
     borderWidth: 2,
@@ -311,6 +400,8 @@ export const GlobalStyles = StyleSheet.create({
   selectionOptionText: {
     fontSize: 16,
     color: '#333',
+    includeFontPadding: false,
+    lineHeight: 22,
   },
   selectionOptionTextActive: {
     color: Colors.primary,
@@ -443,6 +534,7 @@ export const GlobalStyles = StyleSheet.create({
     marginBottom: 8,
     letterSpacing: 1.2,
   },
+
   formDivider: {
     height: 1,
     backgroundColor: Colors.black,
@@ -664,9 +756,10 @@ export const GlobalStyles = StyleSheet.create({
     padding: 20,
   },
   modalBox: {
-    width: '85%',
+    width: 310,
+    maxWidth: '90%',
     backgroundColor: Colors.white,
-    borderRadius: 40,
+    borderRadius: 20,
     paddingVertical: 25,
     paddingHorizontal: 25,
     alignItems: 'center',
@@ -788,7 +881,7 @@ export const GlobalStyles = StyleSheet.create({
     width: 150,
   },
 
-  // Detail View Styles (Read Pasien)
+
   detailMainCard: {
     backgroundColor: Colors.white,
     borderWidth: 1,
@@ -796,18 +889,117 @@ export const GlobalStyles = StyleSheet.create({
     borderRadius: 50,
     padding: 40,
     marginTop: 30,
-    marginHorizontal: 35, // Increased from 25
-    // Soft Premium Shadow
+    marginHorizontal: 35,
+
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 10 },
     shadowOpacity: 0.05,
-    shadowRadius: 20,
-    elevation: 5,
+    shadowRadius: 5,
+    elevation: 10,
   },
-  // Form Picker Utilities
-  // Form Picker Utilities
+
+
+  tableCardAtomic: {
+    width: '100%',
+    maxWidth: 900,
+    backgroundColor: Colors.white,
+    borderRadius: 0,
+    overflow: 'hidden',
+  },
+  filterSectionAtomic: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 20,
+    paddingVertical: 10,
+    backgroundColor: Colors.white,
+  },
+  pickerWrapper: {
+    flex: 1,
+    minWidth: 200,
+    height: 50,
+    justifyContent: 'center',
+    borderWidth: 1.5,
+    borderColor: Colors.black,
+    borderRadius: 10,
+    backgroundColor: Colors.white,
+    paddingHorizontal: 5,
+    marginLeft: 10,
+  },
+  picker: {
+    width: '100%',
+    height: 50,
+    color: Colors.black,
+  },
+  tableHeaderAtomic: {
+    flexDirection: 'row',
+    backgroundColor: Colors.white,
+    alignItems: 'stretch',
+    borderTopWidth: 1,
+    borderTopColor: Colors.black,
+  },
+  tableBodyWrapperAtomic: {
+    minHeight: 150,
+  },
+  tableRowAtomic: {
+    flexDirection: 'row',
+    alignItems: 'stretch',
+    minHeight: 65,
+  },
+  tableCellAtomic: {
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingHorizontal: 8,
+    borderRightWidth: 1,
+    borderRightColor: Colors.black,
+    borderBottomWidth: 1,
+    borderBottomColor: Colors.black,
+  },
+  tableThText: {
+    fontWeight: 'bold',
+    fontSize: 13,
+    color: Colors.black,
+    textAlign: 'center',
+  },
+  tableTdText: {
+    fontSize: 12,
+    color: Colors.black,
+    textAlign: 'center',
+  },
+  tableFooterRow: {
+    flexDirection: 'row',
+    height: 55,
+  },
+  tableCellFirst: {
+    borderLeftWidth: 1,
+    borderLeftColor: Colors.black,
+  },
+  exportBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    width: '100%',
+    height: '100%',
+  },
+  exportBtnText: {
+    color: Colors.white,
+    fontSize: 12,
+    fontWeight: 'bold',
+    marginLeft: 8,
+  },
+  detailCard: {
+    width: '100%',
+    maxWidth: 900,
+    backgroundColor: Colors.white,
+    borderWidth: 1.5,
+    borderColor: Colors.black,
+    borderRadius: 25,
+    padding: 30,
+    marginBottom: 30,
+  },
+
+
   btnKembaliLink: {
-    backgroundColor: '#2D58D1', // Nicer blue
+    backgroundColor: '#2D58D1',
     paddingVertical: 15,
     paddingHorizontal: 50,
     borderRadius: 35,
@@ -954,5 +1146,409 @@ export const GlobalStyles = StyleSheet.create({
     elevation: 3,
     borderWidth: 1,
     borderColor: '#EEE',
+  },
+
+
+  historyFilterCard: {
+    marginHorizontal: 10,
+    marginVertical: 10,
+    backgroundColor: Colors.white,
+    borderRadius: 12,
+    borderWidth: 1.5,
+    borderColor: Colors.primary,
+    padding: 10,
+    elevation: 3,
+  },
+  historyFilterRow: {
+    flexDirection: 'row',
+    marginBottom: 6,
+  },
+  historyFilterItem: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 5,
+  },
+  historyFilterLabel: {
+    fontSize: 13,
+    fontWeight: '600',
+    color: '#333',
+    width: 80,
+  },
+  historyPickerBox: {
+    flex: 1,
+    borderWidth: 1,
+    borderColor: '#ccc',
+    borderRadius: 8,
+    backgroundColor: Colors.white,
+    justifyContent: 'center',
+    height: 40,
+  },
+  historyTableContainer: {
+    marginHorizontal: 10,
+    backgroundColor: Colors.white,
+    borderWidth: 1.5,
+    borderColor: Colors.black,
+    borderRadius: 0,
+    overflow: 'hidden',
+  },
+  historyTableRowAlt: {
+    backgroundColor: '#F9F9F9',
+  },
+  historyFooterCount: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingHorizontal: 20,
+    paddingVertical: 10,
+    backgroundColor: '#F5F5F5',
+    borderTopWidth: 1,
+    borderTopColor: '#DDD',
+  },
+  historyFooterText: {
+    fontSize: 12,
+    color: Colors.text,
+  },
+  historyResetText: {
+    fontSize: 12,
+    color: Colors.primary,
+    fontWeight: 'bold',
+  },
+
+
+  billCard: {
+    backgroundColor: Colors.white,
+    borderRadius: 20,
+    borderWidth: 1.5,
+    borderColor: Colors.primary,
+    padding: 20,
+    marginBottom: 20,
+    flexDirection: 'row',
+    elevation: 3,
+  },
+  billBody: {
+    flex: 1,
+  },
+  billInfoRow: {
+    flexDirection: 'row',
+    marginBottom: 8,
+  },
+  billLabel: {
+    width: 125,
+    fontSize: 14,
+    fontWeight: 'bold',
+    color: '#333',
+  },
+  billColon: {
+    width: 15,
+    fontSize: 14,
+    fontWeight: 'bold',
+  },
+  billValue: {
+    flex: 1,
+    fontSize: 14,
+    color: '#555',
+  },
+  billActionSection: {
+    justifyContent: 'center',
+    marginLeft: 15,
+  },
+  billCetakBtn: {
+    paddingVertical: 12,
+    paddingHorizontal: 15,
+    borderRadius: 12,
+    alignItems: 'center',
+    justifyContent: 'center',
+    width: 135,
+  },
+  billCetakBtnText: {
+    color: Colors.white,
+    fontSize: 11,
+    fontWeight: 'bold',
+    textAlign: 'center',
+    marginTop: 5,
+  },
+  billDateBox: {
+    borderWidth: 1,
+    borderColor: '#CCC',
+    paddingHorizontal: 15,
+    paddingVertical: 8,
+    borderRadius: 8,
+    backgroundColor: Colors.white,
+    marginTop: 2,
+  },
+  billDateText: {
+    fontSize: 14,
+    fontWeight: 'bold',
+    color: '#333',
+  },
+  statusPill: {
+    paddingVertical: 6,
+    paddingHorizontal: 15,
+    borderRadius: 15,
+    borderWidth: 1,
+    borderColor: 'rgba(0,0,0,0.05)',
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    width: '100%',
+  },
+  statusPillText: {
+    fontWeight: 'bold',
+    fontSize: 13,
+  },
+  rujukanCard: {
+    backgroundColor: Colors.white,
+    padding: 15,
+    borderRadius: 15,
+    borderWidth: 1.5,
+    borderColor: Colors.primary,
+    marginBottom: 15,
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  rujukanCardTitle: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: '#333',
+    marginBottom: 4,
+  },
+  rujukanCardSubtitle: {
+    fontSize: 13,
+    color: '#666',
+  },
+  rujukanActionBtn: {
+    backgroundColor: Colors.primary,
+    paddingVertical: 10,
+    paddingHorizontal: 15,
+    borderRadius: 10,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginLeft: 10,
+  },
+  rujukanActionBtnText: {
+    color: Colors.white,
+    fontSize: 12,
+    fontWeight: 'bold',
+    marginTop: 5,
+  },
+
+
+  receiptContainer: {
+    width: '95%',
+    backgroundColor: Colors.white,
+    padding: 25,
+    borderWidth: 1.5,
+    borderColor: Colors.black,
+    elevation: 3,
+  },
+  receiptHeaderContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: 5,
+  },
+  receiptLogoAligner: {
+    width: 60,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  receiptHeaderTextContainer: {
+    flex: 1,
+    alignItems: 'center',
+  },
+  receiptTitleUmum: {
+    fontSize: 22,
+    fontWeight: 'bold',
+    fontFamily: Platform.OS === 'ios' ? 'Times New Roman' : 'serif',
+    color: Colors.black,
+    textAlign: 'center',
+  },
+  receiptDoctorName: {
+    fontSize: 20,
+    fontWeight: '900',
+    color: Colors.black,
+    textAlign: 'center',
+    marginVertical: 2,
+  },
+  receiptSipText: {
+    fontSize: 12,
+    color: Colors.black,
+    fontWeight: 'bold',
+    textAlign: 'center',
+    marginBottom: 2,
+  },
+  receiptAddressText: {
+    fontSize: 13,
+    color: Colors.black,
+    textAlign: 'center',
+  },
+  receiptLineThick: {
+    height: 3,
+    backgroundColor: Colors.black,
+    marginBottom: 2,
+  },
+  receiptLineThin: {
+    height: 1,
+    backgroundColor: Colors.black,
+  },
+  receiptTitle: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    fontFamily: Platform.OS === 'ios' ? 'Times New Roman' : 'serif',
+    color: Colors.black,
+    textAlign: 'center',
+  },
+  receiptNo: {
+    fontSize: 18,
+    fontFamily: Platform.OS === 'ios' ? 'Times New Roman' : 'serif',
+    textAlign: 'center',
+    marginTop: 2,
+  },
+  receiptInfoRow: {
+    flexDirection: 'row',
+    marginBottom: 10,
+  },
+  receiptSubInfoRow: {
+    flexDirection: 'row',
+    marginBottom: 10,
+    marginLeft: 40,
+  },
+  receiptLabel: {
+    width: 150,
+    fontSize: 15,
+    fontFamily: Platform.OS === 'ios' ? 'Times New Roman' : 'serif',
+    fontStyle: 'italic',
+    fontWeight: 'bold',
+    color: Colors.black,
+  },
+  receiptSubLabel: {
+    width: 110,
+    fontSize: 15,
+    fontFamily: Platform.OS === 'ios' ? 'Times New Roman' : 'serif',
+    fontStyle: 'italic',
+    fontWeight: 'bold',
+    color: Colors.black,
+  },
+  receiptColon: {
+    width: 25,
+    fontSize: 15,
+    fontFamily: Platform.OS === 'ios' ? 'Times New Roman' : 'serif',
+    fontWeight: 'bold',
+    color: Colors.black,
+    textAlign: 'center',
+  },
+  receiptValue: {
+    flex: 1,
+    fontSize: 16,
+    fontFamily: Platform.OS === 'ios' ? 'Times New Roman' : 'serif',
+    color: Colors.black,
+  },
+  receiptNominalBoxWrapper: {
+    width: '45%',
+  },
+  receiptNominalText: {
+    fontSize: 16,
+    fontFamily: Platform.OS === 'ios' ? 'Times New Roman' : 'serif',
+    fontWeight: 'bold',
+    fontStyle: 'italic',
+    color: Colors.black,
+    marginLeft: 5,
+    marginVertical: 2,
+  },
+  receiptAdminSign: {
+    alignItems: 'flex-end',
+    width: '45%',
+  },
+  receiptDateInfo: {
+    textAlign: 'right',
+    fontSize: 14,
+    fontFamily: Platform.OS === 'ios' ? 'Times New Roman' : 'serif',
+    color: Colors.black,
+  },
+  receiptLogoCircle: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    width: 80,
+    height: 80,
+    borderRadius: 40,
+    overflow: 'hidden',
+  },
+  receiptDoubleLineContainer: {
+    marginTop: 10,
+    marginBottom: 5,
+  },
+  receiptDoubleLineSmall: {
+    marginVertical: 4,
+  },
+  receiptSignSpace: {
+    height: 60,
+  },
+  receiptFooter: {
+    marginTop: 10,
+  },
+  receiptNominalRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'flex-end',
+    marginTop: 20,
+  },
+
+
+  rujukanTitleUmumHuge: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    fontFamily: Platform.OS === 'ios' ? 'Times New Roman' : 'serif',
+    color: Colors.black,
+    textAlign: 'center',
+    marginBottom: 4,
+  },
+  rujukanBoldText: {
+    fontFamily: Platform.OS === 'ios' ? 'Times New Roman' : 'serif',
+    fontWeight: 'bold',
+    fontSize: 14,
+    color: Colors.black,
+  },
+  rujukanDotLineUnder: {
+    borderBottomWidth: 1,
+    borderBottomColor: '#aaa',
+    alignSelf: 'flex-start',
+    minWidth: 200,
+    marginBottom: 5,
+  },
+  rujukanValueRowWrapper: {
+    flex: 1,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+  },
+  rujukanGenderTextRight: {
+    fontFamily: Platform.OS === 'ios' ? 'Times New Roman' : 'serif',
+    fontWeight: 'bold',
+    fontSize: 14,
+    marginLeft: 10,
+  },
+  rujukanDateInfoBold: {
+    textAlign: 'center',
+    fontSize: 14,
+    fontFamily: Platform.OS === 'ios' ? 'Times New Roman' : 'serif',
+    fontWeight: 'bold',
+    color: Colors.black,
+    marginTop: 2,
+  },
+  rujukanAdminSign: {
+    alignItems: 'center',
+    width: 250,
+  },
+  rujukanLogo: {
+    width: 65,
+    height: 65,
+    borderRadius: 32.5,
+    borderWidth: 2,
+    borderColor: '#C62828',
+    marginRight: 15,
+  },
+  doctorNameSmall: {
+    fontSize: 13,
+    letterSpacing: 1,
   },
 });

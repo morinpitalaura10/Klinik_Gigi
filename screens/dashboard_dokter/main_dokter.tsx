@@ -14,13 +14,14 @@ import { Colors, GlobalStyles, LayoutStyles } from '../../styles/GlobalStyles';
 import AdminLayout from '../../components/templates/AdminLayout';
 import { useFocusEffect, useNavigation } from '@react-navigation/native';
 import { AuthContext } from '../../context/AuthContext';
+import { useAlert } from '../../context/AlertContext';
 
 interface DentalRecord {
   id_record: number;
   tanggal: string;
   layanan: string;
   status: string;
-  keluhan: string;
+  gigi: string;
   tb_pasien: {
     nama_pasien: string;
     jk: string;
@@ -30,6 +31,7 @@ interface DentalRecord {
 export default function MainDokter() {
   const navigation = useNavigation<any>();
   const { user, logout } = useContext(AuthContext); 
+  const { showAlert } = useAlert();
   const [records, setRecords] = useState<DentalRecord[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -51,11 +53,9 @@ export default function MainDokter() {
         .eq('tanggal', today)
         .eq('status', 'Diproses');
 
-      // Filter berdasarkan spesialisasi dokter (Sangat Fleksibel)
       if (user?.role === 'dokter' && user?.spesialisasi) {
           const spec = user.spesialisasi.toLowerCase();
           if (spec.includes('orto')) {
-              // Menangkap 'Ortodental', 'Ortodonti', 'ortho', dll.
               query = query.ilike('layanan', '%orto%');
           } else if (spec.includes('umum')) {
               query = query.ilike('layanan', '%umum%');
@@ -69,7 +69,7 @@ export default function MainDokter() {
       if (error) throw error;
       setRecords(data || []);
     } catch (error: any) {
-      Alert.alert('Error', error.message);
+      showAlert({ title: 'Error', message: error.message, type: 'error' });
     } finally {
       setLoading(false);
       setRefreshing(false);
@@ -82,11 +82,22 @@ export default function MainDokter() {
     }, [])
   );
 
+  const formatTanggalValue = (dateStr: string) => {
+    if (!dateStr) return "-";
+    const date = new Date(dateStr);
+    const d = String(date.getDate()).padStart(2, '0');
+    const m = String(date.getMonth() + 1).padStart(2, '0');
+    const y = date.getFullYear();
+    return `${d}-${m}-${y}`;
+  };
+
   const handleLogout = () => {
-    Alert.alert('Logout', 'Apakah Anda yakin ingin keluar?', [
-        { text: 'Batal', style: 'cancel' },
-        { text: 'Keluar', onPress: logout }
-    ]);
+    showAlert({ 
+      title: 'Logout', 
+      message: 'Apakah Anda yakin ingin keluar?', 
+      type: 'confirm',
+      onConfirm: logout
+    });
   };
 
   return (
@@ -99,38 +110,31 @@ export default function MainDokter() {
         <ActivityIndicator size="large" color={Colors.black} style={LayoutStyles.mt50} />
       ) : (
         <View style={LayoutStyles.flex1}>
-          {/* Header Dashboard Dokter */}
           <View style={[LayoutStyles.ph20, LayoutStyles.pt10, LayoutStyles.mb20]}>
             <View>
-                <Text style={{ fontSize: 13, color: '#888' }}>Selamat Bekerja,</Text>
-                <Text style={{ fontSize: 20, fontWeight: 'bold', color: '#333' }}>
+                <Text style={LayoutStyles.textGray}>Selamat Bekerja,</Text>
+                <Text style={[LayoutStyles.textBoldHuge, LayoutStyles.textDark]}>
                     drg. {user?.nama || 'Dokter'}
                 </Text>
-                <Text style={{ fontSize: 12, color: Colors.primary, fontWeight: 'bold' }}>
+                <Text style={LayoutStyles.textSmallPrimary}>
                     Spesialisasi: {user?.spesialisasi || 'Belum Terdeteksi (Silakan Re-login)'}
                 </Text>
-                <Text style={{ fontSize: 13, color: '#555', marginTop: 2 }}>
+                <Text style={[LayoutStyles.textGrayDark, LayoutStyles.mt10]}>
                     Antrean Pasien - {new Date().toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })}
                 </Text>
             </View>
           </View>
 
           <View style={[GlobalStyles.tableContainer, LayoutStyles.mh20]}>
-            <ScrollView horizontal={true} showsHorizontalScrollIndicator={false}>
-              <View style={[GlobalStyles.tableContentWrapper, { width: 700 }]}>
-                <View style={GlobalStyles.tableHeader}>
-                  <View style={[GlobalStyles.tableHeaderCell, { width: 200 }]}>
-                    <Text style={GlobalStyles.tableHeaderText}>Nama</Text>
-                  </View>
-                  <View style={[GlobalStyles.tableHeaderCell, { width: 100 }]}>
-                    <Text style={GlobalStyles.tableHeaderText}>Gender</Text>
-                  </View>
-                  <View style={[GlobalStyles.tableHeaderCell, { width: 300 }]}>
-                    <Text style={GlobalStyles.tableHeaderText}>Keluhan</Text>
-                  </View>
-                  <View style={[GlobalStyles.tableHeaderCell, { width: 100, borderRightWidth: 0 }]}>
-                    <Text style={GlobalStyles.tableHeaderText}>Aksi</Text>
-                  </View>
+            <ScrollView horizontal={true} showsHorizontalScrollIndicator={true}>
+              <View style={[GlobalStyles.tableContentWrapper, { width: 900, borderLeftWidth: 1, borderRightWidth: 1, borderTopWidth: 1, borderTopColor: Colors.black }]}>
+                <View style={[GlobalStyles.tableRowAtomic, { backgroundColor: Colors.white, minHeight: 50 }]}>
+                    <View style={[GlobalStyles.tableCellAtomic, GlobalStyles.tableCellFirst, { width: 130 }]}><Text style={GlobalStyles.tableThText}>Tanggal</Text></View>
+                    <View style={[GlobalStyles.tableCellAtomic, { width: 190 }]}><Text style={GlobalStyles.tableThText}>Nama Pasien</Text></View>
+                    <View style={[GlobalStyles.tableCellAtomic, { width: 110 }]}><Text style={GlobalStyles.tableThText}>JK</Text></View>
+                    <View style={[GlobalStyles.tableCellAtomic, { width: 140 }]}><Text style={GlobalStyles.tableThText}>Layanan</Text></View>
+                    <View style={[GlobalStyles.tableCellAtomic, { width: 190 }]}><Text style={GlobalStyles.tableThText}>Nomor Gigi</Text></View>
+                    <View style={[GlobalStyles.tableCellAtomic, { width: 140, borderRightWidth: 0 }]}><Text style={GlobalStyles.tableThText}>Aksi</Text></View>
                 </View>
 
                 <FlatList
@@ -145,25 +149,18 @@ export default function MainDokter() {
                   renderItem={({ item, index }) => {
                     const isLast = index === records.length - 1;
                     return (
-                      <View style={[
-                        GlobalStyles.tableRow,
-                        isLast && GlobalStyles.tableRowLast
-                      ]}>
-                        <View style={[GlobalStyles.tableCell, { width: 200, alignItems: 'flex-start', paddingHorizontal: 15 }]}>
-                          <Text style={GlobalStyles.tableRowText} numberOfLines={1}>{item.tb_pasien?.nama_pasien}</Text>
-                        </View>
-                        <View style={[GlobalStyles.tableCell, { width: 100 }]}>
-                          <Text style={GlobalStyles.tableRowText}>{item.tb_pasien?.jk}</Text>
-                        </View>
-                        <View style={[GlobalStyles.tableCell, { width: 300, alignItems: 'flex-start', paddingHorizontal: 15 }]}>
-                          <Text style={GlobalStyles.tableRowText} numberOfLines={2}>{item.keluhan}</Text>
-                        </View>
-                        <View style={[GlobalStyles.tableCell, { width: 100, borderRightWidth: 0 }]}>
+                      <View style={[GlobalStyles.tableRowAtomic, isLast && { borderBottomWidth: 0 }]}>
+                        <View style={[GlobalStyles.tableCellAtomic, GlobalStyles.tableCellFirst, { width: 130 }]}><Text style={GlobalStyles.tableTdText}>{formatTanggalValue(item.tanggal)}</Text></View>
+                        <View style={[GlobalStyles.tableCellAtomic, { width: 190 }]}><Text style={GlobalStyles.tableTdText} numberOfLines={2}>{item.tb_pasien?.nama_pasien}</Text></View>
+                        <View style={[GlobalStyles.tableCellAtomic, { width: 110 }]}><Text style={GlobalStyles.tableTdText}>{item.tb_pasien?.jk}</Text></View>
+                        <View style={[GlobalStyles.tableCellAtomic, { width: 140 }]}><Text style={GlobalStyles.tableTdText} numberOfLines={2}>{item.layanan}</Text></View>
+                        <View style={[GlobalStyles.tableCellAtomic, { width: 190 }]}><Text style={GlobalStyles.tableTdText} numberOfLines={2}>{item.gigi}</Text></View>
+                        <View style={[GlobalStyles.tableCellAtomic, { width: 140, borderRightWidth: 0 }]}>
                           <TouchableOpacity
-                            style={[GlobalStyles.btnSimpan, { height: 35, width: 70, paddingVertical: 0, borderRadius: 8, marginLeft: 0 }]}
+                            style={[GlobalStyles.btnActionUpdate, LayoutStyles.h35, { width: 110, paddingVertical: 0, borderRadius: 8, marginLeft: 0 }]}
                             onPress={() => navigation.navigate('IsiRekamMedis', { record: item })}
                           >
-                            <MaterialCommunityIcons name="note-edit-outline" size={20} color="white" />
+                            <Text style={{ color: 'white', fontSize: 13, fontWeight: 'bold' }}>Edit Data</Text>
                           </TouchableOpacity>
                         </View>
                       </View>
@@ -183,3 +180,4 @@ export default function MainDokter() {
     </AdminLayout>
   );
 }
+

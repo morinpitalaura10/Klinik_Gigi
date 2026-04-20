@@ -16,9 +16,11 @@ import DropdownInput from '../../../components/molecules/DropdownInput';
 import DatePickerInput from '../../../components/molecules/DatePickerInput';
 import PrimaryButton from '../../../components/atoms/PrimaryButton';
 import { useNavigation } from '@react-navigation/native';
+import { useAlert } from '../../../context/AlertContext';
 
 export function CreatePasien() {
     const navigation = useNavigation<any>();
+    const { showAlert } = useAlert();
     
     const [nama, setNama] = useState('');
     const [tglLahir, setTglLahir] = useState('');
@@ -37,7 +39,7 @@ export function CreatePasien() {
 
     const handleSave = async () => {
         if (!nama || !tglLahir || !jk || !nope || !alamat) {
-            Alert.alert('Peringatan', 'Harap isi kolom wajib (Nama, Tgl Lahir, JK, No HP, Alamat)!');
+            showAlert({ title: 'Peringatan', message: 'Harap isi kolom wajib (Nama, Tgl Lahir, JK, No HP, Alamat)!', type: 'warning' });
             return;
         }
 
@@ -57,11 +59,9 @@ export function CreatePasien() {
                 });
 
             if (error) throw error;
-
-            Alert.alert('Berhasil', 'Data pasien baru berhasil ditambahkan.');
-            navigation.goBack();
+            showAlert({ title: 'Berhasil', message: 'Data pasien baru berhasil ditambahkan.', type: 'success', onConfirm: () => navigation.goBack() });
         } catch (error: any) {
-            Alert.alert('Gagal Menyimpan', error.message);
+            showAlert({ title: 'Gagal Menyimpan', message: error.message, type: 'error' });
         } finally {
             setLoading(false);
         }

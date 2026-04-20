@@ -7,8 +7,8 @@ export interface InputTextProps extends TextInputProps {
 }
 
 export default function InputText({ style, variant = 'form', ...props }: InputTextProps) {
-  // Gunakan pillInput (border hitam/putih) jika variant 'login',
-  // Gunakan formInput (border merah/bg pink) jika variant 'form'.
+
+
   const inputStyle = variant === 'login' ? GlobalStyles.pillInput : GlobalStyles.formInput;
 
   return (

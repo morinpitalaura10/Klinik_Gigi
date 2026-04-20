@@ -13,8 +13,8 @@ interface Props extends TextInputProps {
 export default function PasswordInput({ label, containerStyle, variant = 'form', ...props }: Props) {
   const [isVisible, setIsVisible] = useState(false);
 
-  // Gunakan pillInput (putih, border hitam) untuk login,
-  // inputContainer (pink, border merah) untuk form admin.
+
+
   const containerInputStyle = variant === 'login'
     ? [GlobalStyles.pillInput, { flexDirection: 'row' as const, alignItems: 'center' as const, paddingHorizontal: 15 }]
     : GlobalStyles.inputContainer;

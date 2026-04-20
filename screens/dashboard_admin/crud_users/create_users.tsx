@@ -21,7 +21,7 @@ import { useNavigation } from '@react-navigation/native';
 export function CreateUser() {
   const navigation = useNavigation<any>();
 
-  // Form States
+
   const [namaUsers, setNamaUsers] = useState('');
   const [us, setUs] = useState('');
   const [pw, setPw] = useState('');
@@ -76,7 +76,7 @@ export function CreateUser() {
 
       if (userError) throw userError;
 
-      // Handle tb_dokter if role is dokter
+
       if (role === 'dokter' && newUser) {
         const { error: docError } = await supabase
           .from('tb_dokter')

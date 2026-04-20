@@ -62,7 +62,7 @@ export function ReadUser() {
       customRightTitle="Manajemen User"
     >
       <View style={GlobalStyles.formCard}>
-        {/* BARIS 1: NAMA & USERNAME */}
+        
         <View style={GlobalStyles.detailRow}>
           <View style={GlobalStyles.detailItem}>
             <Text style={GlobalStyles.detailLabel}>Nama Lengkap</Text>
@@ -74,7 +74,7 @@ export function ReadUser() {
           </View>
         </View>
 
-        {/* BARIS 2: EMAIL & ROLE */}
+        
         <View style={GlobalStyles.detailRow}>
           <View style={GlobalStyles.detailItem}>
             <Text style={GlobalStyles.detailLabel}>Email Pengguna</Text>
@@ -86,7 +86,7 @@ export function ReadUser() {
           </View>
         </View>
 
-        {/* BARIS 3: SPESIALISASI (HANYA UNTUK DOKTER) */}
+        
         {userData?.role === 'dokter' && (
           <View style={GlobalStyles.detailRow}>
             <View style={GlobalStyles.detailItem}>

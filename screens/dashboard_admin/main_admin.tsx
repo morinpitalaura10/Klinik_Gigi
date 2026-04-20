@@ -17,9 +17,9 @@ export default function MainAdmin({ navigation }: any) {
     <AdminLayout showBackButton={false}>
       <View style={LayoutStyles.gridContainer}>
 
-        {/* BARIS 1: 1 Besar (Kiri) + 3 Kecil (Kanan) */}
+        
         <View style={LayoutStyles.topRow}>
-          {/* Besar: Dental Record */}
+          
           <DashboardCard
             title="Dental Record"
             icon={<MaterialCommunityIcons name="account-details" size={110} color={Colors.white} />}
@@ -28,7 +28,7 @@ export default function MainAdmin({ navigation }: any) {
             onPress={() => navigation.navigate('TampilRecordAdmin')}
           />
 
-          {/* Kolom Kanan: 3 Tombol Stacked Vertikal */}
+          
           <View style={LayoutStyles.rightColumn}>
             <DashboardCard
               title="Cetak Kwitansi"
@@ -45,7 +45,7 @@ export default function MainAdmin({ navigation }: any) {
               style={[LayoutStyles.flex1, LayoutStyles.mv10]}
               textStyle={LayoutStyles.textSmall}
               orientation="horizontal"
-              onPress={() => navigation.navigate('TampilRujukan')}
+              onPress={() => navigation.navigate('CreateRujukan')}
             />
 
             <DashboardCard
@@ -59,7 +59,7 @@ export default function MainAdmin({ navigation }: any) {
           </View>
         </View>
 
-        {/* BARIS GRID 2: Aktifitas (Kiri) + Manajemen User (Kanan) */}
+        
         <View style={[LayoutStyles.rowBetween, LayoutStyles.mt15]}>
             <DashboardCard
                 title="Aktifitas"
@@ -80,7 +80,7 @@ export default function MainAdmin({ navigation }: any) {
             />
         </View>
 
-        {/* BARIS GRID 3: Manajemen Perawatan (Kiri) + Logout (Kanan) */}
+        
         <View style={[LayoutStyles.rowBetween, LayoutStyles.mt15]}>
             <DashboardCard
                 title="Manajemen Perawatan"

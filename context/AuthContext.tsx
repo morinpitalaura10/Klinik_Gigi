@@ -7,7 +7,7 @@ export interface User {
   username: string;
   nama: string;
   role: UserRole;
-  spesialisasi?: string; // Menampung info 'Umum' atau 'Ortodental'
+  spesialisasi?: string;
 }
 
 interface AuthContextProps {

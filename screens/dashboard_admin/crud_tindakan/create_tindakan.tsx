@@ -40,7 +40,7 @@ export function CreateTindakan() {
                 .from('tb_tindakan')
                 .insert({
                     nama_tindakan: namaTindakan,
-                    layanan: layanan // Menyimpan kategori layanan langsung
+                    layanan: layanan
                 });
 
             if (error) throw error;

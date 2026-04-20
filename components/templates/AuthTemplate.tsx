@@ -24,13 +24,13 @@ export default function AuthTemplate({ children }: Props) {
       >
         <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
           <View style={AuthStyles.container}>
-            {/* Bagian Merah Atas (Spacer) */}
+            
             <View style={AuthStyles.topSection} />
 
-            {/* Arch sempit di atas - ada maroon di sisi kiri kanan */}
+            
             <View style={AuthStyles.archTop} />
 
-            {/* Bagian putih penuh di bawah */}
+            
             <View style={AuthStyles.bottomFull}>
               <ScrollView
                 style={{ width: '100%' }}

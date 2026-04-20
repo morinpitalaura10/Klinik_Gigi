@@ -16,6 +16,7 @@ import DropdownInput from '../../../components/molecules/DropdownInput';
 import LabeledInput from '../../../components/molecules/LabeledInput';
 import PrimaryButton from '../../../components/atoms/PrimaryButton';
 import { useNavigation, useRoute, useFocusEffect } from '@react-navigation/native';
+import { useAlert } from '../../../context/AlertContext';
 
 interface Pasien {
     id_pasien: number;
@@ -25,21 +26,27 @@ interface Pasien {
 export function CreateRecordAdmin() {
     const navigation = useNavigation<any>();
     const route = useRoute();
+    const { showAlert } = useAlert();
     const { editItem } = (route.params as any) || {};
 
     const [loading, setLoading] = useState(false);
     const [fetchingPasien, setFetchingPasien] = useState(true);
     
-    // States
+
     const [pasienList, setPasienList] = useState<Pasien[]>([]);
     const [selectedPasienId, setSelectedPasienId] = useState<string>(editItem?.id_pasien?.toString() || '');
     const [layanan, setLayanan] = useState(editItem?.layanan || 'Ortodental');
-    const [keluhan, setKeluhan] = useState(editItem?.keluhan || '');
+    const [gigi, setGigi] = useState(editItem?.gigi || '');
 
     const layananOptions = [
         { label: 'Ortodental', value: 'Ortodental' },
         { label: 'Umum', value: 'Umum' },
     ];
+
+    const gigiOptions = Array.from({ length: 85 }, (_, i) => ({
+        label: (i + 1).toString(),
+        value: (i + 1).toString(),
+    }));
 
     const fetchPasien = async () => {
         try {
@@ -52,7 +59,7 @@ export function CreateRecordAdmin() {
             if (error) throw error;
             setPasienList(data || []);
         } catch (error: any) {
-            Alert.alert('Error', 'Gagal memuat data pasien: ' + error.message);
+            showAlert({ title: 'Error', message: 'Gagal memuat data pasien: ' + error.message, type: 'error' });
         } finally {
             setFetchingPasien(false);
         }
@@ -65,8 +72,8 @@ export function CreateRecordAdmin() {
     );
 
     const handleSave = async () => {
-        if (!selectedPasienId || !keluhan) {
-            Alert.alert('Peringatan', 'Harap pilih pasien dan isi keluhan!');
+        if (!selectedPasienId || !gigi) {
+            showAlert({ title: 'Peringatan', message: 'Harap pilih pasien dan nomor gigi!', type: 'warning' });
             return;
         }
 
@@ -75,7 +82,7 @@ export function CreateRecordAdmin() {
             const recordData = {
                 id_pasien: parseInt(selectedPasienId),
                 layanan: layanan,
-                keluhan: keluhan,
+                gigi: gigi,
                 tanggal: new Date().toLocaleDateString('en-CA'),
                 status: editItem?.status || 'Menunggu'
             };
@@ -96,10 +103,9 @@ export function CreateRecordAdmin() {
 
             if (error) throw error;
 
-            Alert.alert('Berhasil', 'Dental record berhasil disimpan.');
-            navigation.goBack();
+            showAlert({ title: 'Berhasil', message: 'Dental record berhasil disimpan.', type: 'success', onConfirm: () => navigation.goBack() });
         } catch (error: any) {
-            Alert.alert('Gagal', error.message);
+            showAlert({ title: 'Gagal', message: error.message, type: 'error' });
         } finally {
             setLoading(false);
         }
@@ -134,7 +140,7 @@ export function CreateRecordAdmin() {
                                 options={pasienOptions}
                                 selectedValue={selectedPasienId}
                                 onValueChange={setSelectedPasienId}
-                                disabled={!!editItem} // Pasien tidak bisa diubah saat edit
+                                disabled={!!editItem}
                             />
                         )}
 
@@ -145,13 +151,12 @@ export function CreateRecordAdmin() {
                             onValueChange={setLayanan}
                         />
 
-                        <LabeledInput
-                            label="Keluhan"
-                            placeholder="Tuliskan keluhan pasien..."
-                            value={keluhan}
-                            onChangeText={setKeluhan}
-                            multiline={true}
-                            numberOfLines={4}
+                        <DropdownInput
+                            label="Nomor Gigi"
+                            options={gigiOptions}
+                            selectedValue={gigi}
+                            onValueChange={setGigi}
+                            placeholder="Pilih Nomor Gigi"
                         />
 
                         <View style={[LayoutStyles.rowEnd, LayoutStyles.mt20]}>

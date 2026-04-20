@@ -15,13 +15,14 @@ import { supabase } from '../../../utils/supabase';
 import { Colors, GlobalStyles, LayoutStyles } from '../../../styles/GlobalStyles';
 import AdminLayout from '../../../components/templates/AdminLayout';
 import { useFocusEffect, useNavigation } from '@react-navigation/native';
+import { useAlert } from '../../../context/AlertContext';
 
 interface DentalRecord {
   id_record: number;
   tanggal: string;
   layanan: string;
   status: string;
-  keluhan: string;
+  gigi: string;
   tb_pasien: {
     nama_pasien: string;
     jk: string;
@@ -30,16 +31,17 @@ interface DentalRecord {
 
 export function TampilRecordAdmin() {
   const navigation = useNavigation<any>();
+  const { showAlert } = useAlert();
   const [records, setRecords] = useState<DentalRecord[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [refreshing, setRefreshing] = useState(false);
   
-  // Custom Modal State
+
   const [statusModalVisible, setStatusModalVisible] = useState(false);
   const [activeRecordId, setActiveRecordId] = useState<number | null>(null);
 
-  // Helper date function (Local YYYY-MM-DD)
+
   const getLocalDate = () => {
     const d = new Date();
     return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
@@ -65,7 +67,7 @@ export function TampilRecordAdmin() {
       if (error) throw error;
       setRecords(data || []);
     } catch (error: any) {
-      Alert.alert('Error', error.message);
+      showAlert({ title: 'Error', message: error.message, type: 'error' });
     } finally {
       setLoading(false);
       setRefreshing(false);
@@ -92,7 +94,7 @@ export function TampilRecordAdmin() {
       ));
       setStatusModalVisible(false);
     } catch (error: any) {
-      Alert.alert('Gagal Update', error.message);
+      showAlert({ title: 'Gagal Update', message: error.message, type: 'error' });
     }
   };
 
@@ -117,7 +119,7 @@ export function TampilRecordAdmin() {
       ) : (
         <View style={LayoutStyles.flex1}>
           <View style={LayoutStyles.pt10}>
-            {/* Search and Add Row */}
+            
             <View style={[GlobalStyles.searchRow, LayoutStyles.ph20]}>
               <View style={GlobalStyles.searchWrapper}>
                 <View style={GlobalStyles.listSearchContainer}>
@@ -142,9 +144,9 @@ export function TampilRecordAdmin() {
               </View>
             </View>
 
-            {/* Date Display Section */}
+            
             <View style={[LayoutStyles.ph20, LayoutStyles.mb15]}>
-                <Text style={{ fontSize: 16, fontWeight: 'bold', color: '#555' }}>
+                <Text style={GlobalStyles.inputLabel}>
                     Tanggal : {new Date(selectedDate).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })}
                 </Text>
             </View>
@@ -152,21 +154,21 @@ export function TampilRecordAdmin() {
 
           <View style={[GlobalStyles.tableContainer, LayoutStyles.mh20]}>
             <ScrollView horizontal={true} showsHorizontalScrollIndicator={false}>
-              <View style={[GlobalStyles.tableContentWrapper, { width: 900 }]}>
+              <View style={[GlobalStyles.tableContentWrapper, LayoutStyles.w900]}>
                 <View style={GlobalStyles.tableHeader}>
-                  <View style={[GlobalStyles.tableHeaderCell, { width: 220 }]}>
+                  <View style={[GlobalStyles.tableHeaderCell, LayoutStyles.w220]}>
                     <Text style={GlobalStyles.tableHeaderText}>Nama</Text>
                   </View>
-                  <View style={[GlobalStyles.tableHeaderCell, { width: 100 }]}>
+                  <View style={[GlobalStyles.tableHeaderCell, LayoutStyles.w100]}>
                     <Text style={GlobalStyles.tableHeaderText}>Gender</Text>
                   </View>
-                  <View style={[GlobalStyles.tableHeaderCell, { width: 150 }]}>
+                  <View style={[GlobalStyles.tableHeaderCell, LayoutStyles.w150]}>
                     <Text style={GlobalStyles.tableHeaderText}>Layanan</Text>
                   </View>
-                  <View style={[GlobalStyles.tableHeaderCell, { width: 250 }]}>
+                  <View style={[GlobalStyles.tableHeaderCell, LayoutStyles.w250]}>
                     <Text style={GlobalStyles.tableHeaderText}>Status Kunjungan</Text>
                   </View>
-                  <View style={[GlobalStyles.tableHeaderCell, { width: 180, borderRightWidth: 0 }]}>
+                  <View style={[GlobalStyles.tableHeaderCell, LayoutStyles.w180, { borderRightWidth: 0 }]}>
                     <Text style={GlobalStyles.tableHeaderText}>Aksi</Text>
                   </View>
                 </View>
@@ -189,47 +191,36 @@ export function TampilRecordAdmin() {
                         GlobalStyles.tableRow,
                         isLast && GlobalStyles.tableRowLast
                       ]}>
-                        <View style={[GlobalStyles.tableCell, { width: 220, alignItems: 'flex-start', paddingHorizontal: 15 }]}>
+                        <View style={[GlobalStyles.tableCell, LayoutStyles.w220, { alignItems: 'flex-start', paddingHorizontal: 15 }]}>
                           <Text style={GlobalStyles.tableRowText} numberOfLines={1}>{item.tb_pasien?.nama_pasien}</Text>
                         </View>
-                        <View style={[GlobalStyles.tableCell, { width: 100 }]}>
+                        <View style={[GlobalStyles.tableCell, LayoutStyles.w100]}>
                           <Text style={GlobalStyles.tableRowText}>{item.tb_pasien?.jk}</Text>
                         </View>
-                        <View style={[GlobalStyles.tableCell, { width: 150 }]}>
+                        <View style={[GlobalStyles.tableCell, LayoutStyles.w150]}>
                           <Text style={GlobalStyles.tableRowText}>{item.layanan}</Text>
                         </View>
                         
-                        {/* Status Custom Pill */}
-                        <View style={[GlobalStyles.tableCell, { width: 250, paddingHorizontal: 15 }]}>
+                        
+                        <View style={[GlobalStyles.tableCell, LayoutStyles.w250, { paddingHorizontal: 15 }]}>
                           <TouchableOpacity 
-                            style={{ 
-                                backgroundColor: statusStyle.bg, 
-                                paddingVertical: 6, 
-                                paddingHorizontal: 15, 
-                                borderRadius: 15, 
-                                borderWidth: 1, 
-                                borderColor: 'rgba(0,0,0,0.05)',
-                                flexDirection: 'row',
-                                alignItems: 'center',
-                                justifyContent: 'space-between',
-                                width: '100%'
-                            }}
+                            style={[GlobalStyles.statusPill, { backgroundColor: statusStyle.bg }]}
                             onPress={() => {
                                 setActiveRecordId(item.id_record);
                                 setStatusModalVisible(true);
                             }}
                           >
-                            <Text style={{ color: statusStyle.text, fontWeight: 'bold', fontSize: 13 }}>{item.status}</Text>
+                            <Text style={[GlobalStyles.statusPillText, { color: statusStyle.text }]}>{item.status}</Text>
                             <MaterialCommunityIcons name="chevron-down" size={16} color={statusStyle.text} />
                           </TouchableOpacity>
                         </View>
 
-                        <View style={[GlobalStyles.tableCell, { width: 180, borderRightWidth: 0 }]}>
+                        <View style={[GlobalStyles.tableCell, LayoutStyles.w180, { borderRightWidth: 0 }]}>
                           <TouchableOpacity
-                            style={[GlobalStyles.btnSimpan, { height: 35, width: 140, marginLeft: 0 }]}
+                            style={[GlobalStyles.btnActionUpdate, LayoutStyles.w140, { height: 35, marginLeft: 0 }]}
                             onPress={() => navigation.navigate('CreateRecordAdmin', { editItem: item })}
                           >
-                            <Text style={{ color: 'white', fontWeight: 'bold', fontSize: 12 }}>Edit Data</Text>
+                            <Text style={[GlobalStyles.historyResetText, { color: 'white' }]}>Edit Data</Text>
                           </TouchableOpacity>
                         </View>
                       </View>
@@ -245,7 +236,7 @@ export function TampilRecordAdmin() {
             </ScrollView>
           </View>
 
-          {/* Custom Status Modal */}
+          
           <Modal
             visible={statusModalVisible}
             transparent={true}
@@ -257,8 +248,8 @@ export function TampilRecordAdmin() {
                 activeOpacity={1} 
                 onPress={() => setStatusModalVisible(false)}
             >
-                <View style={[GlobalStyles.selectionModalContent, { width: 300 }]}>
-                    <Text style={[GlobalStyles.selectionModalTitle, { marginBottom: 15 }]}>Ubah Status</Text>
+                <View style={[GlobalStyles.selectionModalContent, LayoutStyles.w300]}>
+                    <Text style={[GlobalStyles.selectionModalTitle, LayoutStyles.mb15]}>Ubah Status</Text>
                     
                     {['Menunggu', 'Diproses', 'Selesai', 'Batal'].map((opt) => (
                         <TouchableOpacity 
@@ -266,7 +257,7 @@ export function TampilRecordAdmin() {
                             style={GlobalStyles.selectionOptionItem}
                             onPress={() => activeRecordId && updateStatus(activeRecordId, opt)}
                         >
-                            <Text style={{ fontSize: 16, color: '#333' }}>{opt}</Text>
+                            <Text style={GlobalStyles.tableRowText}>{opt}</Text>
                         </TouchableOpacity>
                     ))}
                 </View>

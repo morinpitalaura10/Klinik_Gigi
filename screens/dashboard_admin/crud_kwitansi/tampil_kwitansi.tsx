@@ -8,8 +8,9 @@ import {
   ActivityIndicator,
   Alert,
   ScrollView,
-  StyleSheet
+  Platform,
 } from 'react-native';
+import DateTimePicker from '@react-native-community/datetimepicker';
 import { MaterialCommunityIcons, Feather } from '@expo/vector-icons';
 import { supabase } from '../../../utils/supabase';
 import { Colors, GlobalStyles, LayoutStyles } from '../../../styles/GlobalStyles';
@@ -43,24 +44,32 @@ export function TampilKwitansi() {
   const [searchQuery, setSearchQuery] = useState('');
   const [refreshing, setRefreshing] = useState(false);
 
-  // Helper date function (Local YYYY-MM-DD)
   const getLocalDate = () => {
     const d = new Date();
     return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
   };
 
-  const selectedDate = getLocalDate();
+  const [selectedDate, setSelectedDate] = useState<string>(getLocalDate());
+  const [showPicker, setShowPicker] = useState(false);
+
+  const parsedDate = new Date(selectedDate);
+
+  const formatDisplayDate = (dateStr: string) => {
+    const d = new Date(dateStr);
+    if (isNaN(d.getTime())) return dateStr;
+    return d.toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+  };
 
   const fetchPendingBills = async () => {
     try {
       setLoading(true);
-      // Ambil record hari ini yang statusnya 'Selesai' (siap ditagih)
+
       const { data, error } = await supabase
         .from('tb_rekam_medis')
         .select(`
           *,
           tb_pasien (nama_pasien, nope),
-          tb_users!doctor_id (nama_users),
+          tb_users!fk_rekam_medis_doctor (nama_users),
           tb_tindakan (nama_tindakan)
         `)
         .eq('tanggal', selectedDate)
@@ -80,7 +89,7 @@ export function TampilKwitansi() {
   useFocusEffect(
     useCallback(() => {
       fetchPendingBills();
-    }, [])
+    }, [selectedDate])
   );
 
   const filteredData = pendingBills.filter(item =>
@@ -91,46 +100,46 @@ export function TampilKwitansi() {
     const isOrto = item.layanan === 'Ortodental';
 
     return (
-      <View style={styles.billCard}>
-        <View style={styles.billBody}>
-          <View style={styles.infoRow}>
-            <Text style={styles.label}>Nama Dokter</Text>
-            <Text style={styles.colon}>:</Text>
-            <Text style={styles.value}>{item.tb_users?.nama_users || '-'}</Text>
+      <View style={GlobalStyles.billCard}>
+        <View style={GlobalStyles.billBody}>
+          <View style={GlobalStyles.billInfoRow}>
+            <Text style={GlobalStyles.billLabel}>Nama Dokter</Text>
+            <Text style={GlobalStyles.billColon}>:</Text>
+            <Text style={GlobalStyles.billValue}>{item.tb_users?.nama_users || '-'}</Text>
           </View>
 
-          <View style={styles.infoRow}>
-            <Text style={styles.label}>Nama Pasien</Text>
-            <Text style={styles.colon}>:</Text>
-            <Text style={styles.value}>{item.tb_pasien?.nama_pasien}</Text>
+          <View style={GlobalStyles.billInfoRow}>
+            <Text style={GlobalStyles.billLabel}>Nama Pasien</Text>
+            <Text style={GlobalStyles.billColon}>:</Text>
+            <Text style={GlobalStyles.billValue}>{item.tb_pasien?.nama_pasien}</Text>
           </View>
 
-          <View style={styles.infoRow}>
-            <Text style={styles.label}>Keluhan/Diagnosis</Text>
-            <Text style={styles.colon}>:</Text>
-            <Text style={styles.value}>{item.diagnosa || '-'}</Text>
+          <View style={GlobalStyles.billInfoRow}>
+            <Text style={GlobalStyles.billLabel}>Keluhan/Diagnosis</Text>
+            <Text style={GlobalStyles.billColon}>:</Text>
+            <Text style={GlobalStyles.billValue}>{item.diagnosa || '-'}</Text>
           </View>
 
-          <View style={styles.infoRow}>
-            <Text style={styles.label}>Perawatan</Text>
-            <Text style={styles.colon}>:</Text>
-            <Text style={styles.value}>{item.tb_tindakan?.nama_tindakan || '-'}</Text>
+          <View style={GlobalStyles.billInfoRow}>
+            <Text style={GlobalStyles.billLabel}>Perawatan</Text>
+            <Text style={GlobalStyles.billColon}>:</Text>
+            <Text style={GlobalStyles.billValue}>{item.tb_tindakan?.nama_tindakan || '-'}</Text>
           </View>
 
-          <View style={styles.infoRow}>
-            <Text style={styles.label}>Keterangan</Text>
-            <Text style={styles.colon}>:</Text>
-            <Text style={styles.value}>{item.keterangan || '-'}</Text>
+          <View style={GlobalStyles.billInfoRow}>
+            <Text style={GlobalStyles.billLabel}>Keterangan</Text>
+            <Text style={GlobalStyles.billColon}>:</Text>
+            <Text style={GlobalStyles.billValue}>{item.keterangan || '-'}</Text>
           </View>
         </View>
 
-        <View style={styles.actionSection}>
+        <View style={GlobalStyles.billActionSection}>
           <TouchableOpacity
-            style={[styles.cetakBtn, { backgroundColor: isOrto ? Colors.primary : '#2E50D4' }]}
+            style={[GlobalStyles.billCetakBtn, { backgroundColor: isOrto ? Colors.primary : '#2E50D4' }]}
             onPress={() => navigation.navigate('CreateKwitansi', { record: item })}
           >
             <MaterialCommunityIcons name="file-document-outline" size={24} color="white" />
-            <Text style={styles.cetakBtnText}>
+            <Text style={GlobalStyles.billCetakBtnText}>
               Cetak Kwitansi {isOrto ? 'Ortodental' : 'Umum'}
             </Text>
           </TouchableOpacity>
@@ -143,8 +152,8 @@ export function TampilKwitansi() {
     <AdminLayout noScroll={true} customRightTitle="Tagihan Harian">
       <View style={LayoutStyles.flex1}>
         <View style={LayoutStyles.pt10}>
-          {/* Header Section from SS */}
-          <View style={[GlobalStyles.searchRow, LayoutStyles.ph20, { marginBottom: 15 }]}>
+          
+          <View style={[GlobalStyles.searchRow, LayoutStyles.ph20, LayoutStyles.mb10]}>
             <View style={GlobalStyles.searchWrapper}>
               <View style={GlobalStyles.listSearchContainer}>
                 <Feather name="search" size={20} color="#888" style={GlobalStyles.inputIcon} />
@@ -157,14 +166,33 @@ export function TampilKwitansi() {
               </View>
             </View>
 
-            <View style={{ marginLeft: 15 }}>
-              <Text style={{ fontSize: 13, color: '#666' }}>Hari/Tanggal :</Text>
-              <View style={styles.dateBox}>
-                <Text style={styles.dateText}>
-                  {new Date().toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })}
-                </Text>
-              </View>
+            <View style={LayoutStyles.ml10}>
+              <Text style={GlobalStyles.inputLabelSmall}>Hari/Tanggal :</Text>
+              <TouchableOpacity
+                style={[GlobalStyles.billDateBox, { flexDirection: 'row', alignItems: 'center', gap: 6 }]}
+                onPress={() => setShowPicker(true)}
+              >
+                <MaterialCommunityIcons name="calendar" size={16} color={Colors.primary} />
+                <Text style={GlobalStyles.billDateText}>{formatDisplayDate(selectedDate)}</Text>
+              </TouchableOpacity>
             </View>
+
+            {showPicker && (
+              <DateTimePicker
+                value={parsedDate}
+                mode="date"
+                display={Platform.OS === 'ios' ? 'inline' : 'calendar'}
+                onChange={(event, date) => {
+                  setShowPicker(false);
+                  if (date) {
+                    const y = date.getFullYear();
+                    const m = String(date.getMonth() + 1).padStart(2, '0');
+                    const d = String(date.getDate()).padStart(2, '0');
+                    setSelectedDate(`${y}-${m}-${d}`);
+                  }
+                }}
+              />
+            )}
           </View>
         </View>
 
@@ -174,7 +202,7 @@ export function TampilKwitansi() {
           <FlatList
             data={filteredData}
             keyExtractor={(item) => item.id_record.toString()}
-            contentContainerStyle={{ padding: 20, paddingBottom: 100 }}
+            contentContainerStyle={{ paddingHorizontal: 20, paddingBottom: 25, paddingTop: 0 }}
             refreshing={refreshing}
             onRefresh={() => {
               setRefreshing(true);
@@ -193,75 +221,3 @@ export function TampilKwitansi() {
   );
 }
 
-const styles = StyleSheet.create({
-  billCard: {
-    backgroundColor: 'white',
-    borderRadius: 20,
-    borderWidth: 1.5,
-    borderColor: Colors.primary,
-    padding: 20,
-    marginBottom: 20,
-    flexDirection: 'row',
-    elevation: 3,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-  },
-  billBody: {
-    flex: 1,
-  },
-  infoRow: {
-    flexDirection: 'row',
-    marginBottom: 8,
-  },
-  label: {
-    width: 120,
-    fontSize: 14,
-    fontWeight: 'bold',
-    color: '#333',
-  },
-  colon: {
-    width: 15,
-    fontSize: 14,
-    fontWeight: 'bold',
-  },
-  value: {
-    flex: 1,
-    fontSize: 14,
-    color: '#555',
-  },
-  actionSection: {
-    justifyContent: 'center',
-    marginLeft: 15,
-  },
-  cetakBtn: {
-    paddingVertical: 12,
-    paddingHorizontal: 15,
-    borderRadius: 12,
-    alignItems: 'center',
-    justifyContent: 'center',
-    width: 130,
-  },
-  cetakBtnText: {
-    color: 'white',
-    fontSize: 11,
-    fontWeight: 'bold',
-    textAlign: 'center',
-    marginTop: 5,
-  },
-  dateBox: {
-    borderWidth: 1,
-    borderColor: '#CCC',
-    paddingHorizontal: 15,
-    paddingVertical: 8,
-    borderRadius: 8,
-    backgroundColor: 'white',
-    marginTop: 2,
-  },
-  dateText: {
-    fontSize: 14,
-    fontWeight: 'bold',
-    color: '#333',
-  }
-});

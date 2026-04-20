@@ -19,7 +19,7 @@ import { useNavigation, useRoute } from '@react-navigation/native';
 export function CreateKwitansi() {
     const navigation = useNavigation<any>();
     const route = useRoute();
-    const { record } = route.params as { record: any }; // Menerima record dari TampilKwitansi
+    const { record } = route.params as { record: any };
 
     const [loading, setLoading] = useState(false);
     const [nominal, setNominal] = useState('');
@@ -32,12 +32,35 @@ export function CreateKwitansi() {
         generateNoKwitansi();
     }, []);
 
-    const generateNoKwitansi = () => {
-        const date = new Date();
-        const year = date.getFullYear().toString().slice(-2);
-        const month = (date.getMonth() + 1).toString().padStart(2, '0');
-        const random = Math.floor(1000 + Math.random() * 9000);
-        setNoKwitansi(`KW-${year}${month}-${random}`);
+    const generateNoKwitansi = async () => {
+        try {
+            const isOrto = record.layanan === 'Ortodental';
+            const prefix = isOrto ? 'KWOrt' : 'KWU';
+
+
+            const doctorName: string = record.tb_users?.nama_users || '';
+            const getInitials = (name: string) => {
+                const skipWords = ['drg', 'dr', 'prof', 'sp', 'ort', 'kons', 'kes', 'mkes', 'msi'];
+                const words = name.split(/[\s,\.]+/).filter(w =>
+                    w.length > 1 && !skipWords.includes(w.toLowerCase())
+                );
+                return words.slice(0, 2).map(w => w[0].toUpperCase()).join('') || 'XX';
+            };
+            const initials = getInitials(doctorName);
+            const noPrefix = `${prefix}-${initials}-`;
+
+
+            const { count } = await supabase
+                .from('tb_kwitansi')
+                .select('*', { count: 'exact', head: true })
+                .like('no_kwitansi', `${noPrefix}%`);
+
+            const nextNum = String((count || 0) + 1).padStart(3, '0');
+            setNoKwitansi(`${noPrefix}${nextNum}`);
+        } catch {
+            const fallback = `KW-${Math.floor(1000 + Math.random() * 9000)}`;
+            setNoKwitansi(fallback);
+        }
     };
 
     const handleSave = async () => {
@@ -67,11 +90,9 @@ export function CreateKwitansi() {
 
             if (error) throw error;
 
-            Alert.alert('Berhasil', 'Kwitansi berhasil dibuat.', [
-                { text: 'OK', onPress: () => navigation.navigate('PreviewKwitansi', { item: { ...data, tb_pasien: record.tb_pasien, tb_rekam_medis: record } }) }
-            ]);
+            navigation.navigate('PreviewKwitansi', { item: { ...data, tb_pasien: record.tb_pasien, tb_rekam_medis: record } });
         } catch (error: any) {
-            Alert.alert('Gagal', error.message);
+            Alert.alert('Gagal Menyimpan', error.message);
         } finally {
             setLoading(false);
         }

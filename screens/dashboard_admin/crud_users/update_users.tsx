@@ -23,7 +23,7 @@ export function UpdateUser() {
   const route = useRoute<any>();
   const { editUser } = route.params;
 
-  // Form States
+
   const [namaUsers, setNamaUsers] = useState(editUser?.nama_users || '');
   const [us, setUs] = useState(editUser?.us || '');
   const [pw, setPw] = useState(editUser?.pw || '');
@@ -97,7 +97,7 @@ export function UpdateUser() {
 
       if (userError) throw userError;
 
-      // Handle tb_dokter
+
       if (role === 'dokter') {
         const { data: existingDoc } = await supabase
           .from('tb_dokter')
