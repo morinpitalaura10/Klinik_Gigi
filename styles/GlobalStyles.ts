@@ -2001,7 +2001,7 @@ export const CreateRecordStyles = StyleSheet.create({
     borderRadius: 16,
     paddingHorizontal: 20,
     height: 60,
-    marginBottom: 25,
+    marginBottom: 15,
     elevation: 3,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },

@@ -1,13 +1,11 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { View, Text, ScrollView, TouchableOpacity, KeyboardAvoidingView, Platform, ActivityIndicator } from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity, KeyboardAvoidingView, Platform, ActivityIndicator, Modal, TextInput } from 'react-native';
 import { supabase } from '../../../utils/supabase';
-import { GlobalStyles, LayoutStyles, Colors } from '../../../styles/GlobalStyles';
+import { GlobalStyles, LayoutStyles, Colors, CreateRecordStyles } from '../../../styles/GlobalStyles';
 import AdminLayout from '../../../components/templates/AdminLayout';
-import LabeledInput from '../../../components/molecules/LabeledInput';
-import DropdownInput from '../../../components/molecules/DropdownInput';
-import PrimaryButton from '../../../components/atoms/PrimaryButton';
 import { useNavigation, useRoute, useFocusEffect } from '@react-navigation/native';
 import { useAlert } from '../../../context/AlertContext';
+import { MaterialCommunityIcons } from '@expo/vector-icons';
 
 export function CreateRujukan() {
     const navigation = useNavigation<any>();
@@ -20,18 +18,20 @@ export function CreateRujukan() {
     const [availableRecords, setAvailableRecords] = useState<any[]>([]);
     const [availableUsers, setAvailableUsers] = useState<any[]>([]);
     const [selectedRecordId, setSelectedRecordId] = useState<string>('');
+    const [selectedRecordName, setSelectedRecordName] = useState<string>('Pilih data pasien/Rekam medis');
     const [currentRecord, setCurrentRecord] = useState<any>(initialRecord || null);
-
 
     const [namaDokter, setNamaDokter] = useState('');
     const [namaPasien, setNamaPasien] = useState('');
     const [tgl, setTgl] = useState(new Date().toLocaleDateString('en-CA'));
-    const [jenisKelamin, setJenisKelamin] = useState('Laki-laki');
+    const [jenisKelamin, setJenisKelamin] = useState('');
     const [umur, setUmur] = useState('');
     const [alamat, setAlamat] = useState('');
     const [keluhan_rujukan, setKeluhan_rujukan] = useState('');
     const [diagnosa, setDiagnosa] = useState('');
     const [penandatangan, setPenandatangan] = useState('');
+    const [penandatanganModalVisible, setPenandatanganModalVisible] = useState(false);
+    const [recordModalVisible, setRecordModalVisible] = useState(false);
 
     const calculateUmur = (tglLahir: string) => {
         if (!tglLahir) return '';
@@ -95,6 +95,7 @@ export function CreateRujukan() {
             setKeluhan_rujukan(currentRecord.keterangan || '');
             setDiagnosa(currentRecord.diagnosa || '');
             setSelectedRecordId(currentRecord.id_record.toString());
+            setSelectedRecordName(`${currentRecord.tb_pasien?.nama_pasien} (${currentRecord.tanggal})`);
         }
     }, [currentRecord]);
 
@@ -103,23 +104,9 @@ export function CreateRujukan() {
         if (found) {
             setCurrentRecord(found);
             setSelectedRecordId(id);
+            setRecordModalVisible(false);
         }
     };
-
-    const recordOptions = availableRecords.map(r => ({
-        label: `${r.tb_pasien?.nama_pasien} (${r.tanggal})`,
-        value: r.id_record.toString()
-    }));
-
-    const userOptions = availableUsers.map(u => ({
-        label: u.nama_users,
-        value: u.nama_users
-    }));
-
-    const genderOptions = [
-        { label: 'Laki-laki', value: 'Laki-laki' },
-        { label: 'Perempuan', value: 'Perempuan' }
-    ];
 
     const handleSave = async () => {
         if (!namaDokter || !currentRecord) {
@@ -175,116 +162,126 @@ export function CreateRujukan() {
         }
     };
 
+    const renderCustomInput = (label: string, value: string, setValue: (t: string) => void, placeholder: string = "", multiline: boolean = false) => (
+        <View style={{ marginBottom: 12 }}>
+            <Text style={CreateRecordStyles.fieldLabel}>{label}</Text>
+            <TextInput
+                style={[CreateRecordStyles.inputDropdown, multiline && { height: 100, textAlignVertical: 'top', paddingTop: 15 }]}
+                value={value}
+                onChangeText={setValue}
+                placeholder={placeholder || label}
+                placeholderTextColor="#999"
+                multiline={multiline}
+            />
+        </View>
+    );
+
     return (
-        <AdminLayout noScroll={true} customRightTitle="Form rujukan">
+        <AdminLayout noScroll={true} customRightTitle="Rujukan">
             <KeyboardAvoidingView
                 behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
                 style={LayoutStyles.flex1}
             >
-                <ScrollView contentContainerStyle={LayoutStyles.scrollContent}>
-                    <View style={GlobalStyles.formCard}>
+                <ScrollView contentContainerStyle={CreateRecordStyles.mainContainer} showsVerticalScrollIndicator={false}>
+                    <View style={CreateRecordStyles.card}>
+                        <Text style={CreateRecordStyles.cardTitle}>DATA REKAM MEDIS</Text>
+                        <View style={CreateRecordStyles.divider} />
 
-                        <Text style={[GlobalStyles.formSectionTitle, LayoutStyles.mb15]}>DATA REKAM MEDIS</Text>
-
-                        {fetching ? (
-                            <ActivityIndicator size="small" color={Colors.primary} style={LayoutStyles.mb20} />
-                        ) : (
-                            <DropdownInput
-                                label="Pilih Data Pasien/Rekam Medis"
-                                options={recordOptions}
-                                selectedValue={selectedRecordId}
-                                onValueChange={handleSelectRecord}
-                                placeholder="-- Cari & Pilih Pasien --"
-                            />
-                        )}
+                        {/* Dropdown Pasien / Record */}
+                        <Text style={CreateRecordStyles.fieldLabel}>Pilih data pasien/Rekam medis</Text>
+                        <TouchableOpacity
+                            style={CreateRecordStyles.inputDropdown}
+                            onPress={() => setRecordModalVisible(true)}
+                        >
+                            <Text style={[CreateRecordStyles.inputText, !selectedRecordId && { color: '#999' }]} numberOfLines={1}>
+                                {fetching ? 'Memuat...' : (selectedRecordId ? selectedRecordName : 'Pilih data pasien/Rekam medis')}
+                            </Text>
+                            <MaterialCommunityIcons name="menu-down" size={24} color={Colors.primary} />
+                        </TouchableOpacity>
 
                         <View style={GlobalStyles.formDivider} />
 
-                        <LabeledInput
-                            label="Nama Dokter / RS Tujuan"
-                            placeholder="Contoh: drg. X / RS Sehat"
-                            value={namaDokter}
-                            onChangeText={setNamaDokter}
-                        />
+                        {renderCustomInput("Nama Instansi", namaDokter, setNamaDokter, "Masukkan nama instansi")}
+                        {renderCustomInput("Nama Pasien", namaPasien, setNamaPasien, "Masukkan nama pasien")}
+                        {renderCustomInput("Tanggal Rujukan", tgl, setTgl, "Masukkan tanggal rujukan")}
+                        {renderCustomInput("Jenis Kelamin", jenisKelamin, setJenisKelamin, "Masukkan jenis kelamin")}
+                        {renderCustomInput("Umur", umur, setUmur, "Masukkan umur pasien")}
+                        {renderCustomInput("Alamat", alamat, setAlamat, "Masukkan alamat", true)}
+                        {renderCustomInput("Keluhan", keluhan_rujukan, setKeluhan_rujukan, "Masukkan keluhan", true)}
+                        {renderCustomInput("Diagnosa", diagnosa, setDiagnosa, "Masukkan diagnosa", true)}
 
-                        <LabeledInput
-                            label="Nama Pasien"
-                            placeholder="Auto-fill dari rekam medis"
-                            value={namaPasien}
-                            onChangeText={setNamaPasien}
-                        />
+                        {/* Dropdown Penandatangan */}
+                        <Text style={CreateRecordStyles.fieldLabel}>Penandatanganan/Hormat Kami</Text>
+                        <TouchableOpacity
+                            style={CreateRecordStyles.inputDropdown}
+                            onPress={() => setPenandatanganModalVisible(true)}
+                        >
+                            <Text style={[CreateRecordStyles.inputText, !penandatangan && { color: '#999' }]} numberOfLines={1}>
+                                {penandatangan || 'Pilih penandatangan'}
+                            </Text>
+                            <MaterialCommunityIcons name="menu-down" size={24} color={Colors.primary} />
+                        </TouchableOpacity>
 
-                        <LabeledInput
-                            label="Tanggal Rujukan"
-                            placeholder="Masukkan tanggal (YYYY-MM-DD)"
-                            value={tgl}
-                            onChangeText={setTgl}
-                        />
-
-                        <DropdownInput
-                            label="Jenis Kelamin"
-                            options={genderOptions}
-                            selectedValue={jenisKelamin}
-                            onValueChange={setJenisKelamin}
-                        />
-
-                        <LabeledInput
-                            label="Umur"
-                            placeholder="Auto-fill dari rekam medis"
-                            value={umur}
-                            onChangeText={setUmur}
-                        />
-
-                        <LabeledInput
-                            label="Alamat"
-                            placeholder="Auto-fill dari rekam medis"
-                            value={alamat}
-                            onChangeText={setAlamat}
-                            multiline={true}
-                        />
-
-                        <LabeledInput
-                            label="Keluhan Utama"
-                            placeholder="Auto-fill dari rekam medis (bisa diedit)"
-                            value={keluhan_rujukan}
-                            onChangeText={setKeluhan_rujukan}
-                            multiline={true}
-                        />
-
-                        <LabeledInput
-                            label="Diagnosa Sementara"
-                            placeholder="Auto-fill dari rekam medis"
-                            value={diagnosa}
-                            onChangeText={setDiagnosa}
-                            multiline={true}
-                        />
-
-                        <DropdownInput
-                            label="Penandatangan (Hormat Kami)"
-                            options={userOptions}
-                            selectedValue={penandatangan}
-                            onValueChange={setPenandatangan}
-                            placeholder="-- Pilih Nama Penandatangan --"
-                        />
-
-                        <View style={[LayoutStyles.rowEnd, LayoutStyles.mt20]}>
+                        {/* Tombol Simpan */}
+                        <View style={CreateRecordStyles.btnSimpanContainer}>
                             <TouchableOpacity
-                                style={GlobalStyles.btnBatal}
-                                onPress={() => navigation.goBack()}
-                            >
-                                <Text style={GlobalStyles.btnBatalText}>Batal</Text>
-                            </TouchableOpacity>
-
-                            <PrimaryButton
-                                title={loading ? "Menyimpan..." : "Simpan"}
+                                style={CreateRecordStyles.btnSimpan}
                                 onPress={handleSave}
-                                style={GlobalStyles.btnSimpan}
                                 disabled={loading}
-                            />
+                            >
+                                <Text style={CreateRecordStyles.btnSimpanText}>
+                                    {loading ? 'Menyimpan...' : 'Simpan'}
+                                </Text>
+                            </TouchableOpacity>
                         </View>
                     </View>
                 </ScrollView>
             </KeyboardAvoidingView>
+
+            {/* Modal Pilih Record */}
+            <Modal visible={recordModalVisible} transparent animationType="fade" onRequestClose={() => setRecordModalVisible(false)}>
+                <TouchableOpacity style={GlobalStyles.selectionModalOverlay} activeOpacity={1} onPress={() => setRecordModalVisible(false)}>
+                    <View style={GlobalStyles.selectionModalContent}>
+                        <Text style={GlobalStyles.selectionModalTitle}>Pilih Rekam Medis</Text>
+                        <ScrollView style={{ maxHeight: 400, width: '100%' }}>
+                            {availableRecords.map(r => (
+                                <TouchableOpacity
+                                    key={r.id_record}
+                                    style={GlobalStyles.selectionOptionItem}
+                                    onPress={() => handleSelectRecord(r.id_record.toString())}
+                                >
+                                    <Text style={GlobalStyles.tableRowText}>
+                                        {r.tb_pasien?.nama_pasien} ({r.tanggal})
+                                    </Text>
+                                </TouchableOpacity>
+                            ))}
+                        </ScrollView>
+                    </View>
+                </TouchableOpacity>
+            </Modal>
+
+            {/* Modal Pilih Penandatangan */}
+            <Modal visible={penandatanganModalVisible} transparent animationType="fade" onRequestClose={() => setPenandatanganModalVisible(false)}>
+                <TouchableOpacity style={GlobalStyles.selectionModalOverlay} activeOpacity={1} onPress={() => setPenandatanganModalVisible(false)}>
+                    <View style={GlobalStyles.selectionModalContent}>
+                        <Text style={GlobalStyles.selectionModalTitle}>Pilih Penandatangan</Text>
+                        <ScrollView style={{ maxHeight: 300, width: '100%' }}>
+                            {availableUsers.map(u => (
+                                <TouchableOpacity
+                                    key={u.id_users}
+                                    style={GlobalStyles.selectionOptionItem}
+                                    onPress={() => {
+                                        setPenandatangan(u.nama_users);
+                                        setPenandatanganModalVisible(false);
+                                    }}
+                                >
+                                    <Text style={GlobalStyles.tableRowText}>{u.nama_users}</Text>
+                                </TouchableOpacity>
+                            ))}
+                        </ScrollView>
+                    </View>
+                </TouchableOpacity>
+            </Modal>
         </AdminLayout>
     );
 }

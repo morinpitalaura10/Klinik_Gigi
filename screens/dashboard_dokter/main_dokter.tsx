@@ -50,7 +50,6 @@ export default function MainDokter() {
                 jk
             )
         `)
-        .eq('tanggal', today)
         .eq('status', 'Diproses');
 
       if (user?.role === 'dokter' && user?.spesialisasi) {

@@ -62,7 +62,6 @@ export function TampilRecordAdmin() {
                 jk
             )
         `)
-        .eq('tanggal', selectedDate)
         .order('id_record', { ascending: false });
 
       if (error) throw error;
@@ -123,10 +122,7 @@ export function TampilRecordAdmin() {
             
             <View style={DentalRecordStyles.headerRow}>
               <View>
-                <Text style={DentalRecordStyles.headerTitle}>Dental Record</Text>
-                <Text style={DentalRecordStyles.headerSubtitle}>
-                  Tanggal : {new Date(selectedDate).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })}
-                </Text>
+                <Text style={DentalRecordStyles.headerTitle}>Histori Dental Record</Text>
               </View>
               <TouchableOpacity 
                 style={DentalRecordStyles.btnRecordBaru}

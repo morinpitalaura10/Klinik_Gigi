@@ -260,6 +260,7 @@ export function PreviewRujukan() {
       });
       if (uri) {
         await Sharing.shareAsync(uri, { UTI: '.pdf', mimeType: 'application/pdf', dialogTitle: 'Ekspor Rujukan' });
+        navigation.popToTop(); 
       }
     } catch (error: any) {
       Alert.alert('Gagal Mengekspor', error.message);

@@ -138,6 +138,7 @@ export function PreviewKwitansi() {
       const { uri } = await Print.printToFileAsync({ html: htmlContent, width: 1123, height: 794 });
       if (uri) {
         await Sharing.shareAsync(uri, { UTI: '.pdf', mimeType: 'application/pdf', dialogTitle: 'Ekspor Kwitansi' });
+        navigation.popToTop();
       }
     } catch (error: any) {
       Alert.alert('Gagal Mengekspor', error.message);
