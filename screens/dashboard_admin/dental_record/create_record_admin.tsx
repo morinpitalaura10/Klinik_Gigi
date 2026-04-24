@@ -7,14 +7,14 @@ import {
     TouchableOpacity,
     KeyboardAvoidingView,
     Platform,
-    ActivityIndicator
+    ActivityIndicator,
+    Modal,
+    TextInput
 } from 'react-native';
+import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { supabase } from '../../../utils/supabase';
-import { GlobalStyles, LayoutStyles, Colors } from '../../../styles/GlobalStyles';
+import { GlobalStyles, LayoutStyles, Colors, CreateRecordStyles } from '../../../styles/GlobalStyles';
 import AdminLayout from '../../../components/templates/AdminLayout';
-import DropdownInput from '../../../components/molecules/DropdownInput';
-import LabeledInput from '../../../components/molecules/LabeledInput';
-import PrimaryButton from '../../../components/atoms/PrimaryButton';
 import { useNavigation, useRoute, useFocusEffect } from '@react-navigation/native';
 import { useAlert } from '../../../context/AlertContext';
 
@@ -31,22 +31,22 @@ export function CreateRecordAdmin() {
 
     const [loading, setLoading] = useState(false);
     const [fetchingPasien, setFetchingPasien] = useState(true);
-    
 
     const [pasienList, setPasienList] = useState<Pasien[]>([]);
     const [selectedPasienId, setSelectedPasienId] = useState<string>(editItem?.id_pasien?.toString() || '');
-    const [layanan, setLayanan] = useState(editItem?.layanan || 'Ortodental');
-    const [gigi, setGigi] = useState(editItem?.gigi || '');
+    const [selectedPasienName, setSelectedPasienName] = useState<string>('Masukkan nama pasien');
+    const [layanan, setLayanan] = useState(editItem?.layanan || '');
 
-    const layananOptions = [
-        { label: 'Ortodental', value: 'Ortodental' },
-        { label: 'Umum', value: 'Umum' },
-    ];
+    // Keluhan state (mapped to 'keluhan' column in DB)
+    const [diagnosa, setDiagnosa] = useState<string>(
+        editItem?.diagnosa || ''
+    );
 
-    const gigiOptions = Array.from({ length: 85 }, (_, i) => ({
-        label: (i + 1).toString(),
-        value: (i + 1).toString(),
-    }));
+    // Modals for dropdowns
+    const [pasienModalVisible, setPasienModalVisible] = useState(false);
+    const [layananModalVisible, setLayananModalVisible] = useState(false);
+
+    const layananOptions = ['Ortodental', 'Umum'];
 
     const fetchPasien = async () => {
         try {
@@ -58,6 +58,11 @@ export function CreateRecordAdmin() {
 
             if (error) throw error;
             setPasienList(data || []);
+
+            if (editItem?.id_pasien) {
+                const p = data?.find(x => x.id_pasien === editItem.id_pasien);
+                if (p) setSelectedPasienName(p.nama_pasien);
+            }
         } catch (error: any) {
             showAlert({ title: 'Error', message: 'Gagal memuat data pasien: ' + error.message, type: 'error' });
         } finally {
@@ -72,8 +77,8 @@ export function CreateRecordAdmin() {
     );
 
     const handleSave = async () => {
-        if (!selectedPasienId || !gigi) {
-            showAlert({ title: 'Peringatan', message: 'Harap pilih pasien dan nomor gigi!', type: 'warning' });
+        if (!selectedPasienId || !diagnosa.trim() || !layanan) {
+            showAlert({ title: 'Peringatan', message: 'Harap isi semua data (Pasien, Layanan, dan Keluhan)!', type: 'warning' });
             return;
         }
 
@@ -82,7 +87,8 @@ export function CreateRecordAdmin() {
             const recordData = {
                 id_pasien: parseInt(selectedPasienId),
                 layanan: layanan,
-                gigi: gigi,
+                diagnosa: diagnosa,
+                gigi: editItem?.gigi || '1',
                 tanggal: new Date().toLocaleDateString('en-CA'),
                 status: editItem?.status || 'Menunggu'
             };
@@ -111,72 +117,119 @@ export function CreateRecordAdmin() {
         }
     };
 
-    const pasienOptions = pasienList.map(p => ({
-        label: p.nama_pasien,
-        value: p.id_pasien.toString()
-    }));
-
     return (
-        <AdminLayout
-            noScroll={true}
-            customRightTitle="Dental Record"
-        >
+        <AdminLayout noScroll={true} customRightTitle="Dental Record">
             <KeyboardAvoidingView
                 behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
                 style={LayoutStyles.flex1}
             >
-                <ScrollView contentContainerStyle={LayoutStyles.scrollContent}>
-                    <View style={GlobalStyles.formCard}>
-                        <Text style={GlobalStyles.formSectionTitle}>
-                            {editItem ? 'EDIT RECORD' : 'RECORD BARU'}
+                <ScrollView contentContainerStyle={CreateRecordStyles.mainContainer} showsVerticalScrollIndicator={false}>
+
+                    <View style={CreateRecordStyles.card}>
+
+                        <Text style={CreateRecordStyles.cardTitle}>
+                            {editItem ? 'DENTAL RECORD' : 'DENTAL RECORD BARU'}
                         </Text>
-                        <View style={GlobalStyles.formDivider} />
+                        <View style={CreateRecordStyles.divider} />
 
-                        {fetchingPasien ? (
-                            <ActivityIndicator size="small" color={Colors.primary} style={LayoutStyles.mb20} />
-                        ) : (
-                            <DropdownInput
-                                label="Pilih Pasien"
-                                options={pasienOptions}
-                                selectedValue={selectedPasienId}
-                                onValueChange={setSelectedPasienId}
-                                disabled={!!editItem}
-                            />
-                        )}
+                        {/* Dropdown Pasien */}
+                        <Text style={CreateRecordStyles.fieldLabel}>Nama Pasien</Text>
+                        <TouchableOpacity
+                            style={CreateRecordStyles.inputDropdown}
+                            onPress={() => !editItem && setPasienModalVisible(true)}
+                            disabled={!!editItem}
+                        >
+                            <Text style={CreateRecordStyles.inputText}>
+                                {fetchingPasien ? 'Memuat...' : selectedPasienName}
+                            </Text>
+                            <MaterialCommunityIcons name="menu-down" size={24} color={Colors.primary} />
+                        </TouchableOpacity>
 
-                        <DropdownInput
-                            label="Layanan"
-                            options={layananOptions}
-                            selectedValue={layanan}
-                            onValueChange={setLayanan}
+                        {/* Dropdown Layanan */}
+                        <Text style={CreateRecordStyles.fieldLabel}>Layanan</Text>
+                        <TouchableOpacity
+                            style={CreateRecordStyles.inputDropdown}
+                            onPress={() => setLayananModalVisible(true)}
+                        >
+                            <Text style={CreateRecordStyles.inputText}>
+                                {layanan || 'Pilih pelayanan'}
+                            </Text>
+                            <MaterialCommunityIcons name="menu-down" size={24} color={Colors.primary} />
+                        </TouchableOpacity>
+
+                        {/* Text Area Keluhan */}
+                        <Text style={CreateRecordStyles.fieldLabel}>Keluhan/Diagnosis</Text>
+                        <TextInput
+                            style={CreateRecordStyles.textArea}
+                            placeholder="Masukkan keluhan pasien..."
+                            placeholderTextColor="#999"
+                            multiline={true}
+                            value={diagnosa}
+                            onChangeText={setDiagnosa}
                         />
 
-                        <DropdownInput
-                            label="Nomor Gigi"
-                            options={gigiOptions}
-                            selectedValue={gigi}
-                            onValueChange={setGigi}
-                            placeholder="Pilih Nomor Gigi"
-                        />
-
-                        <View style={[LayoutStyles.rowEnd, LayoutStyles.mt20]}>
+                        {/* Tombol Simpan */}
+                        <View style={CreateRecordStyles.btnSimpanContainer}>
                             <TouchableOpacity
-                                style={GlobalStyles.btnBatal}
-                                onPress={() => navigation.goBack()}
-                            >
-                                <Text style={GlobalStyles.btnBatalText}>Batal</Text>
-                            </TouchableOpacity>
-
-                            <PrimaryButton
-                                title={loading ? "Menyimpan..." : (editItem ? "Simpan Perubahan" : "Simpan")}
+                                style={CreateRecordStyles.btnSimpan}
                                 onPress={handleSave}
-                                style={GlobalStyles.btnSimpan}
                                 disabled={loading}
-                            />
+                            >
+                                <Text style={CreateRecordStyles.btnSimpanText}>
+                                    {loading ? 'Menyimpan...' : 'Simpan'}
+                                </Text>
+                            </TouchableOpacity>
                         </View>
+
                     </View>
                 </ScrollView>
             </KeyboardAvoidingView>
+
+            {/* Modal Pilih Pasien */}
+            <Modal visible={pasienModalVisible} transparent animationType="fade" onRequestClose={() => setPasienModalVisible(false)}>
+                <TouchableOpacity style={GlobalStyles.selectionModalOverlay} activeOpacity={1} onPress={() => setPasienModalVisible(false)}>
+                    <View style={GlobalStyles.selectionModalContent}>
+                        <Text style={GlobalStyles.selectionModalTitle}>Pilih Pasien</Text>
+                        <ScrollView style={{ maxHeight: 300, width: '100%' }}>
+                            {pasienList.map(p => (
+                                <TouchableOpacity
+                                    key={p.id_pasien}
+                                    style={GlobalStyles.selectionOptionItem}
+                                    onPress={() => {
+                                        setSelectedPasienId(p.id_pasien.toString());
+                                        setSelectedPasienName(p.nama_pasien);
+                                        setPasienModalVisible(false);
+                                    }}
+                                >
+                                    <Text style={GlobalStyles.tableRowText}>{p.nama_pasien}</Text>
+                                </TouchableOpacity>
+                            ))}
+                        </ScrollView>
+                    </View>
+                </TouchableOpacity>
+            </Modal>
+
+            {/* Modal Pilih Layanan */}
+            <Modal visible={layananModalVisible} transparent animationType="fade" onRequestClose={() => setLayananModalVisible(false)}>
+                <TouchableOpacity style={GlobalStyles.selectionModalOverlay} activeOpacity={1} onPress={() => setLayananModalVisible(false)}>
+                    <View style={GlobalStyles.selectionModalContent}>
+                        <Text style={GlobalStyles.selectionModalTitle}>Pilih Layanan</Text>
+                        {layananOptions.map(opt => (
+                            <TouchableOpacity
+                                key={opt}
+                                style={GlobalStyles.selectionOptionItem}
+                                onPress={() => {
+                                    setLayanan(opt);
+                                    setLayananModalVisible(false);
+                                }}
+                            >
+                                <Text style={GlobalStyles.tableRowText}>{opt}</Text>
+                            </TouchableOpacity>
+                        ))}
+                    </View>
+                </TouchableOpacity>
+            </Modal>
+
         </AdminLayout>
     );
 }

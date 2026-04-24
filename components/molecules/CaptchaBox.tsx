@@ -4,7 +4,7 @@ import { GlobalStyles } from '../../styles/GlobalStyles';
 
 interface Props {
   isChecked: boolean;
-  onValidChange: (isValid: boolean) => void;
+  onValidChange: (isValid: boolean, val?: string) => void;
   containerStyle?: StyleProp<ViewStyle>;
 }
 
@@ -21,15 +21,15 @@ export default function CaptchaBox({ isChecked, onValidChange, containerStyle }:
     setNum1(Math.floor(Math.random() * 10) + 1);
     setNum2(Math.floor(Math.random() * 10) + 1);
     setAnswer('');
-    onValidChange(false);
+    onValidChange(false, '');
   };
 
   const handleAnswerChange = (val: string) => {
     setAnswer(val);
     if (parseInt(val) === num1 + num2) {
-      onValidChange(true);
+      onValidChange(true, val);
     } else {
-      onValidChange(false);
+      onValidChange(false, val);
     }
   };
 
@@ -37,7 +37,10 @@ export default function CaptchaBox({ isChecked, onValidChange, containerStyle }:
     <View style={[GlobalStyles.captchaSection, containerStyle]}>
       <Text style={GlobalStyles.captchaText}>Verifikasi Keamanan:</Text>
       <View style={[GlobalStyles.captchaMathBox, { marginTop: 8 }]}>
-         <Text style={GlobalStyles.captchaMathQuestion}>Berapa {num1} + {num2} = ?</Text>
+         <View style={{flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between'}}>
+           <Text style={GlobalStyles.captchaMathQuestion}>Berapa {num1} + {num2} = ?</Text>
+           <Text onPress={generateCaptcha} style={{color: '#007BFF', fontSize: 20, marginLeft: 10}}>↻</Text>
+         </View>
          <TextInput 
             style={GlobalStyles.captchaMathInput}
             value={answer}

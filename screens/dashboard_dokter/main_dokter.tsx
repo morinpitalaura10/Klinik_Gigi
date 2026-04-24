@@ -5,12 +5,11 @@ import {
   FlatList, 
   TouchableOpacity, 
   ActivityIndicator,
-  Alert,
   ScrollView
 } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { supabase } from '../../utils/supabase';
-import { Colors, GlobalStyles, LayoutStyles } from '../../styles/GlobalStyles';
+import { Colors, DoctorDashboardStyles } from '../../styles/GlobalStyles';
 import AdminLayout from '../../components/templates/AdminLayout';
 import { useFocusEffect, useNavigation } from '@react-navigation/native';
 import { AuthContext } from '../../context/AuthContext';
@@ -21,7 +20,8 @@ interface DentalRecord {
   tanggal: string;
   layanan: string;
   status: string;
-  gigi: string;
+  diagnosa?: string;
+  gigi?: string;
   tb_pasien: {
     nama_pasien: string;
     jk: string;
@@ -82,13 +82,11 @@ export default function MainDokter() {
     }, [])
   );
 
-  const formatTanggalValue = (dateStr: string) => {
-    if (!dateStr) return "-";
-    const date = new Date(dateStr);
-    const d = String(date.getDate()).padStart(2, '0');
-    const m = String(date.getMonth() + 1).padStart(2, '0');
-    const y = date.getFullYear();
-    return `${d}-${m}-${y}`;
+  const getFormattedDate = () => {
+    const days = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
+    const months = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
+    const d = new Date();
+    return `${days[d.getDay()]}, ${d.getDate()} ${months[d.getMonth()]} ${d.getFullYear()}`;
   };
 
   const handleLogout = () => {
@@ -105,78 +103,88 @@ export default function MainDokter() {
         showBackButton={false} 
         customRightTitle="Dokter"
         onLogout={handleLogout}
+        noScroll={true}
     >
-      {loading && !refreshing ? (
-        <ActivityIndicator size="large" color={Colors.black} style={LayoutStyles.mt50} />
-      ) : (
-        <View style={LayoutStyles.flex1}>
-          <View style={[LayoutStyles.ph20, LayoutStyles.pt10, LayoutStyles.mb20]}>
-            <View>
-                <Text style={LayoutStyles.textGray}>Selamat Bekerja,</Text>
-                <Text style={[LayoutStyles.textBoldHuge, LayoutStyles.textDark]}>
-                    drg. {user?.nama || 'Dokter'}
-                </Text>
-                <Text style={LayoutStyles.textSmallPrimary}>
-                    Spesialisasi: {user?.spesialisasi || 'Belum Terdeteksi (Silakan Re-login)'}
-                </Text>
-                <Text style={[LayoutStyles.textGrayDark, LayoutStyles.mt10]}>
-                    Antrean Pasien - {new Date().toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })}
-                </Text>
-            </View>
-          </View>
-
-          <View style={[GlobalStyles.tableContainer, LayoutStyles.mh20]}>
-            <ScrollView horizontal={true} showsHorizontalScrollIndicator={true}>
-              <View style={[GlobalStyles.tableContentWrapper, { width: 900, borderLeftWidth: 1, borderRightWidth: 1, borderTopWidth: 1, borderTopColor: Colors.black }]}>
-                <View style={[GlobalStyles.tableRowAtomic, { backgroundColor: Colors.white, minHeight: 50 }]}>
-                    <View style={[GlobalStyles.tableCellAtomic, GlobalStyles.tableCellFirst, { width: 130 }]}><Text style={GlobalStyles.tableThText}>Tanggal</Text></View>
-                    <View style={[GlobalStyles.tableCellAtomic, { width: 190 }]}><Text style={GlobalStyles.tableThText}>Nama Pasien</Text></View>
-                    <View style={[GlobalStyles.tableCellAtomic, { width: 110 }]}><Text style={GlobalStyles.tableThText}>JK</Text></View>
-                    <View style={[GlobalStyles.tableCellAtomic, { width: 140 }]}><Text style={GlobalStyles.tableThText}>Layanan</Text></View>
-                    <View style={[GlobalStyles.tableCellAtomic, { width: 190 }]}><Text style={GlobalStyles.tableThText}>Nomor Gigi</Text></View>
-                    <View style={[GlobalStyles.tableCellAtomic, { width: 140, borderRightWidth: 0 }]}><Text style={GlobalStyles.tableThText}>Aksi</Text></View>
-                </View>
-
-                <FlatList
-                  data={records}
-                  keyExtractor={(item) => item.id_record.toString()}
-                  refreshing={refreshing}
-                  scrollEnabled={false}
-                  onRefresh={() => {
-                    setRefreshing(true);
-                    fetchQueue();
-                  }}
-                  renderItem={({ item, index }) => {
-                    const isLast = index === records.length - 1;
-                    return (
-                      <View style={[GlobalStyles.tableRowAtomic, isLast && { borderBottomWidth: 0 }]}>
-                        <View style={[GlobalStyles.tableCellAtomic, GlobalStyles.tableCellFirst, { width: 130 }]}><Text style={GlobalStyles.tableTdText}>{formatTanggalValue(item.tanggal)}</Text></View>
-                        <View style={[GlobalStyles.tableCellAtomic, { width: 190 }]}><Text style={GlobalStyles.tableTdText} numberOfLines={2}>{item.tb_pasien?.nama_pasien}</Text></View>
-                        <View style={[GlobalStyles.tableCellAtomic, { width: 110 }]}><Text style={GlobalStyles.tableTdText}>{item.tb_pasien?.jk}</Text></View>
-                        <View style={[GlobalStyles.tableCellAtomic, { width: 140 }]}><Text style={GlobalStyles.tableTdText} numberOfLines={2}>{item.layanan}</Text></View>
-                        <View style={[GlobalStyles.tableCellAtomic, { width: 190 }]}><Text style={GlobalStyles.tableTdText} numberOfLines={2}>{item.gigi}</Text></View>
-                        <View style={[GlobalStyles.tableCellAtomic, { width: 140, borderRightWidth: 0 }]}>
-                          <TouchableOpacity
-                            style={[GlobalStyles.btnActionUpdate, LayoutStyles.h35, { width: 110, paddingVertical: 0, borderRadius: 8, marginLeft: 0 }]}
-                            onPress={() => navigation.navigate('IsiRekamMedis', { record: item })}
-                          >
-                            <Text style={{ color: 'white', fontSize: 13, fontWeight: 'bold' }}>Edit Data</Text>
-                          </TouchableOpacity>
-                        </View>
-                      </View>
-                    );
-                  }}
-                  ListEmptyComponent={
-                    <View style={GlobalStyles.emptyContent}>
-                      <Text style={GlobalStyles.emptyText}>Tidak ada antrean pasien untuk hari ini</Text>
-                    </View>
-                  }
-                />
-              </View>
-            </ScrollView>
-          </View>
+      <ScrollView 
+        style={DoctorDashboardStyles.mainContainer}
+        contentContainerStyle={{ paddingBottom: 40 }}
+        showsVerticalScrollIndicator={false}
+      >
+        <View style={DoctorDashboardStyles.doctorInfoContainer}>
+            <Text style={DoctorDashboardStyles.doctorName}>
+                drg. {user?.nama || 'Dokter'}
+            </Text>
+            <Text style={DoctorDashboardStyles.doctorSpec}>
+                Spesialisasi : {user?.spesialisasi || '-'}
+            </Text>
+            <Text style={DoctorDashboardStyles.currentDate}>
+                {getFormattedDate()}
+            </Text>
         </View>
-      )}
+
+        <View style={DoctorDashboardStyles.tableWrapper}>
+            {/* Header */}
+            <View style={DoctorDashboardStyles.tableHeaderRow}>
+                <View style={DoctorDashboardStyles.colName}>
+                    <Text style={[DoctorDashboardStyles.thText, { textAlign: 'left', paddingLeft: 10 }]}>Nama</Text>
+                </View>
+                <View style={DoctorDashboardStyles.colGender}>
+                    <Text style={[DoctorDashboardStyles.thText, { textAlign: 'center' }]}>Gender</Text>
+                </View>
+                <View style={DoctorDashboardStyles.colKeluhan}>
+                    <Text style={[DoctorDashboardStyles.thText, { textAlign: 'center' }]}>Keluhan</Text>
+                </View>
+                <View style={DoctorDashboardStyles.colAksi}>
+                    <Text style={[DoctorDashboardStyles.thText, { textAlign: 'center' }]}>Aksi</Text>
+                </View>
+            </View>
+
+            {/* List */}
+            {loading && !refreshing ? (
+                <ActivityIndicator size="large" color={Colors.primary} style={{ marginVertical: 30 }} />
+            ) : (
+                <View>
+                    {records.length > 0 ? (
+                        records.map((item, index) => (
+                            <View key={item.id_record} style={DoctorDashboardStyles.tableRow}>
+                                <View style={DoctorDashboardStyles.colName}>
+                                    <Text style={[DoctorDashboardStyles.tdText, { textAlign: 'left', paddingLeft: 10 }]} numberOfLines={2}>
+                                        {item.tb_pasien?.nama_pasien}
+                                    </Text>
+                                </View>
+
+                                <View style={DoctorDashboardStyles.colGender}>
+                                    <View style={DoctorDashboardStyles.badgeContainer}>
+                                        <Text style={DoctorDashboardStyles.badgeText}>{item.tb_pasien?.jk}</Text>
+                                    </View>
+                                </View>
+
+                                <View style={DoctorDashboardStyles.colKeluhan}>
+                                    <Text style={[DoctorDashboardStyles.tdText, { textAlign: 'center' }]} numberOfLines={2}>
+                                        {item.diagnosa || '-'}
+                                    </Text>
+                                </View>
+
+                                <View style={DoctorDashboardStyles.colAksi}>
+                                    <TouchableOpacity 
+                                        style={DoctorDashboardStyles.btnEdit}
+                                        onPress={() => navigation.navigate('IsiRekamMedis', { record: item })}
+                                    >
+                                        <MaterialCommunityIcons name="square-edit-outline" size={16} color="#FFF" />
+                                        <Text style={DoctorDashboardStyles.btnEditText}>Edit</Text>
+                                    </TouchableOpacity>
+                                </View>
+                            </View>
+                        ))
+                    ) : (
+                        <View style={{ padding: 30, alignItems: 'center' }}>
+                            <Text style={{ color: '#999' }}>Tidak ada antrean pasien hari ini</Text>
+                        </View>
+                    )}
+                </View>
+            )}
+        </View>
+      </ScrollView>
     </AdminLayout>
   );
 }

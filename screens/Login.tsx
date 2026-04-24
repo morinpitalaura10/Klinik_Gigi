@@ -17,6 +17,7 @@ export default function Login({ navigation }: any) {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [isCaptchaChecked, setIsCaptchaChecked] = useState(false);
+  const [captchaValue, setCaptchaValue] = useState('');
 
 
   const { login } = useContext(AuthContext);
@@ -24,12 +25,25 @@ export default function Login({ navigation }: any) {
 
   const handleLogin = async () => {
 
-    if (!username || !password) {
-      showAlert({ title: 'Peringatan', message: 'Tolong isi username dan password!', type: 'warning' });
+    if (!username && !password) {
+      showAlert({ title: 'Peringatan', message: 'Harap isi username dan password!', type: 'warning' });
       return;
     }
+    if (!username) {
+      showAlert({ title: 'Peringatan', message: 'Harap isi username!', type: 'warning' });
+      return;
+    }
+    if (!password) {
+      showAlert({ title: 'Peringatan', message: 'Harap isi password!', type: 'warning' });
+      return;
+    }
+
     if (!isCaptchaChecked) {
-      showAlert({ title: 'Captcha', message: "Jangan lupa centang captcha 'Saya bukan robot'!", type: 'warning' });
+      if (!captchaValue) {
+        showAlert({ title: 'Captcha', message: 'Harap isi kode captcha!', type: 'warning' });
+      } else {
+        showAlert({ title: 'Captcha', message: 'Kode captcha tidak sesuai!', type: 'warning' });
+      }
       return;
     }
 
@@ -65,7 +79,7 @@ export default function Login({ navigation }: any) {
 
 
     if (!data || data.length === 0) {
-      showAlert({ title: 'Gagal', message: 'Login Gagal: Username atau password salah!', type: 'error' });
+      showAlert({ title: 'Gagal', message: 'Username atau password salah, harap isi dengan benar!', type: 'error' });
       return;
     }
 
@@ -133,7 +147,10 @@ export default function Login({ navigation }: any) {
 
       <CaptchaBox
         isChecked={isCaptchaChecked}
-        onValidChange={setIsCaptchaChecked}
+        onValidChange={(isValid, val) => {
+          setIsCaptchaChecked(isValid);
+          if (val !== undefined) setCaptchaValue(val);
+        }}
       />
 
       <PrimaryButton

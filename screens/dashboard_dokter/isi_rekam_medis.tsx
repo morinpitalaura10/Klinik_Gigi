@@ -1,20 +1,18 @@
-import React, { useState, useEffect, useContext } from 'react';
+import React, { useState, useEffect, useContext, useCallback } from 'react';
 import {
     View,
     Text,
     ScrollView,
-    Alert,
     TouchableOpacity,
     KeyboardAvoidingView,
     Platform,
-    ActivityIndicator
+    ActivityIndicator,
+    Modal
 } from 'react-native';
+import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { supabase } from '../../utils/supabase';
-import { GlobalStyles, LayoutStyles, Colors } from '../../styles/GlobalStyles';
+import { GlobalStyles, LayoutStyles, Colors, CreateRecordStyles } from '../../styles/GlobalStyles';
 import AdminLayout from '../../components/templates/AdminLayout';
-import DropdownInput from '../../components/molecules/DropdownInput';
-import LabeledInput from '../../components/molecules/LabeledInput';
-import PrimaryButton from '../../components/atoms/PrimaryButton';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import { AuthContext } from '../../context/AuthContext';
 import { useAlert } from '../../context/AlertContext';
@@ -30,10 +28,16 @@ export function IsiRekamMedis() {
     const [fetchingTindakan, setFetchingTindakan] = useState(true);
     const [tindakanList, setTindakanList] = useState<any[]>([]);
 
-
-    const [diagnosa, setDiagnosa] = useState(record?.diagnosa || '');
     const [selectedTindakanId, setSelectedTindakanId] = useState<string>(record?.id_tindakan?.toString() || '');
+    const [selectedTindakanName, setSelectedTindakanName] = useState<string>('Pilih perawatan');
     const [keterangan, setKeterangan] = useState(record?.keterangan || '');
+    
+    // Tooth selection state
+    const [selectedGigi, setSelectedGigi] = useState<string[]>(
+        record?.gigi && record.gigi !== '-' ? record.gigi.split(',') : []
+    );
+
+    const [tindakanModalVisible, setTindakanModalVisible] = useState(false);
 
     useEffect(() => {
         fetchTindakan();
@@ -48,6 +52,11 @@ export function IsiRekamMedis() {
 
             if (error) throw error;
             setTindakanList(data || []);
+
+            if (record?.id_tindakan) {
+                const found = data?.find(x => x.id_tindakan === record.id_tindakan);
+                if (found) setSelectedTindakanName(found.nama_tindakan);
+            }
         } catch (error: any) {
             showAlert({ title: 'Error', message: 'Gagal memuat daftar tindakan', type: 'error' });
         } finally {
@@ -55,15 +64,20 @@ export function IsiRekamMedis() {
         }
     };
 
+    const toggleGigi = (no: string) => {
+        setSelectedGigi(prev => 
+            prev.includes(no) ? prev.filter(g => g !== no) : [...prev, no]
+        );
+    };
+
     const handleSave = async () => {
-        if (!diagnosa || !selectedTindakanId) {
-            showAlert({ title: 'Peringatan', message: 'Harap isi diagnosa dan pilih tindakan!', type: 'warning' });
+        if (!selectedTindakanId) {
+            showAlert({ title: 'Peringatan', message: 'Harap pilih tindakan/perawatan!', type: 'warning' });
             return;
         }
 
-
         if (!user?.id_users) {
-            showAlert({ title: 'Gagal', message: 'Sesi login dokter tidak valid. Silakan Logout dan Login kembali untuk melanjutkan.', type: 'error' });
+            showAlert({ title: 'Gagal', message: 'Sesi login dokter tidak valid.', type: 'error' });
             return;
         }
 
@@ -72,9 +86,9 @@ export function IsiRekamMedis() {
             const { error } = await supabase
                 .from('tb_rekam_medis')
                 .update({
-                    diagnosa: diagnosa,
                     id_tindakan: parseInt(selectedTindakanId),
                     keterangan: keterangan,
+                    gigi: selectedGigi.join(','),
                     doctor_id: user?.id_users,
                     status: 'Selesai' 
                 })
@@ -89,74 +103,108 @@ export function IsiRekamMedis() {
         }
     };
 
-    const tindakanOptions = tindakanList.map(t => ({
-        label: t.nama_tindakan,
-        value: t.id_tindakan.toString()
-    }));
-
     return (
-        <AdminLayout
-            customRightTitle="Dokter"
-        >
+        <AdminLayout customRightTitle="Dokter" noScroll={true}>
             <KeyboardAvoidingView
                 behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
                 style={LayoutStyles.flex1}
             >
-                <ScrollView contentContainerStyle={LayoutStyles.scrollContent}>
-                    <View style={GlobalStyles.formCard}>
-                        <Text style={GlobalStyles.formSectionTitle}>MEDICAL RECORD</Text>
-                        <Text style={LayoutStyles.textCenterGray}>
-                            Pasien: {record.tb_pasien?.nama_pasien}
+                <ScrollView contentContainerStyle={CreateRecordStyles.mainContainer} showsVerticalScrollIndicator={false}>
+                    <View style={CreateRecordStyles.card}>
+                        <Text style={CreateRecordStyles.cardTitle}>
+                            DENTAL RECORD ({record.tb_pasien?.nama_pasien || 'PASIEN'})
                         </Text>
-                        <View style={GlobalStyles.formDivider} />
+                        <View style={CreateRecordStyles.divider} />
 
-                        <LabeledInput
-                            label="Diagnosa"
-                            placeholder="Masukkan hasil diagnosa..."
-                            value={diagnosa}
-                            onChangeText={setDiagnosa}
+                        {/* Dropdown Tindakan */}
+                        <Text style={CreateRecordStyles.fieldLabel}>Tindakan/Perawatan</Text>
+                        <TouchableOpacity
+                            style={CreateRecordStyles.inputDropdown}
+                            onPress={() => setTindakanModalVisible(true)}
+                        >
+                            <Text style={CreateRecordStyles.inputText}>
+                                {fetchingTindakan ? 'Memuat...' : selectedTindakanName}
+                            </Text>
+                            <MaterialCommunityIcons name="menu-down" size={24} color={Colors.primary} />
+                        </TouchableOpacity>
+
+                        {/* Keterangan */}
+                        <Text style={CreateRecordStyles.fieldLabel}>Keterangan</Text>
+                        <TextInput
+                            style={CreateRecordStyles.textArea}
+                            placeholder="Masukkan keterangan"
+                            placeholderTextColor="#999"
                             multiline={true}
-                            numberOfLines={3}
-                        />
-
-                        {fetchingTindakan ? (
-                            <ActivityIndicator size="small" color={Colors.primary} style={LayoutStyles.mb20} />
-                        ) : (
-                            <DropdownInput
-                                label="Perawatan"
-                                options={tindakanOptions}
-                                selectedValue={selectedTindakanId}
-                                onValueChange={setSelectedTindakanId}
-                            />
-                        )}
-
-                        <LabeledInput
-                            label="Keterangan"
-                            placeholder="Tambahkan catatan jika ada..."
                             value={keterangan}
                             onChangeText={setKeterangan}
-                            multiline={true}
-                            numberOfLines={3}
                         />
 
-                        <View style={[LayoutStyles.rowEnd, LayoutStyles.mt20]}>
-                            <TouchableOpacity
-                                style={GlobalStyles.btnBatal}
-                                onPress={() => navigation.goBack()}
-                            >
-                                <Text style={GlobalStyles.btnBatalText}>Batal</Text>
-                            </TouchableOpacity>
-
-                            <PrimaryButton
-                                title={loading ? "Menyimpan..." : "Simpan"}
-                                onPress={handleSave}
-                                style={GlobalStyles.btnSimpan}
-                                disabled={loading}
-                            />
+                        {/* Grid Gigi */}
+                        <Text style={CreateRecordStyles.fieldLabel}>Nomor Gigi</Text>
+                        <View style={CreateRecordStyles.gridContainer}>
+                            {Array.from({ length: 85 }, (_, i) => {
+                                const numStr = (i + 1).toString();
+                                const isChecked = selectedGigi.includes(numStr);
+                                return (
+                                    <TouchableOpacity 
+                                        key={numStr} 
+                                        style={CreateRecordStyles.checkboxWrapper16} 
+                                        onPress={() => toggleGigi(numStr)}
+                                    >
+                                        <View style={{ alignItems: 'center' }}>
+                                            <View style={[CreateRecordStyles.checkbox, isChecked && CreateRecordStyles.checkboxChecked]}>
+                                                {isChecked && <MaterialCommunityIcons name="check" size={12} color="#FFF" />}
+                                            </View>
+                                            <Text style={CreateRecordStyles.checkboxLabel}>{numStr}</Text>
+                                        </View>
+                                    </TouchableOpacity>
+                                );
+                            })}
                         </View>
+
+                        {/* Tombol Simpan */}
+                        <View style={CreateRecordStyles.btnSimpanContainer}>
+                            <TouchableOpacity
+                                style={CreateRecordStyles.btnSimpan}
+                                onPress={handleSave}
+                                disabled={loading}
+                            >
+                                <Text style={CreateRecordStyles.btnSimpanText}>
+                                    {loading ? 'Menyimpan...' : 'Simpan'}
+                                </Text>
+                            </TouchableOpacity>
+                        </View>
+
                     </View>
                 </ScrollView>
             </KeyboardAvoidingView>
+
+            {/* Modal Pilih Tindakan */}
+            <Modal visible={tindakanModalVisible} transparent animationType="fade" onRequestClose={() => setTindakanModalVisible(false)}>
+                <TouchableOpacity style={GlobalStyles.selectionModalOverlay} activeOpacity={1} onPress={() => setTindakanModalVisible(false)}>
+                    <View style={GlobalStyles.selectionModalContent}>
+                        <Text style={GlobalStyles.selectionModalTitle}>Pilih Perawatan</Text>
+                        <ScrollView style={{ maxHeight: 300, width: '100%' }}>
+                            {tindakanList.map(t => (
+                                <TouchableOpacity
+                                    key={t.id_tindakan}
+                                    style={GlobalStyles.selectionOptionItem}
+                                    onPress={() => {
+                                        setSelectedTindakanId(t.id_tindakan.toString());
+                                        setSelectedTindakanName(t.nama_tindakan);
+                                        setTindakanModalVisible(false);
+                                    }}
+                                >
+                                    <Text style={GlobalStyles.tableRowText}>{t.nama_tindakan}</Text>
+                                </TouchableOpacity>
+                            ))}
+                        </ScrollView>
+                    </View>
+                </TouchableOpacity>
+            </Modal>
         </AdminLayout>
     );
 }
+
+// Ensure TextInput is imported locally since LabeledInput was used before
+import { TextInput } from 'react-native';
