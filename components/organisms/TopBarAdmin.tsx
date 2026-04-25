@@ -24,14 +24,14 @@ export default function TopBarAdmin({ title, role, customLeftTitle, customRightT
             style={GlobalStyles.backButton} 
             onPress={() => navigation.canGoBack() && navigation.goBack()}
           >
-            <MaterialCommunityIcons name="arrow-left" size={24} color={Colors.white} />
+            <MaterialCommunityIcons name="chevron-left" size={28} color={Colors.white} />
           </TouchableOpacity>
         )}
         
         <View style={GlobalStyles.topBarLogoBadge}>
           <Image 
             source={require('../../assets/icon.png')} 
-            style={{ width: 45, height: 45, borderRadius: 22.5 }} 
+            style={GlobalStyles.logoCircleSmall} 
             resizeMode="cover"
           />
         </View>
@@ -41,8 +41,8 @@ export default function TopBarAdmin({ title, role, customLeftTitle, customRightT
         </View>
       </View>
 
-      <View style={[GlobalStyles.alignEnd, { flexDirection: 'row', alignItems: 'center' }]}>
-        <View style={{ alignItems: 'flex-end', marginRight: onLogout ? 15 : 0 }}>
+      <View style={[GlobalStyles.topBarRightContent, GlobalStyles.alignEnd]}>
+        <View style={[GlobalStyles.topBarRightTextWrapper, { marginRight: onLogout ? 15 : 0 }]}>
             {customRightTitle && (
             <Text style={GlobalStyles.topBarTextRightBold}>
                 {customRightTitle}
@@ -56,11 +56,7 @@ export default function TopBarAdmin({ title, role, customLeftTitle, customRightT
         {onLogout && (
             <TouchableOpacity 
                 onPress={onLogout}
-                style={{
-                    backgroundColor: 'rgba(255,255,255,0.2)',
-                    padding: 8,
-                    borderRadius: 10
-                }}
+                style={GlobalStyles.logoutButtonBackground}
             >
                 <MaterialCommunityIcons name="logout" size={20} color={Colors.white} />
             </TouchableOpacity>

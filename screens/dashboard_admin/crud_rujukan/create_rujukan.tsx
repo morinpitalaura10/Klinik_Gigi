@@ -109,8 +109,13 @@ export function CreateRujukan() {
     };
 
     const handleSave = async () => {
-        if (!namaDokter || !currentRecord) {
-            showAlert({ title: 'Peringatan', message: 'Harap pilih data pasien dan isi Nama Dokter Tujuan!', type: 'warning' });
+        if (!currentRecord) {
+            showAlert({ title: 'Pilih Rekam Medis', message: 'Harap pilih data pasien dari daftar rekam medis terlebih dahulu!', type: 'warning' });
+            return;
+        }
+
+        if (!namaDokter.trim()) {
+            showAlert({ title: 'Nama Instansi Kosong', message: 'Harap isi Nama Instansi atau Dokter tujuan rujukan!', type: 'warning' });
             return;
         }
 
@@ -151,26 +156,33 @@ export function CreateRujukan() {
 
             showAlert({
                 title: 'Berhasil',
-                message: 'Surat rujukan berhasil dibuat.',
+                message: 'Surat rujukan berhasil dibuat dan disimpan.',
                 type: 'success',
                 onConfirm: () => navigation.navigate('PreviewRujukan', { item: fullItemForPreview })
             });
         } catch (error: any) {
-            showAlert({ title: 'Gagal', message: error.message, type: 'error' });
+            let userMessage = 'Terjadi kesalahan saat menyimpan rujukan.';
+            if (error.message.includes('not-null')) {
+                userMessage = 'Beberapa data wajib masih kosong.';
+            } else if (error.message.includes('network')) {
+                userMessage = 'Koneksi internet bermasalah. Silakan coba lagi.';
+            }
+            showAlert({ title: 'Gagal Menyimpan', message: userMessage, type: 'error' });
+            console.error('Rujukan Save Error:', error.message);
         } finally {
             setLoading(false);
         }
     };
 
     const renderCustomInput = (label: string, value: string, setValue: (t: string) => void, placeholder: string = "", multiline: boolean = false) => (
-        <View style={{ marginBottom: 12 }}>
+        <View style={GlobalStyles.mb12}>
             <Text style={CreateRecordStyles.fieldLabel}>{label}</Text>
             <TextInput
-                style={[CreateRecordStyles.inputDropdown, multiline && { height: 100, textAlignVertical: 'top', paddingTop: 15 }]}
+                style={[CreateRecordStyles.inputDropdown, multiline && GlobalStyles.textAreaSmall]}
                 value={value}
                 onChangeText={setValue}
                 placeholder={placeholder || label}
-                placeholderTextColor="#999"
+                placeholderTextColor={Colors.placeholder}
                 multiline={multiline}
             />
         </View>
@@ -193,7 +205,7 @@ export function CreateRujukan() {
                             style={CreateRecordStyles.inputDropdown}
                             onPress={() => setRecordModalVisible(true)}
                         >
-                            <Text style={[CreateRecordStyles.inputText, !selectedRecordId && { color: '#999' }]} numberOfLines={1}>
+                            <Text style={[CreateRecordStyles.inputText, !selectedRecordId && GlobalStyles.textLightGray]} numberOfLines={1}>
                                 {fetching ? 'Memuat...' : (selectedRecordId ? selectedRecordName : 'Pilih data pasien/Rekam medis')}
                             </Text>
                             <MaterialCommunityIcons name="menu-down" size={24} color={Colors.primary} />
@@ -216,7 +228,7 @@ export function CreateRujukan() {
                             style={CreateRecordStyles.inputDropdown}
                             onPress={() => setPenandatanganModalVisible(true)}
                         >
-                            <Text style={[CreateRecordStyles.inputText, !penandatangan && { color: '#999' }]} numberOfLines={1}>
+                            <Text style={[CreateRecordStyles.inputText, !penandatangan && GlobalStyles.textLightGray]} numberOfLines={1}>
                                 {penandatangan || 'Pilih penandatangan'}
                             </Text>
                             <MaterialCommunityIcons name="menu-down" size={24} color={Colors.primary} />

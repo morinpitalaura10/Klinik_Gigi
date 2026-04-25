@@ -2,8 +2,9 @@ import React, { useState, useEffect } from 'react';
 import { View, Text, ActivityIndicator, TouchableOpacity, Alert } from 'react-native';
 import { supabase } from '../../../utils/supabase';
 import AdminLayout from '../../../components/templates/AdminLayout';
-import { Colors, GlobalStyles, LayoutStyles } from '../../../styles/GlobalStyles';
+import { Colors, GlobalStyles, LayoutStyles, PatientDetailStyles } from '../../../styles/GlobalStyles';
 import { useNavigation, useRoute } from '@react-navigation/native';
+import { MaterialCommunityIcons } from '@expo/vector-icons';
 
 export function ReadUser() {
   const navigation = useNavigation();
@@ -13,6 +14,7 @@ export function ReadUser() {
   const [loading, setLoading] = useState(true);
   const [userData, setUserData] = useState<any>(null);
   const [doctorData, setDoctorData] = useState<any>(null);
+  const [totalPatients, setTotalPatients] = useState(0);
 
   useEffect(() => {
     fetchDetail();
@@ -36,8 +38,20 @@ export function ReadUser() {
           .select('*')
           .eq('user_id', id)
           .maybeSingle();
-        
-        if (doctor) setDoctorData(doctor);
+
+        if (doctor) {
+          setDoctorData(doctor);
+          
+          const { data: recordData } = await supabase
+            .from('tb_rekam_medis')
+            .select('id_pasien')
+            .eq('doctor_id', id);
+
+          if (recordData) {
+            const uniquePatients = new Set(recordData.map(r => r.id_pasien)).size;
+            setTotalPatients(uniquePatients);
+          }
+        }
       }
     } catch (error: any) {
       Alert.alert('Error', error.message);
@@ -61,49 +75,52 @@ export function ReadUser() {
       customLeftTitle="Detail Pengguna" 
       customRightTitle="Manajemen User"
     >
-      <View style={GlobalStyles.formCard}>
+      <View style={[PatientDetailStyles.container, { padding: 20 }]}>
         
-        <View style={GlobalStyles.detailRow}>
-          <View style={GlobalStyles.detailItem}>
-            <Text style={GlobalStyles.detailLabel}>Nama Lengkap</Text>
-            <Text style={GlobalStyles.detailValue}>{userData?.nama_users || '-'}</Text>
-          </View>
-          <View style={GlobalStyles.detailItem}>
-            <Text style={GlobalStyles.detailLabel}>Username</Text>
-            <Text style={GlobalStyles.detailValue}>{userData?.us || '-'}</Text>
-          </View>
-        </View>
-
-        
-        <View style={GlobalStyles.detailRow}>
-          <View style={GlobalStyles.detailItem}>
-            <Text style={GlobalStyles.detailLabel}>Email Pengguna</Text>
-            <Text style={GlobalStyles.detailValue}>{userData?.email_users || '-'}</Text>
-          </View>
-          <View style={GlobalStyles.detailItem}>
-            <Text style={GlobalStyles.detailLabel}>Role / Jabatan</Text>
-            <Text style={GlobalStyles.detailValue}>{userData?.role?.toUpperCase() || '-'}</Text>
-          </View>
-        </View>
-
-        
-        {userData?.role === 'dokter' && (
-          <View style={GlobalStyles.detailRow}>
-            <View style={GlobalStyles.detailItem}>
-              <Text style={GlobalStyles.detailLabel}>Bidang Spesialisasi</Text>
-              <Text style={GlobalStyles.detailValue}>{doctorData?.spesialisasi || 'Umum'}</Text>
+        <View style={PatientDetailStyles.infoCard}>
+            <View style={PatientDetailStyles.infoTitleBar}>
+                <MaterialCommunityIcons name="account-outline" size={20} color="#FFF" />
+                <Text style={PatientDetailStyles.infoTitleText}>INFORMASI AKUN</Text>
             </View>
-          </View>
-        )}
 
-        <View style={GlobalStyles.detailFooter}>
-          <TouchableOpacity 
-            style={GlobalStyles.btnBack}
-            onPress={() => navigation.goBack()}
-          >
-            <Text style={GlobalStyles.btnBackText}>Kembali</Text>
-          </TouchableOpacity>
+            <View style={PatientDetailStyles.gridRow}>
+                <View style={PatientDetailStyles.gridCell}>
+                    <Text style={PatientDetailStyles.infoLabel}>Nama Lengkap</Text>
+                    <Text style={PatientDetailStyles.infoValue}>{userData?.nama_users || '-'}</Text>
+                </View>
+                <View style={[PatientDetailStyles.gridCell, PatientDetailStyles.gridCellLast]}>
+                    <Text style={PatientDetailStyles.infoLabel}>Role / Jabatan</Text>
+                    <Text style={[PatientDetailStyles.infoValue, { color: userData?.role === 'admin' ? '#1976D2' : '#2E7D32' }]}>
+                      {userData?.role?.toUpperCase() || '-'}
+                    </Text>
+                </View>
+            </View>
+
+            <View style={[PatientDetailStyles.gridRow, userData?.role !== 'dokter' && { borderBottomWidth: 0 }]}>
+                <View style={PatientDetailStyles.gridCell}>
+                    <Text style={PatientDetailStyles.infoLabel}>Username</Text>
+                    <Text style={PatientDetailStyles.infoValue}>@{userData?.us || '-'}</Text>
+                </View>
+                <View style={[PatientDetailStyles.gridCell, PatientDetailStyles.gridCellLast]}>
+                    <Text style={PatientDetailStyles.infoLabel}>Email Pengguna</Text>
+                    <Text style={PatientDetailStyles.infoValue}>{userData?.email_users || '-'}</Text>
+                </View>
+            </View>
+
+            {userData?.role === 'dokter' && (
+              <View style={[PatientDetailStyles.gridRow, { borderBottomWidth: 0 }]}>
+                  <View style={PatientDetailStyles.gridCell}>
+                      <Text style={PatientDetailStyles.infoLabel}>Spesialisasi Dokter</Text>
+                      <Text style={PatientDetailStyles.infoValue}>{doctorData?.spesialisasi || 'Umum'}</Text>
+                  </View>
+                  <View style={[PatientDetailStyles.gridCell, PatientDetailStyles.gridCellLast]}>
+                      <Text style={PatientDetailStyles.infoLabel}>Pasien Ditangani</Text>
+                      <Text style={PatientDetailStyles.infoValue}>{totalPatients} Pasien</Text>
+                  </View>
+              </View>
+            )}
         </View>
+
       </View>
     </AdminLayout>
   );

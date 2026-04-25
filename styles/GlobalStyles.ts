@@ -58,17 +58,16 @@ export const AuthStyles = StyleSheet.create({
 export const LayoutStyles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: Colors.primary,
+    backgroundColor: '#FFFFFF',
   },
   container: {
     flex: 1,
-    backgroundColor: Colors.white,
+    backgroundColor: '#F5F5F5',
     justifyContent: 'space-between',
   },
   scrollContent: {
     padding: 25,
     flexGrow: 1,
-    justifyContent: 'center',
   },
   scrollHorizontalContent: {
     flexGrow: 1,
@@ -130,6 +129,7 @@ export const LayoutStyles = StyleSheet.create({
   mt50: { marginTop: 50 },
   mv10: { marginVertical: 10 },
   mr10: { marginRight: 10 },
+  mr15: { marginRight: 15 },
   ml10: { marginLeft: 10 },
   ph20: { paddingHorizontal: 20 },
   ph25: { paddingHorizontal: 25 },
@@ -578,10 +578,30 @@ export const GlobalStyles = StyleSheet.create({
     justifyContent: 'center',
   },
   backButton: {
+    width: 45,
+    height: 45,
+    borderRadius: 22.5,
+    backgroundColor: 'rgba(255, 255, 255, 0.15)',
+    justifyContent: 'center',
+    alignItems: 'center',
     marginRight: 10,
-    backgroundColor: 'rgba(255,255,255,0.2)',
-    padding: 5,
-    borderRadius: 10,
+  },
+  badgeContainer: {
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 12,
+    alignSelf: 'flex-start',
+  },
+  badgeText: {
+    fontSize: 12,
+    fontWeight: 'bold',
+    color: Colors.white,
+  },
+  genderPR: {
+    backgroundColor: '#FF69B4',
+  },
+  genderLK: {
+    backgroundColor: '#4169E1',
   },
   userCard: {
     flexDirection: 'row',
@@ -1214,6 +1234,247 @@ export const GlobalStyles = StyleSheet.create({
     color: Colors.primary,
     fontWeight: 'bold',
   },
+  historyFilterCardPremium: {
+    borderRadius: 8,
+    paddingVertical: 25,
+    paddingHorizontal: 50,
+    borderColor: '#801919',
+    borderWidth: 0.8,
+    marginHorizontal: 20,
+    marginTop: 15,
+    backgroundColor: Colors.white,
+  },
+  historyFilterColumnLeft: {
+    width: 280,
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  historyFilterColumnRight: {
+    width: 320,
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  historyFilterLabelBold: {
+    fontWeight: 'bold',
+    fontSize: 14,
+    color: '#333',
+  },
+  historyDropdownButton: {
+    backgroundColor: 'white',
+    borderColor: 'black',
+    borderWidth: 1.5,
+    borderRadius: 10,
+    height: 38,
+    paddingHorizontal: 12,
+  },
+  historyExportBtnContainer: {
+    marginTop: 15,
+    alignSelf: 'flex-end',
+    marginRight: 20,
+    backgroundColor: '#345AD9',
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    borderRadius: 8,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 3,
+    elevation: 3,
+  },
+  historyTableContainerPremium: {
+    marginHorizontal: 20,
+    borderRadius: 12,
+    borderColor: '#801919',
+    borderWidth: 1.2,
+    overflow: 'hidden',
+    marginTop: 15,
+    elevation: 5,
+    shadowColor: '#801919',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.1,
+    shadowRadius: 6,
+    backgroundColor: 'white',
+  },
+  historyTableHeaderMaron: {
+    backgroundColor: '#801919',
+    height: 45,
+    flexDirection: 'row',
+    alignItems: 'stretch',
+  },
+  historyTableCellTgl: { width: 100 },
+  historyTableCellNama: { width: 140 },
+  historyTableCellDokter: { width: 140 },
+  historyTableCellLayanan: { width: 100 },
+  historyTableCellGigi: { width: 80 },
+  historyTableCellDiagnosa: { width: 200 },
+  historyTableCellPerawatan: { width: 180 },
+  historyTableCellKeterangan: { width: 220 },
+  historyHeaderCellBorder: { borderRightColor: '#601010' },
+  historyBodyCellBorder: { borderRightColor: '#aaa' },
+  historyContainer: {
+    paddingBottom: 40,
+    flex: 1,
+  },
+  historyFilterLabelWrapperLeft: {
+    width: 95,
+  },
+  historyFilterLabelWrapperRight: {
+    width: 90,
+  },
+  historyExportWrapper: {
+    alignItems: 'flex-end',
+    paddingHorizontal: 20,
+    marginTop: 10,
+    marginBottom: 5,
+  },
+  logoCircleSmall: {
+    width: 45,
+    height: 45,
+    borderRadius: 22.5,
+  },
+  topBarRightContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  topBarRightTextWrapper: {
+    alignItems: 'flex-end',
+  },
+  logoutButtonBackground: {
+    backgroundColor: 'rgba(255,255,255,0.2)',
+    padding: 8,
+    borderRadius: 10,
+  },
+  dropdownSearchContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#F5F5F5',
+    borderRadius: 10,
+    paddingHorizontal: 10,
+    marginBottom: 15,
+    borderWidth: 1,
+    borderColor: '#DDD'
+  },
+  dropdownSearchInput: {
+    flex: 1,
+    minHeight: 40,
+    marginLeft: 5,
+    color: '#333',
+    paddingVertical: 5,
+  },
+  modalScrollViewContent: {
+    maxHeight: 300,
+    width: '100%',
+  },
+  alignCenter: {
+    alignItems: 'center',
+  },
+  mb0: {
+    marginBottom: 0,
+  },
+  disabledInput: {
+    opacity: 0.5,
+    backgroundColor: '#EEE',
+  },
+  justifyCenter: {
+    justifyContent: 'center',
+  },
+  pb40: {
+    paddingBottom: 40,
+  },
+  textAlignLeft: {
+    textAlign: 'left',
+  },
+  textAlignCenter: {
+    textAlign: 'center',
+  },
+  pl10: {
+    paddingLeft: 10,
+  },
+  mv30: {
+    marginVertical: 30,
+  },
+  p30: {
+    padding: 30,
+  },
+  textLightGray: {
+    color: '#999',
+  },
+  textLightGray2: {
+    color: '#A0A0A0',
+  },
+  mb12: {
+    marginBottom: 12,
+  },
+  mb15: {
+    marginBottom: 15,
+  },
+  maxH400: {
+    maxHeight: 400,
+  },
+  inputBlack: {
+    color: '#000',
+  },
+  inputGray: {
+    backgroundColor: '#F8F8F8',
+  },
+  textAreaSmall: {
+    height: 100,
+    textAlignVertical: 'top',
+    paddingTop: 15,
+  },
+  justifyEnd: {
+    justifyContent: 'flex-end',
+  },
+  gap15: {
+    gap: 15,
+  },
+  btnGray: {
+    backgroundColor: '#B3AFAF',
+  },
+  fontSerif: {
+    fontFamily: Platform.OS === 'ios' ? 'Times New Roman' : 'serif',
+  },
+  fontSize14: {
+    fontSize: 14,
+  },
+  fontSize16: {
+    fontSize: 16,
+  },
+  textJustify: {
+    textAlign: 'justify',
+  },
+  lineHeight22: {
+    lineHeight: 22,
+  },
+  logoCircleLarge: {
+    width: 110,
+    height: 110,
+    borderRadius: 55,
+    borderWidth: 2,
+    borderColor: '#C62828',
+  },
+  w90p: {
+    width: '90%',
+  },
+  opacity07: {
+    opacity: 0.7,
+  },
+  opacity1: {
+    opacity: 1,
+  },
+  flexRowAlignCenter: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  maxW250: {
+    maxWidth: 250,
+  },
+  h45: {
+    height: 45,
+  },
+  ph20: {
+    paddingHorizontal: 20,
+  },
 
 
   billCard: {
@@ -1331,6 +1592,19 @@ export const GlobalStyles = StyleSheet.create({
     fontSize: 12,
     fontWeight: 'bold',
     marginTop: 5,
+  },
+  mt8: {
+    marginTop: 8,
+  },
+  captchaQuestionRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  captchaRefreshIcon: {
+    color: '#007BFF',
+    fontSize: 20,
+    marginLeft: 10,
   },
 
 
@@ -1519,7 +1793,7 @@ export const GlobalStyles = StyleSheet.create({
   rujukanValueRowWrapper: {
     flex: 1,
     flexDirection: 'row',
-    justifyContent: 'space-between',
+    justifyContent: 'flex-start',
   },
   rujukanGenderTextRight: {
     fontFamily: Platform.OS === 'ios' ? 'Times New Roman' : 'serif',
@@ -1997,7 +2271,7 @@ export const CreateRecordStyles = StyleSheet.create({
     alignItems: 'center',
     backgroundColor: '#FFF',
     borderWidth: 1.5,
-    borderColor: '#E6E6E6',
+    borderColor: Colors.primary,
     borderRadius: 16,
     paddingHorizontal: 20,
     height: 60,
@@ -2053,7 +2327,7 @@ export const CreateRecordStyles = StyleSheet.create({
   textArea: {
     backgroundColor: '#FFF',
     borderWidth: 1.5,
-    borderColor: '#E6E6E6',
+    borderColor: Colors.primary,
     borderRadius: 16,
     paddingHorizontal: 20,
     paddingVertical: 15,
@@ -2187,4 +2461,348 @@ export const DoctorDashboardStyles = StyleSheet.create({
     colGender: { flex: 1.5 },
     colKeluhan: { flex: 3 },
     colAksi: { flex: 1 },
+});
+
+export const PatientTableStyles = StyleSheet.create({
+    headerContainer: {
+        paddingHorizontal: 25,
+        paddingTop: 20,
+        backgroundColor: '#F5F5F5',
+    },
+    headerRow: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        marginBottom: 20,
+    },
+    headerTitle: {
+        fontSize: 22,
+        fontWeight: '900',
+        color: '#000',
+    },
+    headerSubtitle: {
+        fontSize: 14,
+        color: '#333',
+        marginTop: 2,
+    },
+    btnNewPatient: {
+        backgroundColor: '#3B82F6', // Match + Record Baru
+        flexDirection: 'row',
+        alignItems: 'center',
+        paddingHorizontal: 20,
+        paddingVertical: 10,
+        borderRadius: 8,
+        elevation: 2,
+    },
+    btnNewPatientText: {
+        color: '#FFF',
+        fontWeight: 'bold',
+        fontSize: 14,
+        marginLeft: 5,
+    },
+    searchContainer: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        backgroundColor: '#FFF',
+        borderWidth: 1,
+        borderColor: '#CCC',
+        borderRadius: 12,
+        height: 55,
+        paddingHorizontal: 15,
+        marginBottom: 25,
+        marginTop: 0,
+        elevation: 3,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.1,
+        shadowRadius: 4,
+    },
+    searchInput: {
+        flex: 1,
+        fontSize: 14,
+        color: '#333',
+        marginLeft: 10,
+    },
+    tableWrapper: {
+        marginHorizontal: 25,
+        borderWidth: 2,
+        borderColor: Colors.primary,
+        borderRadius: 12,
+        backgroundColor: '#FFF',
+        overflow: 'hidden',
+        elevation: 4,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 3 },
+        shadowOpacity: 0.15,
+        shadowRadius: 5,
+        marginBottom: 30,
+    },
+    tableHeader: {
+        flexDirection: 'row',
+        backgroundColor: Colors.primary,
+        paddingVertical: 16,
+        paddingHorizontal: 20,
+    },
+    thCell: {
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    thText: {
+        color: '#FFF',
+        fontWeight: '900',
+        fontSize: 15,
+        textAlign: 'center',
+    },
+    tableRow: {
+        flexDirection: 'row',
+        paddingVertical: 16,
+        paddingHorizontal: 20,
+        borderBottomWidth: 1,
+        borderColor: '#EBEBEB',
+        alignItems: 'center',
+        backgroundColor: '#FFF',
+    },
+    tdCell: {
+       paddingVertical: 18,
+       justifyContent: 'center',
+       alignItems: 'center',
+       borderColor: '#EBEBEB',
+    },
+    tableBody: {
+        backgroundColor: '#FFF',
+    },
+    tdText: {
+        fontWeight: 'bold',
+        color: '#222',
+        fontSize: 14,
+    },
+    badgeContainer: {
+        paddingHorizontal: 10,
+        paddingVertical: 4,
+        borderRadius: 15,
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'center',
+        backgroundColor: '#E9D6D6',
+        maxWidth: 60,
+    },
+    badgeText: {
+        fontSize: 12,
+        fontWeight: '900',
+        marginRight: 2,
+    },
+    badgePR: {
+        backgroundColor: '#E9D6D6',
+        color: '#801919',
+    },
+    badgeLK: {
+        backgroundColor: '#D6E0E9',
+        color: '#194580',
+    },
+    actionBtn: {
+        marginHorizontal: 5,
+    },
+    // Columns
+    colNama: { flex: 1.5, paddingHorizontal: 15, borderColor: '#EBEBEB' },
+    colTgl: { flex: 1.2, alignItems: 'center', borderColor: '#EBEBEB' },
+    colGender: { flex: 0.8, alignItems: 'center', borderColor: '#EBEBEB' },
+    colAlamat: { flex: 1.5, paddingHorizontal: 15, borderColor: '#EBEBEB' },
+    colPekerjaan: { flex: 1.2, paddingHorizontal: 15, borderColor: '#EBEBEB' },
+    colNope: { flex: 1.3, alignItems: 'center', borderColor: '#EBEBEB' },
+    colAlergi: { flex: 1, paddingHorizontal: 15, borderColor: '#EBEBEB' },
+    colAksi: { flex: 1.2, flexDirection: 'row', justifyContent: 'center' },
+});
+
+export const PatientFormStyles = StyleSheet.create({
+    mainContainer: {
+        flexGrow: 1,
+        backgroundColor: '#FCFCFC',
+        paddingHorizontal: 60,
+        paddingTop: 40,
+        paddingBottom: 60,
+    },
+    card: {
+        backgroundColor: '#FFFFFF',
+        borderRadius: 15,
+        borderWidth: 1.2,
+        borderColor: '#801919',
+        padding: 30,
+        elevation: 1,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.1,
+        shadowRadius: 5,
+    },
+    cardTitle: {
+        fontSize: 12,
+        fontWeight: 'bold',
+        color: '#333',
+        marginBottom: 8,
+        textTransform: 'uppercase',
+    },
+    divider: {
+        height: 1,
+        backgroundColor: '#DDDDDD',
+        marginBottom: 25,
+    },
+    fieldLabel: {
+        fontSize: 15,
+        fontWeight: 'bold',
+        color: '#000',
+        marginBottom: 8,
+    },
+    input: {
+        backgroundColor: '#FFFFFF',
+        borderWidth: 1.2,
+        borderColor: '#C0C0C0',
+        borderRadius: 12,
+        height: 50,
+        paddingHorizontal: 15,
+        fontSize: 15,
+        color: '#333',
+        marginBottom: 20,
+    },
+    row: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        marginBottom: 0,
+    },
+    col: {
+        width: '48%',
+    },
+    btnContainer: {
+        flexDirection: 'row',
+        justifyContent: 'flex-end',
+        marginTop: 25,
+    },
+    btnSimpan: {
+        backgroundColor: '#3B59DA',
+        paddingVertical: 12,
+        paddingHorizontal: 40,
+        borderRadius: 25,
+        elevation: 3,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.2,
+        shadowRadius: 4,
+    },
+    btnSimpanText: {
+        color: '#FFFFFF',
+        fontWeight: 'bold',
+        fontSize: 15,
+    },
+});
+
+export const PatientDetailStyles = StyleSheet.create({
+    container: {
+        padding: 20,
+        backgroundColor: '#FCFCFC',
+    },
+    infoCard: {
+        backgroundColor: '#FFFFFF',
+        borderRadius: 12,
+        overflow: 'hidden',
+        borderWidth: 1,
+        borderColor: '#DDDDDD',
+        marginBottom: 25,
+        elevation: 2,
+    },
+    infoTitleBar: {
+        backgroundColor: Colors.primary,
+        flexDirection: 'row',
+        alignItems: 'center',
+        paddingVertical: 12,
+        paddingHorizontal: 15,
+    },
+    infoTitleText: {
+        color: '#FFFFFF',
+        fontSize: 14,
+        fontWeight: 'bold',
+        marginLeft: 8,
+        letterSpacing: 0.5,
+    },
+    gridRow: {
+        flexDirection: 'row',
+        borderBottomWidth: 1,
+        borderColor: '#EEEEEE',
+    },
+    gridCell: {
+        flex: 1,
+        padding: 15,
+        borderRightWidth: 1,
+        borderColor: '#EEEEEE',
+        minHeight: 80,
+    },
+    gridCellLast: {
+        borderRightWidth: 0,
+    },
+    infoLabel: {
+        fontSize: 13,
+        color: '#666666',
+        fontWeight: '500',
+        marginBottom: 4,
+    },
+    infoValue: {
+        fontSize: 15,
+        color: '#000000',
+        fontWeight: 'bold',
+    },
+    genderPill: {
+        alignSelf: 'flex-start',
+        paddingHorizontal: 20,
+        paddingVertical: 6,
+        borderRadius: 10,
+        marginTop: 5,
+    },
+    genderPillPR: {
+        backgroundColor: '#E9D6D6',
+    },
+    genderPillLK: {
+        backgroundColor: '#D6E0E9',
+    },
+    genderPillText: {
+        fontSize: 14,
+        fontWeight: 'bold',
+    },
+    historyTitleRow: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        marginBottom: 15,
+        marginTop: 10,
+    },
+    historySectionTitle: {
+        fontSize: 14,
+        fontWeight: 'bold',
+        color: '#000',
+        textTransform: 'uppercase',
+    },
+    filterAndExport: {
+        flexDirection: 'row',
+        alignItems: 'center',
+    },
+    dropdownWrapper: {
+        width: 130,
+        marginRight: 10,
+    },
+    dropdownButton: {
+        height: 35,
+        backgroundColor: '#E9D6D6',
+        borderRadius: 8,
+        paddingHorizontal: 10,
+        borderWidth: 0,
+    },
+    btnExport: {
+        backgroundColor: Colors.primary,
+        paddingVertical: 8,
+        paddingHorizontal: 15,
+        borderRadius: 8,
+        flexDirection: 'row',
+        alignItems: 'center',
+    },
+    btnExportText: {
+        color: '#FFFFFF',
+        fontSize: 12,
+        fontWeight: 'bold',
+    },
 });

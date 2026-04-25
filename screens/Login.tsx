@@ -119,9 +119,11 @@ export default function Login({ navigation }: any) {
     });
 
 
-    if (userRole !== 'admin') {
-      showAlert({ title: 'Login Berhasil', message: `Selamat datang, ${userData.nama || 'User'} (${userRole})`, type: 'success' });
-    }
+    showAlert({ 
+      title: 'Login Berhasil', 
+      message: `Selamat datang, ${userData.nama_users || userData.nama || 'Admin'} (${userRole})`, 
+      type: 'success' 
+    });
   };
 
   return (

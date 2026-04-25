@@ -7,22 +7,22 @@ import { GlobalStyles } from '../../styles/GlobalStyles';
 interface Props extends TextInputProps {
   label: string;
   containerStyle?: StyleProp<ViewStyle>;
+  innerContainerStyle?: StyleProp<ViewStyle>;
+  hideLabel?: boolean;
   variant?: 'login' | 'form';
 }
 
-export default function PasswordInput({ label, containerStyle, variant = 'form', ...props }: Props) {
+export default function PasswordInput({ label, containerStyle, innerContainerStyle, hideLabel = false, variant = 'form', ...props }: Props) {
   const [isVisible, setIsVisible] = useState(false);
-
-
 
   const containerInputStyle = variant === 'login'
     ? [GlobalStyles.pillInput, { flexDirection: 'row' as const, alignItems: 'center' as const, paddingHorizontal: 15 }]
     : GlobalStyles.inputContainer;
 
   return (
-    <View style={[GlobalStyles.inputWrapper, containerStyle]}>
-      <TextLabel style={GlobalStyles.inputLabel}>{label}</TextLabel>
-      <View style={containerInputStyle}>
+    <View style={[!hideLabel && GlobalStyles.inputWrapper, containerStyle]}>
+      {!hideLabel && <TextLabel style={GlobalStyles.inputLabel}>{label}</TextLabel>}
+      <View style={[containerInputStyle, innerContainerStyle]}>
         <TextInput
           style={GlobalStyles.inputText}
           placeholderTextColor="#A0A0A0"
@@ -36,8 +36,8 @@ export default function PasswordInput({ label, containerStyle, variant = 'form',
         >
           <Feather
             name={isVisible ? 'eye' : 'eye-off'}
-            size={20}
-            color="black"
+            size={16}
+            color="#801919"
           />
         </TouchableOpacity>
       </View>

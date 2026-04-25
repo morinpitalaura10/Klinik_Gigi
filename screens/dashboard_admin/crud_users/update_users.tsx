@@ -10,7 +10,7 @@ import {
   Platform
 } from 'react-native';
 import { supabase } from '../../../utils/supabase';
-import { Colors, GlobalStyles, LayoutStyles } from '../../../styles/GlobalStyles';
+import { Colors, GlobalStyles, LayoutStyles, CreateRecordStyles } from '../../../styles/GlobalStyles';
 import AdminLayout from '../../../components/templates/AdminLayout';
 import LabeledInput from '../../../components/molecules/LabeledInput';
 import PasswordInput from '../../../components/molecules/PasswordInput';
@@ -90,8 +90,7 @@ export function UpdateUser() {
           us: us,
           pw: pw,
           email_users: emailUsers,
-          role: role,
-          spesialisasi: role === 'dokter' ? spesialisasi : null
+          role: role
         })
         .eq('id_users', editUser.id_users);
 
@@ -142,81 +141,105 @@ export function UpdateUser() {
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         style={LayoutStyles.flex1}
       >
-        <ScrollView contentContainerStyle={LayoutStyles.scrollContent}>
-          <View style={GlobalStyles.formCard}>
-            <Text style={GlobalStyles.formSectionTitle}>UBAH INFORMASI AKUN</Text>
-            <View style={GlobalStyles.formDivider} />
+        <ScrollView contentContainerStyle={CreateRecordStyles.mainContainer} showsVerticalScrollIndicator={false}>
+          <View style={CreateRecordStyles.card}>
+            <Text style={CreateRecordStyles.cardTitle}>UBAH INFORMASI AKUN</Text>
+            <View style={CreateRecordStyles.divider} />
 
+            <Text style={CreateRecordStyles.fieldLabel}>Nama Lengkap</Text>
             <LabeledInput
-              label="Nama Lengkap"
+              label=""
               placeholder="Masukkan nama lengkap pengguna"
               value={namaUsers}
               onChangeText={setNamaUsers}
+              hideLabel={true}
+              style={CreateRecordStyles.inputDropdown}
             />
 
-            <LabeledInput
-              label="Username"
-              placeholder="Contoh: dr.Budi"
-              value={us}
-              onChangeText={setUs}
-              autoCapitalize="none"
-            />
+            <View style={{ flexDirection: 'row', gap: 15 }}>
+              <View style={{ flex: 1 }}>
+                <Text style={CreateRecordStyles.fieldLabel}>Username</Text>
+                <LabeledInput
+                  label=""
+                  placeholder="Contoh: dr.Budi"
+                  value={us}
+                  onChangeText={setUs}
+                  autoCapitalize="none"
+                  hideLabel={true}
+                  style={CreateRecordStyles.inputDropdown}
+                />
+              </View>
+              <View style={{ flex: 1 }}>
+                <Text style={CreateRecordStyles.fieldLabel}>Role</Text>
+                <DropdownInput
+                  label=""
+                  options={roleOptions}
+                  selectedValue={role}
+                  onValueChange={setRole}
+                  placeholder="Pilih role..."
+                  hideLabel={true}
+                  buttonStyle={CreateRecordStyles.inputDropdown}
+                />
+              </View>
+            </View>
 
+            {role === 'dokter' && (
+               <View>
+                 <Text style={CreateRecordStyles.fieldLabel}>Spesialisasi Dokter</Text>
+                 <DropdownInput
+                   label=""
+                   options={spesialisasiOptions}
+                   selectedValue={spesialisasi}
+                   onValueChange={setSpesialisasi}
+                   placeholder="Pilih spesialisasi..."
+                   hideLabel={true}
+                   buttonStyle={CreateRecordStyles.inputDropdown}
+                 />
+               </View>
+            )}
+
+            <Text style={CreateRecordStyles.fieldLabel}>Password Baru (Opsional)</Text>
             <PasswordInput
-              label="Password Baru (Opsional)"
+              label=""
               placeholder="Masukkan password baru"
               value={pw}
               onChangeText={setPw}
+              hideLabel={true}
+              innerContainerStyle={CreateRecordStyles.inputDropdown}
             />
 
+            <Text style={CreateRecordStyles.fieldLabel}>Konfirmasi Password Baru</Text>
             <PasswordInput
-              label="Konfirmasi Password Baru"
+              label=""
               placeholder="Konfirmasi password baru"
               value={confirmPw}
               onChangeText={setConfirmPw}
+              hideLabel={true}
+              innerContainerStyle={CreateRecordStyles.inputDropdown}
             />
 
+            <Text style={CreateRecordStyles.fieldLabel}>Email</Text>
             <LabeledInput
-              label="Email"
+              label=""
               placeholder="Masukkan email pengguna"
               value={emailUsers}
               onChangeText={setEmailUsers}
               keyboardType="email-address"
               autoCapitalize="none"
+              hideLabel={true}
+              style={CreateRecordStyles.inputDropdown}
             />
 
-            <DropdownInput
-              label="Role"
-              options={roleOptions}
-              selectedValue={role}
-              onValueChange={setRole}
-              placeholder="Pilih role pengguna..."
-            />
-
-            {role === 'dokter' && (
-              <DropdownInput
-                label="Spesialisasi Dokter"
-                options={spesialisasiOptions}
-                selectedValue={spesialisasi}
-                onValueChange={setSpesialisasi}
-                placeholder="Pilih spesialisasi..."
-              />
-            )}
-
-            <View style={[LayoutStyles.rowEnd, LayoutStyles.mt20]}>
+            <View style={CreateRecordStyles.btnSimpanContainer}>
               <TouchableOpacity
-                style={GlobalStyles.btnBatal}
-                onPress={() => navigation.goBack()}
-              >
-                <Text style={GlobalStyles.btnBatalText}>Batal</Text>
-              </TouchableOpacity>
-
-              <PrimaryButton
-                title={loading ? "Memperbarui..." : "Simpan"}
+                style={CreateRecordStyles.btnSimpan}
                 onPress={handleUpdate}
-                style={GlobalStyles.btnSimpan}
                 disabled={loading}
-              />
+              >
+                <Text style={CreateRecordStyles.btnSimpanText}>
+                  {loading ? 'Memperbarui...' : 'Simpan'}
+                </Text>
+              </TouchableOpacity>
             </View>
           </View>
         </ScrollView>

@@ -6,6 +6,7 @@ import {
     Alert,
     ActivityIndicator,
     TouchableOpacity,
+    Image,
 } from 'react-native';
 import { supabase } from '../../../utils/supabase';
 import { Colors, GlobalStyles, LayoutStyles } from '../../../styles/GlobalStyles';
@@ -59,8 +60,25 @@ export function TampilHistori() {
         useCallback(() => {
             fetchAll();
             fetchDoctors();
+            fetchMasterData();
         }, [])
     );
+
+    const fetchMasterData = async () => {
+        try {
+            const { data: actions } = await supabase.from('tb_tindakan').select('*');
+            if (actions) setTindakanList(actions);
+
+            const { data: medicalRecords } = await supabase.from('tb_rekam_medis').select('diagnosa');
+            if (medicalRecords) {
+                const diagnosaSet = new Set<string>();
+                medicalRecords.forEach((r: any) => {
+                    if (r.diagnosa) diagnosaSet.add(r.diagnosa);
+                });
+                setDiagnosaList(Array.from(diagnosaSet));
+            }
+        } catch (_) {}
+    };
 
     const fetchDoctors = async () => {
         try {
@@ -94,10 +112,6 @@ export function TampilHistori() {
                     doctor_id,
                     tb_pasien (
                         nama_pasien
-                    ),
-                    tb_tindakan (
-                        id_tindakan,
-                        nama_tindakan
                     )
                 `)
                 .eq('status', 'Selesai')
@@ -108,22 +122,6 @@ export function TampilHistori() {
             const allRecords = data || [];
             setRecords(allRecords);
             setFiltered(allRecords);
-
-
-            const tindakanMap = new Map<number, string>();
-            allRecords.forEach((r: any) => {
-                if (r.id_tindakan && r.tb_tindakan?.nama_tindakan) {
-                    tindakanMap.set(r.id_tindakan, r.tb_tindakan.nama_tindakan);
-                }
-            });
-            setTindakanList(Array.from(tindakanMap.entries()).map(([id_tindakan, nama_tindakan]) => ({ id_tindakan, nama_tindakan })));
-
-
-            const diagnosaSet = new Set<string>();
-            allRecords.forEach((r: any) => {
-                if (r.diagnosa) diagnosaSet.add(r.diagnosa);
-            });
-            setDiagnosaList(Array.from(diagnosaSet));
 
         } catch (e: any) {
             showAlert({ title: 'Error', message: e.message, type: 'error' });
@@ -179,6 +177,13 @@ export function TampilHistori() {
         if (isExporting || filtered.length === 0) return;
         setIsExporting(true);
         try {
+            const logoUri = (Image as any).resolveAssetSource(require('../../../assets/icon.png')).uri;
+            
+            const monthLabel = filterBulan ? BULAN_OPTIONS.find(o => o.value === filterBulan)?.label : 'Semua';
+            const pelayananLabel = filterLayanan || 'Semua';
+            const layananLabel = filterTindakan ? tindakanList.find(t => t.id_tindakan.toString() === filterTindakan)?.nama_tindakan : 'Semua';
+            const diagnosaLabel = filterDiagnosa || 'Semua';
+
             const trs = filtered.map(r => `
                 <tr>
                     <td>${formatTanggal(r.tanggal)}</td>
@@ -187,7 +192,10 @@ export function TampilHistori() {
                     <td>${r.layanan || '-'}</td>
                     <td>${r.gigi || '-'}</td>
                     <td>${r.diagnosa || '-'}</td>
-                    <td>${r.tb_tindakan?.nama_tindakan || '-'}</td>
+                    <td>${r.id_tindakan ? r.id_tindakan.toString().split(',').map((id: string) => {
+                        const t = tindakanList.find(x => x.id_tindakan.toString() === id.trim());
+                        return t ? t.nama_tindakan : '';
+                    }).filter(Boolean).join(', ') : '-'}</td>
                     <td>${r.keterangan || '-'}</td>
                 </tr>
             `).join('');
@@ -197,37 +205,95 @@ export function TampilHistori() {
                     <head>
                         <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no" />
                         <style>
-                            body { font-family: sans-serif; padding: 20px; }
-                            h2 { text-align: center; }
-                            table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-                            th, td { border: 1px solid black; padding: 8px; text-align: center; font-size: 12px; }
-                            th { background-color: #f2f2f2; }
+                            @page { margin: 0 !important; size: 16.5cm 21.5cm; }
+                            html, body { 
+                                margin: 0 !important; 
+                                padding: 0 !important; 
+                                font-family: 'Times New Roman', serif; 
+                                background-color: white; 
+                                width: 16.5cm;
+                                height: 21.5cm;
+                                overflow: hidden;
+                            }
+                            .container {
+                                margin: 0 !important;
+                                padding: 5px 10px 15px 10px;
+                                box-sizing: border-box;
+                                width: 100%;
+                            }
+                            .header-detailed {
+                                display: flex; align-items: center; justify-content: center; gap: 20px; margin-top: 5px;
+                            }
+                            .double-line { border-bottom: 3px solid #000; border-top: 1px solid #000; height: 2px; margin: 10px 0; }
+                            .doc-title { text-align: center; font-size: 18px; font-weight: bold; margin: 10px 0; text-transform: uppercase; }
+                            
+                            .filter-grid { 
+                                display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 10px 0; font-size: 13px;
+                                border: 1px solid #ddd; padding: 10px; background: #fafafa;
+                            }
+                            .f-row { display: flex; margin-bottom: 3px; }
+                            .f-label { width: 80px; font-weight: normal; color: #555; }
+                            .f-value { font-weight: bold; flex: 1; }
+
+                            table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+                            th { background-color: #801919; color: white; padding: 8px 3px; font-size: 10px; font-weight: bold; text-align: center; border: 1px solid #601010; }
+                            td { padding: 6px 3px; border: 1px solid #ddd; text-align: center; font-size: 9px; vertical-align: middle; }
+                            tr:nth-child(even) { background-color: #f9f9f9; }
                         </style>
                     </head>
                     <body>
-                        <h2>Histori Medis Keseluruhan</h2>
-                        <table>
-                            <thead>
-                                <tr>
-                                    <th>Tgl</th>
-                                    <th>Nama Pasien</th>
-                                    <th>Dokter</th>
-                                    <th>Layanan</th>
-                                    <th>Gigi</th>
-                                    <th>Diagnosa</th>
-                                    <th>Perawatan</th>
-                                    <th>Keterangan</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                ${trs}
-                            </tbody>
-                        </table>
+                        <div class="container">
+                            <div class="header-detailed">
+                                <img src="${logoUri}" style="width: 60px; height: 60px; border-radius: 30px; border: 2.5px solid #801919;" />
+                                <div style="text-align: center;">
+                                    <div style="font-size: 16px; font-weight: bold; font-family: sans-serif;">PRAKTEK DOKTER GIGI SPESIALIS</div>
+                                    <div style="font-size: 19px; font-weight: 900; margin: 1px 0; font-family: serif;">drg. INDRA RAFISUKMAWAN, Sp.Ort</div>
+                                    <div style="font-size: 10px; font-weight: bold; margin-bottom: 1px;">SIP : 500.16.7/054-DPMPTSP/SIPTM/Drgs.2/IV/2025</div>
+                                    <div style="font-size: 10px;">Cipto Park Jl. Dr. Cipto Mangunkusumo No. 54 Cirebon</div>
+                                </div>
+                            </div>
+                            
+                            <div class="double-line"></div>
+                            <div class="doc-title">DENTAL RECORD (ALL ACTIVITY)</div>
+
+                            <div class="filter-grid">
+                                <div>
+                                    <div class="f-row"><div class="f-label">Bulan</div><div class="f-value">: ${monthLabel}</div></div>
+                                    <div class="f-row"><div class="f-label">Pelayanan</div><div class="f-value">: ${pelayananLabel}</div></div>
+                                </div>
+                                <div>
+                                    <div class="f-row"><div class="f-label">Layanan</div><div class="f-value">: ${layananLabel}</div></div>
+                                    <div class="f-row"><div class="f-label">Diagnosa</div><div class="f-value">: ${diagnosaLabel}</div></div>
+                                </div>
+                            </div>
+
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th style="width: 50px;">Tgl</th>
+                                        <th>Pasien</th>
+                                        <th>Dokter</th>
+                                        <th>Lyn</th>
+                                        <th>Gigi</th>
+                                        <th>Kel/Diagnosa</th>
+                                        <th>Perawatan</th>
+                                        <th>Ket</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    ${trs}
+                                </tbody>
+                            </table>
+                        </div>
                     </body>
                 </html>
             `;
 
-            const { uri } = await Print.printToFileAsync({ html: htmlContent });
+            const { uri } = await Print.printToFileAsync({ 
+                html: htmlContent,
+                width: 624,
+                height: 813
+            });
             await Sharing.shareAsync(uri, { UTI: '.pdf', mimeType: 'application/pdf', dialogTitle: 'Ekspor Riwayat Medis' });
         } catch (e: any) {
             showAlert({ title: 'Gagal Ekspor', message: e.message, type: 'error' });
@@ -237,64 +303,66 @@ export function TampilHistori() {
     };
 
     return (
-        <AdminLayout noScroll={true} customRightTitle="Histori">
-            <View style={LayoutStyles.flex1}>
+        <AdminLayout title="Aktifitas / Histori Admin">
+            <View style={GlobalStyles.historyContainer}>
 
                 
-                <View style={GlobalStyles.historyFilterCard}>
-                    <View style={GlobalStyles.historyFilterRow}>
-                        
-                        <View style={GlobalStyles.historyFilterItem}>
+                <View style={GlobalStyles.historyFilterCardPremium}>
+                    <View style={[LayoutStyles.rowBetween, { marginBottom: 15 }]}>
+                        <View style={GlobalStyles.historyFilterColumnLeft}>
+                            <View style={GlobalStyles.historyFilterLabelWrapperLeft}>
+                                <Text style={GlobalStyles.historyFilterLabelBold}>Bulan :</Text>
+                            </View>
                             <DropdownInput
                                 label="Bulan"
-                                options={[
-                                    { label: 'Semua Bulan', value: '' },
-                                    { label: 'Januari', value: '01' },
-                                    { label: 'Februari', value: '02' },
-                                    { label: 'Maret', value: '03' },
-                                    { label: 'April', value: '04' },
-                                    { label: 'Mei', value: '05' },
-                                    { label: 'Juni', value: '06' },
-                                    { label: 'Juli', value: '07' },
-                                    { label: 'Agustus', value: '08' },
-                                    { label: 'September', value: '09' },
-                                    { label: 'Oktober', value: '10' },
-                                    { label: 'November', value: '11' },
-                                    { label: 'Desember', value: '12' }
-                                ]}
+                                options={BULAN_OPTIONS}
                                 selectedValue={filterBulan}
                                 onValueChange={(val) => onFilterChange('bulan', val)}
+                                hideLabel={true}
+                                containerStyle={LayoutStyles.flex1}
+                                buttonStyle={GlobalStyles.historyDropdownButton}
                             />
                         </View>
                         
-                        <View style={GlobalStyles.historyFilterItem}>
+                        <View style={GlobalStyles.historyFilterColumnRight}>
+                            <View style={GlobalStyles.historyFilterLabelWrapperRight}>
+                                <Text style={GlobalStyles.historyFilterLabelBold}>Layanan :</Text>
+                            </View>
                             <DropdownInput
                                 label="Layanan"
                                 options={[
                                     { label: 'Semua Layanan', value: '' },
-                                    { label: 'Umum', value: 'Umum' },
-                                    { label: 'Ortodental', value: 'Ortodental' }
-                                ]}
-                                selectedValue={filterLayanan}
-                                onValueChange={(val) => onFilterChange('layanan', val)}
-                            />
-                        </View>
-                    </View>
-                    <View style={GlobalStyles.historyFilterRow}>
-                        
-                        <View style={GlobalStyles.historyFilterItem}>
-                            <DropdownInput
-                                label="Perawatan"
-                                options={[
-                                    { label: 'Semua Perawatan', value: '' },
                                     ...tindakanList.map(t => ({ label: t.nama_tindakan, value: t.id_tindakan.toString() }))
                                 ]}
                                 selectedValue={filterTindakan}
                                 onValueChange={(val) => onFilterChange('tindakan', val)}
+                                hideLabel={true}
+                                containerStyle={LayoutStyles.flex1}
+                                buttonStyle={GlobalStyles.historyDropdownButton}
+                            />
+                        </View>
+                    </View>
+
+                    <View style={LayoutStyles.rowBetween}>
+                        <View style={GlobalStyles.historyFilterColumnLeft}>
+                            <View style={GlobalStyles.historyFilterLabelWrapperLeft}>
+                                <Text style={GlobalStyles.historyFilterLabelBold}>Pelayanan :</Text>
+                            </View>
+                            <DropdownInput
+                                label="Pelayanan"
+                                options={LAYANAN_OPTIONS}
+                                selectedValue={filterLayanan}
+                                onValueChange={(val) => onFilterChange('layanan', val)}
+                                hideLabel={true}
+                                containerStyle={LayoutStyles.flex1}
+                                buttonStyle={GlobalStyles.historyDropdownButton}
                             />
                         </View>
                         
-                        <View style={GlobalStyles.historyFilterItem}>
+                        <View style={GlobalStyles.historyFilterColumnRight}>
+                            <View style={GlobalStyles.historyFilterLabelWrapperRight}>
+                                <Text style={GlobalStyles.historyFilterLabelBold}>Diagnosa :</Text>
+                            </View>
                             <DropdownInput
                                 label="Diagnosa"
                                 options={[
@@ -303,26 +371,30 @@ export function TampilHistori() {
                                 ]}
                                 selectedValue={filterDiagnosa}
                                 onValueChange={(val) => onFilterChange('diagnosa', val)}
+                                hideLabel={true}
+                                containerStyle={LayoutStyles.flex1}
+                                buttonStyle={GlobalStyles.historyDropdownButton}
                             />
                         </View>
                     </View>
                 </View>
 
-                <View style={[LayoutStyles.rowBetween, LayoutStyles.ph20, LayoutStyles.mb15]}>
-                    <Text style={GlobalStyles.formSectionTitle}>DATA REKAM MEDIS</Text>
+                <View style={GlobalStyles.historyExportWrapper}>
                     <TouchableOpacity 
-                        style={[GlobalStyles.listAddButton, { height: 45, paddingHorizontal: 20 }]}
+                        style={GlobalStyles.historyExportBtnContainer}
                         onPress={handleExport}
                         disabled={isExporting}
                     >
-                        {isExporting ? (
-                            <ActivityIndicator size="small" color="white" />
-                        ) : (
-                            <MaterialCommunityIcons name="file-export-outline" size={20} color="white" />
-                        )}
-                        <Text style={[GlobalStyles.exportBtnText, { fontSize: 14, marginLeft: 10 }]}>
-                            {isExporting ? 'Mengekspor...' : 'Export File'}
-                        </Text>
+                        <View style={LayoutStyles.flexRow}>
+                            {isExporting ? (
+                                <ActivityIndicator size="small" color="white" />
+                            ) : (
+                                <MaterialCommunityIcons name="file-document-outline" size={20} color="white" />
+                            )}
+                            <Text style={[GlobalStyles.primaryButtonText, { fontSize: 14, marginLeft: 8 }]}>
+                                {isExporting ? 'Mengekspor...' : 'Export File'}
+                            </Text>
+                        </View>
                     </TouchableOpacity>
                 </View>
 
@@ -331,22 +403,22 @@ export function TampilHistori() {
                     <ActivityIndicator size="large" color={Colors.primary} style={LayoutStyles.mt50} />
                 ) : (
                     <>
-                    <View style={GlobalStyles.historyTableContainer}>
+                    <View style={GlobalStyles.historyTableContainerPremium}>
                     <ScrollView horizontal showsHorizontalScrollIndicator={true}>
-                        <View style={LayoutStyles.w1100}>
+                        <View style={{ width: 1160 }}>
                             
-                            <View style={GlobalStyles.tableHeaderAtomic}>
-                                <View style={[GlobalStyles.tableCellAtomic, GlobalStyles.tableCellFirst, LayoutStyles.w90]}><Text style={GlobalStyles.tableThText}>Tgl</Text></View>
-                                <View style={[GlobalStyles.tableCellAtomic, LayoutStyles.w150]}><Text style={GlobalStyles.tableThText}>Nama</Text></View>
-                                <View style={[GlobalStyles.tableCellAtomic, LayoutStyles.w140]}><Text style={GlobalStyles.tableThText}>Dokter</Text></View>
-                                <View style={[GlobalStyles.tableCellAtomic, LayoutStyles.w100]}><Text style={GlobalStyles.tableThText}>Layanan</Text></View>
-                                <View style={[GlobalStyles.tableCellAtomic, LayoutStyles.w150]}><Text style={GlobalStyles.tableThText}>Gigi</Text></View>
-                                <View style={[GlobalStyles.tableCellAtomic, LayoutStyles.w150]}><Text style={GlobalStyles.tableThText}>Diagnosa</Text></View>
-                                <View style={[GlobalStyles.tableCellAtomic, LayoutStyles.w160]}><Text style={GlobalStyles.tableThText}>Perawatan</Text></View>
-                                <View style={[GlobalStyles.tableCellAtomic, LayoutStyles.w160]}><Text style={GlobalStyles.tableThText}>Ket</Text></View>
+                            <View style={GlobalStyles.historyTableHeaderMaron}>
+                                <View style={[GlobalStyles.tableCellAtomic, GlobalStyles.tableCellFirst, GlobalStyles.historyTableCellTgl, { borderBottomWidth: 0 }, GlobalStyles.historyHeaderCellBorder]}><Text style={[GlobalStyles.tableThText, { color: 'white' }]}>Tgl</Text></View>
+                                <View style={[GlobalStyles.tableCellAtomic, GlobalStyles.historyTableCellNama, { borderBottomWidth: 0 }, GlobalStyles.historyHeaderCellBorder]}><Text style={[GlobalStyles.tableThText, { color: 'white' }]}>Nama</Text></View>
+                                <View style={[GlobalStyles.tableCellAtomic, GlobalStyles.historyTableCellDokter, { borderBottomWidth: 0 }, GlobalStyles.historyHeaderCellBorder]}><Text style={[GlobalStyles.tableThText, { color: 'white' }]}>Dokter</Text></View>
+                                <View style={[GlobalStyles.tableCellAtomic, GlobalStyles.historyTableCellLayanan, { borderBottomWidth: 0 }, GlobalStyles.historyHeaderCellBorder]}><Text style={[GlobalStyles.tableThText, { color: 'white' }]}>Layanan</Text></View>
+                                <View style={[GlobalStyles.tableCellAtomic, GlobalStyles.historyTableCellGigi, { borderBottomWidth: 0 }, GlobalStyles.historyHeaderCellBorder]}><Text style={[GlobalStyles.tableThText, { color: 'white' }]}>Gigi</Text></View>
+                                <View style={[GlobalStyles.tableCellAtomic, GlobalStyles.historyTableCellDiagnosa, { borderBottomWidth: 0 }, GlobalStyles.historyHeaderCellBorder]}><Text style={[GlobalStyles.tableThText, { color: 'white' }]}>Diagnosa</Text></View>
+                                <View style={[GlobalStyles.tableCellAtomic, GlobalStyles.historyTableCellPerawatan, { borderBottomWidth: 0 }, GlobalStyles.historyHeaderCellBorder]}><Text style={[GlobalStyles.tableThText, { color: 'white' }]}>Perawatan</Text></View>
+                                <View style={[GlobalStyles.tableCellAtomic, GlobalStyles.historyTableCellKeterangan, { borderBottomWidth: 0, borderRightWidth: 0 }]}><Text style={[GlobalStyles.tableThText, { color: 'white' }]}>Keterangan</Text></View>
                             </View>
                             
-                            <View style={GlobalStyles.tableBodyWrapperAtomic}>
+                            <View style={[GlobalStyles.tableBodyWrapperAtomic, { minHeight: 0 }]}>
                                 {filtered.length === 0 ? (
                                     <View style={GlobalStyles.emptyContent}>
                                         <Text style={GlobalStyles.emptyText}>Tidak ada data ditemukan</Text>
@@ -354,14 +426,23 @@ export function TampilHistori() {
                                 ) : (
                                     filtered.map((item, index) => (
                                         <View key={item.id_record} style={[GlobalStyles.tableRowAtomic, index % 2 === 1 && GlobalStyles.historyTableRowAlt]}>
-                                            <View style={[GlobalStyles.tableCellAtomic, GlobalStyles.tableCellFirst, LayoutStyles.w90]}><Text style={GlobalStyles.tableTdText}>{formatTanggal(item.tanggal)}</Text></View>
-                                            <View style={[GlobalStyles.tableCellAtomic, LayoutStyles.w150]}><Text style={GlobalStyles.tableTdText}>{item.tb_pasien?.nama_pasien || '-'}</Text></View>
-                                            <View style={[GlobalStyles.tableCellAtomic, LayoutStyles.w140]}><Text style={GlobalStyles.tableTdText}>{item.doctor_id ? (doctorMap[item.doctor_id] || '-') : '-'}</Text></View>
-                                            <View style={[GlobalStyles.tableCellAtomic, LayoutStyles.w100]}><Text style={GlobalStyles.tableTdText}>{item.layanan || '-'}</Text></View>
-                                            <View style={[GlobalStyles.tableCellAtomic, LayoutStyles.w150]}><Text style={GlobalStyles.tableTdText} numberOfLines={2}>{item.gigi || '-'}</Text></View>
-                                            <View style={[GlobalStyles.tableCellAtomic, LayoutStyles.w150]}><Text style={GlobalStyles.tableTdText} numberOfLines={2}>{item.diagnosa || '-'}</Text></View>
-                                            <View style={[GlobalStyles.tableCellAtomic, LayoutStyles.w160]}><Text style={GlobalStyles.tableTdText} numberOfLines={2}>{item.tb_tindakan?.nama_tindakan || '-'}</Text></View>
-                                            <View style={[GlobalStyles.tableCellAtomic, LayoutStyles.w160]}><Text style={GlobalStyles.tableTdText} numberOfLines={2}>{item.keterangan || '-'}</Text></View>
+                                            <View style={[GlobalStyles.tableCellAtomic, GlobalStyles.tableCellFirst, GlobalStyles.historyTableCellTgl, GlobalStyles.historyBodyCellBorder]}><Text style={GlobalStyles.tableTdText} numberOfLines={1}>{formatTanggal(item.tanggal)}</Text></View>
+                                            <View style={[GlobalStyles.tableCellAtomic, GlobalStyles.historyTableCellNama, GlobalStyles.historyBodyCellBorder]}><Text style={GlobalStyles.tableTdText}>{item.tb_pasien?.nama_pasien || '-'}</Text></View>
+                                            <View style={[GlobalStyles.tableCellAtomic, GlobalStyles.historyTableCellDokter, GlobalStyles.historyBodyCellBorder]}><Text style={GlobalStyles.tableTdText}>{item.doctor_id ? (doctorMap[item.doctor_id] || '-') : '-'}</Text></View>
+                                            <View style={[GlobalStyles.tableCellAtomic, GlobalStyles.historyTableCellLayanan, GlobalStyles.historyBodyCellBorder]}><Text style={GlobalStyles.tableTdText}>{item.layanan || '-'}</Text></View>
+                                            <View style={[GlobalStyles.tableCellAtomic, GlobalStyles.historyTableCellGigi, GlobalStyles.historyBodyCellBorder]}><Text style={GlobalStyles.tableTdText} numberOfLines={2}>{item.gigi || '-'}</Text></View>
+                                            <View style={[GlobalStyles.tableCellAtomic, GlobalStyles.historyTableCellDiagnosa, GlobalStyles.historyBodyCellBorder]}><Text style={GlobalStyles.tableTdText} numberOfLines={2}>{item.diagnosa || '-'}</Text></View>
+                                            <View style={[GlobalStyles.tableCellAtomic, GlobalStyles.historyTableCellPerawatan, GlobalStyles.historyBodyCellBorder]}>
+                                                <Text style={GlobalStyles.tableTdText} numberOfLines={2}>
+                                                    {item.id_tindakan ? (
+                                                        item.id_tindakan.toString().split(',').map((id: string) => {
+                                                            const t = tindakanList.find(x => x.id_tindakan.toString() === id.trim());
+                                                            return t ? t.nama_tindakan : '';
+                                                        }).filter(Boolean).join(', ') || '-'
+                                                    ) : '-'}
+                                                </Text>
+                                            </View>
+                                            <View style={[GlobalStyles.tableCellAtomic, GlobalStyles.historyTableCellKeterangan, { borderRightWidth: 0 }]}><Text style={GlobalStyles.tableTdText} numberOfLines={2}>{item.keterangan || '-'}</Text></View>
                                         </View>
                                     ))
                                 )}

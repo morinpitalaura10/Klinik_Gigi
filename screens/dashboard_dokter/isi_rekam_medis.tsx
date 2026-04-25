@@ -7,7 +7,8 @@ import {
     KeyboardAvoidingView,
     Platform,
     ActivityIndicator,
-    Modal
+    Modal,
+    TextInput
 } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { supabase } from '../../utils/supabase';
@@ -28,8 +29,10 @@ export function IsiRekamMedis() {
     const [fetchingTindakan, setFetchingTindakan] = useState(true);
     const [tindakanList, setTindakanList] = useState<any[]>([]);
 
-    const [selectedTindakanId, setSelectedTindakanId] = useState<string>(record?.id_tindakan?.toString() || '');
-    const [selectedTindakanName, setSelectedTindakanName] = useState<string>('Pilih perawatan');
+    const [selectedTindakanIds, setSelectedTindakanIds] = useState<string[]>(
+        record?.id_tindakan ? record.id_tindakan.toString().split(',') : []
+    );
+    const [selectedTindakanNames, setSelectedTindakanNames] = useState<string[]>([]);
     const [keterangan, setKeterangan] = useState(record?.keterangan || '');
     
     // Tooth selection state
@@ -37,7 +40,7 @@ export function IsiRekamMedis() {
         record?.gigi && record.gigi !== '-' ? record.gigi.split(',') : []
     );
 
-    const [tindakanModalVisible, setTindakanModalVisible] = useState(false);
+
 
     useEffect(() => {
         fetchTindakan();
@@ -54,8 +57,11 @@ export function IsiRekamMedis() {
             setTindakanList(data || []);
 
             if (record?.id_tindakan) {
-                const found = data?.find(x => x.id_tindakan === record.id_tindakan);
-                if (found) setSelectedTindakanName(found.nama_tindakan);
+                const ids = record.id_tindakan.toString().split(',');
+                const names = data
+                    ?.filter(x => ids.includes(x.id_tindakan.toString()))
+                    .map(x => x.nama_tindakan);
+                setSelectedTindakanNames(names || []);
             }
         } catch (error: any) {
             showAlert({ title: 'Error', message: 'Gagal memuat daftar tindakan', type: 'error' });
@@ -70,9 +76,18 @@ export function IsiRekamMedis() {
         );
     };
 
+    const toggleTindakan = (id: string, name: string) => {
+        setSelectedTindakanIds(prev => 
+            prev.includes(id) ? prev.filter(i => i !== id) : [...prev, id]
+        );
+        setSelectedTindakanNames(prev => 
+            prev.includes(name) ? prev.filter(n => n !== name) : [...prev, name]
+        );
+    };
+
     const handleSave = async () => {
-        if (!selectedTindakanId) {
-            showAlert({ title: 'Peringatan', message: 'Harap pilih tindakan/perawatan!', type: 'warning' });
+        if (selectedTindakanIds.length === 0) {
+            showAlert({ title: 'Peringatan', message: 'Harap pilih minimal satu tindakan/perawatan!', type: 'warning' });
             return;
         }
 
@@ -86,7 +101,7 @@ export function IsiRekamMedis() {
             const { error } = await supabase
                 .from('tb_rekam_medis')
                 .update({
-                    id_tindakan: parseInt(selectedTindakanId),
+                    id_tindakan: selectedTindakanIds.join(','),
                     keterangan: keterangan,
                     gigi: selectedGigi.join(','),
                     doctor_id: user?.id_users,
@@ -117,16 +132,32 @@ export function IsiRekamMedis() {
                         <View style={CreateRecordStyles.divider} />
 
                         {/* Dropdown Tindakan */}
+                        {/* Checkbox Tindakan */}
                         <Text style={CreateRecordStyles.fieldLabel}>Tindakan/Perawatan</Text>
-                        <TouchableOpacity
-                            style={CreateRecordStyles.inputDropdown}
-                            onPress={() => setTindakanModalVisible(true)}
-                        >
-                            <Text style={CreateRecordStyles.inputText}>
-                                {fetchingTindakan ? 'Memuat...' : selectedTindakanName}
-                            </Text>
-                            <MaterialCommunityIcons name="menu-down" size={24} color={Colors.primary} />
-                        </TouchableOpacity>
+                        {fetchingTindakan ? (
+                            <ActivityIndicator size="small" color={Colors.primary} style={LayoutStyles.mv10} />
+                        ) : (
+                            <View style={[LayoutStyles.flexRow, LayoutStyles.flexWrap, { marginBottom: 10 }]}>
+                                {tindakanList.map((t) => {
+                                    const tIdStr = t.id_tindakan.toString();
+                                    const isChecked = selectedTindakanIds.includes(tIdStr);
+                                    return (
+                                        <TouchableOpacity 
+                                            key={tIdStr} 
+                                            style={{ marginRight: 15, marginBottom: 12 }} 
+                                            onPress={() => toggleTindakan(tIdStr, t.nama_tindakan)}
+                                        >
+                                            <View style={[LayoutStyles.flexRow, LayoutStyles.alignCenter, { backgroundColor: isChecked ? '#FFF0F0' : '#F9F9F9', paddingHorizontal: 12, paddingVertical: 8, borderRadius: 10, borderWidth: 1, borderColor: isChecked ? Colors.primary : '#EEE' }]}>
+                                                <View style={[CreateRecordStyles.checkbox, isChecked && CreateRecordStyles.checkboxChecked, { marginRight: 8 }]}>
+                                                    {isChecked && <MaterialCommunityIcons name="check" size={12} color="#FFF" />}
+                                                </View>
+                                                <Text style={[CreateRecordStyles.checkboxLabel, { color: isChecked ? Colors.primary : '#444', fontWeight: isChecked ? 'bold' : 'normal' }]}>{t.nama_tindakan}</Text>
+                                            </View>
+                                        </TouchableOpacity>
+                                    );
+                                })}
+                            </View>
+                        )}
 
                         {/* Keterangan */}
                         <Text style={CreateRecordStyles.fieldLabel}>Keterangan</Text>
@@ -151,7 +182,7 @@ export function IsiRekamMedis() {
                                         style={CreateRecordStyles.checkboxWrapper16} 
                                         onPress={() => toggleGigi(numStr)}
                                     >
-                                        <View style={{ alignItems: 'center' }}>
+                                        <View style={GlobalStyles.alignCenter}>
                                             <View style={[CreateRecordStyles.checkbox, isChecked && CreateRecordStyles.checkboxChecked]}>
                                                 {isChecked && <MaterialCommunityIcons name="check" size={12} color="#FFF" />}
                                             </View>
@@ -178,33 +209,6 @@ export function IsiRekamMedis() {
                     </View>
                 </ScrollView>
             </KeyboardAvoidingView>
-
-            {/* Modal Pilih Tindakan */}
-            <Modal visible={tindakanModalVisible} transparent animationType="fade" onRequestClose={() => setTindakanModalVisible(false)}>
-                <TouchableOpacity style={GlobalStyles.selectionModalOverlay} activeOpacity={1} onPress={() => setTindakanModalVisible(false)}>
-                    <View style={GlobalStyles.selectionModalContent}>
-                        <Text style={GlobalStyles.selectionModalTitle}>Pilih Perawatan</Text>
-                        <ScrollView style={{ maxHeight: 300, width: '100%' }}>
-                            {tindakanList.map(t => (
-                                <TouchableOpacity
-                                    key={t.id_tindakan}
-                                    style={GlobalStyles.selectionOptionItem}
-                                    onPress={() => {
-                                        setSelectedTindakanId(t.id_tindakan.toString());
-                                        setSelectedTindakanName(t.nama_tindakan);
-                                        setTindakanModalVisible(false);
-                                    }}
-                                >
-                                    <Text style={GlobalStyles.tableRowText}>{t.nama_tindakan}</Text>
-                                </TouchableOpacity>
-                            ))}
-                        </ScrollView>
-                    </View>
-                </TouchableOpacity>
-            </Modal>
         </AdminLayout>
     );
 }
-
-// Ensure TextInput is imported locally since LabeledInput was used before
-import { TextInput } from 'react-native';

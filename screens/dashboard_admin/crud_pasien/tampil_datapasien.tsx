@@ -1,28 +1,27 @@
 import React, { useState, useCallback } from 'react';
-import { 
-  View, 
-  Text, 
-  FlatList, 
-  TouchableOpacity, 
-  TextInput, 
+import {
+  View,
+  Text,
+  TouchableOpacity,
+  TextInput,
   ActivityIndicator,
-  Alert,
-  ScrollView
+  ScrollView,
+  StyleSheet
 } from 'react-native';
 import { MaterialCommunityIcons, Feather } from '@expo/vector-icons';
 import { supabase } from '../../../utils/supabase';
-import { Colors, GlobalStyles, LayoutStyles } from '../../../styles/GlobalStyles';
+import { Colors, GlobalStyles, LayoutStyles, DentalRecordStyles } from '../../../styles/GlobalStyles';
 import AdminLayout from '../../../components/templates/AdminLayout';
 import { useFocusEffect, useNavigation } from '@react-navigation/native';
 
 interface Pasien {
   id_pasien: number;
   nama_pasien: string;
+  nope: string;
+  pekerjaan: string;
+  alamat: string;
   tgl_lahir: string;
   jk: string;
-  alamat: string;
-  pekerjaan: string;
-  nope: string;
   alergi_obat: string;
 }
 
@@ -39,12 +38,12 @@ export function TampilPasien() {
       const { data, error } = await supabase
         .from('tb_pasien')
         .select('*')
-        .order('id_pasien', { ascending: false });
+        .order('nama_pasien', { ascending: true });
 
       if (error) throw error;
       setPasien(data || []);
     } catch (error: any) {
-      Alert.alert('Error', error.message);
+      console.error(error);
     } finally {
       setLoading(false);
       setRefreshing(false);
@@ -58,149 +57,150 @@ export function TampilPasien() {
   );
 
   const filteredData = pasien.filter(item =>
-    item.nama_pasien.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    item.nope.includes(searchQuery)
+    item.nama_pasien.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
   return (
-    <AdminLayout
-      noScroll={true}
-      customRightTitle="Manajemen Pasien"
-    >
+    <AdminLayout noScroll={true} customRightTitle="Admin">
       {loading && !refreshing ? (
-        <ActivityIndicator size="large" color={Colors.black} style={LayoutStyles.mt50} />
+        <ActivityIndicator size="large" color={Colors.primary} style={LayoutStyles.mt50} />
       ) : (
-        <View style={LayoutStyles.flex1}>
-          <View style={LayoutStyles.pt10}>
-            <View style={[GlobalStyles.searchRow, LayoutStyles.ph20]}>
-              <View style={GlobalStyles.searchWrapper}>
-                <View style={GlobalStyles.listSearchContainer}>
-                  <Feather name="search" size={20} color="#888" style={GlobalStyles.inputIcon} />
-                  <TextInput
-                    style={GlobalStyles.listSearchInput}
-                    placeholder="Cari nama atau nomor HP..."
-                    value={searchQuery}
-                    onChangeText={setSearchQuery}
-                  />
-                </View>
+        <ScrollView
+          style={{ flex: 1, backgroundColor: '#F5F5F5' }}
+          contentContainerStyle={{ paddingBottom: 40 }}
+        >
+          {/* Top Section */}
+          <View style={DentalRecordStyles.topSection}>
+            <View style={DentalRecordStyles.headerRow}>
+              <View>
+                <Text style={DentalRecordStyles.headerTitle}>Data Pasien</Text>
+                <Text style={DentalRecordStyles.headerSubtitle}>Kelola informasi pasien klinik</Text>
               </View>
-
-              <View style={GlobalStyles.listAddButtonContainer}>
-                <TouchableOpacity
-                  style={GlobalStyles.listAddButton}
-                  onPress={() => navigation.navigate('CreatePasien')}
-                >
-                  <MaterialCommunityIcons name="plus" size={24} color="white" />
-                  <Text style={GlobalStyles.listAddButtonText}>Pasien</Text>
-                </TouchableOpacity>
-              </View>
+              <TouchableOpacity
+                style={DentalRecordStyles.btnRecordBaru}
+                onPress={() => navigation.navigate('CreatePasien')}
+              >
+                <MaterialCommunityIcons name="plus" size={18} color="#FFF" />
+                <Text style={DentalRecordStyles.btnRecordBaruText}>Pasien Baru</Text>
+              </TouchableOpacity>
             </View>
 
-            <View style={[GlobalStyles.listHeader, LayoutStyles.ph20, LayoutStyles.mt0, LayoutStyles.mb15]}>
-              <Text style={GlobalStyles.listTitle}>Daftar Pasien</Text>
+            <View style={DentalRecordStyles.searchContainer}>
+              <Feather name="search" size={20} color="#AAA" />
+              <TextInput
+                style={DentalRecordStyles.searchInput}
+                placeholder="Cari nama pasien..."
+                value={searchQuery}
+                onChangeText={setSearchQuery}
+                placeholderTextColor="#AAA"
+              />
             </View>
           </View>
 
-          <View style={[GlobalStyles.tableContainer, LayoutStyles.mh20]}>
-            <ScrollView horizontal={true} showsHorizontalScrollIndicator={false}>
-              <View style={[GlobalStyles.tableContentWrapper, LayoutStyles.tableFixed1000]}>
-                <View style={GlobalStyles.tableHeader}>
-                  <View style={[GlobalStyles.tableHeaderCell, GlobalStyles.tableCellNo]}>
-                    <Text style={GlobalStyles.tableHeaderText}>No</Text>
-                  </View>
-                  <View style={[GlobalStyles.tableHeaderCell, GlobalStyles.tableCellName]}>
-                    <Text style={GlobalStyles.tableHeaderText}>Nama Pasien</Text>
-                  </View>
-                  <View style={[GlobalStyles.tableHeaderCell, GlobalStyles.tableCellTglLahir]}>
-                    <Text style={GlobalStyles.tableHeaderText}>Tgl Lahir</Text>
-                  </View>
-                  <View style={[GlobalStyles.tableHeaderCell, GlobalStyles.tableCellJK]}>
-                    <Text style={GlobalStyles.tableHeaderText}>JK</Text>
-                  </View>
-                  <View style={[GlobalStyles.tableHeaderCell, GlobalStyles.tableCellNope]}>
-                    <Text style={GlobalStyles.tableHeaderText}>Nomor HP</Text>
-                  </View>
-                  <View style={[GlobalStyles.tableHeaderCell, GlobalStyles.tableCellAlamat]}>
-                    <Text style={GlobalStyles.tableHeaderText}>Alamat</Text>
-                  </View>
-                  <View style={[GlobalStyles.tableHeaderCell, GlobalStyles.tableCellAlergi]}>
-                    <Text style={GlobalStyles.tableHeaderText}>Alergi</Text>
-                  </View>
-                  <View style={[GlobalStyles.tableHeaderCell, GlobalStyles.tableCellAction]}>
-                    <Text style={GlobalStyles.tableHeaderText}>Aksi</Text>
-                  </View>
-                </View>
+          {/* Table */}
+          <View style={DentalRecordStyles.tableWrapper}>
+            {/* HEADER */}
+            <View style={t.row}>
+              <View style={[t.cell, t.headerBg]}><Text style={t.hTxt}>Nama</Text></View>
+              <View style={[t.cell, t.headerBg]}><Text style={t.hTxt}>Tgl Lahir</Text></View>
+              <View style={[t.cell, t.headerBg]}><Text style={t.hTxt}>Gender</Text></View>
+              <View style={[t.cell, t.headerBg]}><Text style={t.hTxt}>Alamat</Text></View>
+              <View style={[t.cell, t.headerBg]}><Text style={t.hTxt}>Pekerjaan</Text></View>
+              <View style={[t.cell, t.headerBg]}><Text style={t.hTxt}>No. HP</Text></View>
+              <View style={[t.cell, t.headerBg]}><Text style={t.hTxt}>Alergi Obat</Text></View>
+              <View style={[t.cell, t.headerBg]}><Text style={t.hTxt}>Aksi</Text></View>
+            </View>
 
-                <FlatList
-                  data={filteredData}
-                  keyExtractor={(item) => item.id_pasien.toString()}
-                  refreshing={refreshing}
-                  onRefresh={() => {
-                    setRefreshing(true);
-                    fetchPasien();
-                  }}
-                  renderItem={({ item, index }) => {
-                    const isLast = index === filteredData.length - 1;
-                    return (
-                      <View style={[
-                        GlobalStyles.tableRow,
-                        isLast && GlobalStyles.tableRowLast
-                      ]}>
-                        <View style={[GlobalStyles.tableCell, GlobalStyles.tableCellNo]}>
-                          <Text style={GlobalStyles.tableRowText}>{index + 1}</Text>
-                        </View>
-                        <View style={[GlobalStyles.tableCell, GlobalStyles.tableCellName]}>
-                          <Text style={GlobalStyles.tableRowText}>{item.nama_pasien}</Text>
-                        </View>
-                        <View style={[GlobalStyles.tableCell, GlobalStyles.tableCellTglLahir]}>
-                          <Text style={GlobalStyles.tableRowText}>{item.tgl_lahir}</Text>
-                        </View>
-                        <View style={[GlobalStyles.tableCell, GlobalStyles.tableCellJK]}>
-                          <Text style={GlobalStyles.tableRowText}>{item.jk}</Text>
-                        </View>
-                        <View style={[GlobalStyles.tableCell, GlobalStyles.tableCellNope]}>
-                          <Text style={GlobalStyles.tableRowText}>{item.nope}</Text>
-                        </View>
-                        <View style={[GlobalStyles.tableCell, GlobalStyles.tableCellAlamat]}>
-                          <Text style={GlobalStyles.tableRowText}>{item.alamat}</Text>
-                        </View>
-                        <View style={[GlobalStyles.tableCell, GlobalStyles.tableCellAlergi]}>
-                          <Text style={GlobalStyles.tableRowText}>{item.alergi_obat || '-'}</Text>
-                        </View>
-                        <View style={[GlobalStyles.tableCell, GlobalStyles.tableCellAction]}>
-                          <TouchableOpacity
-                            style={GlobalStyles.cardActionBtn}
-                            onPress={() => navigation.navigate('ReadPasien', { id: item.id_pasien })}
-                          >
-                            <MaterialCommunityIcons name="eye-outline" size={24} color="#4A90E2" />
-                          </TouchableOpacity>
-                          <TouchableOpacity
-                            style={GlobalStyles.cardActionBtn}
-                            onPress={() => navigation.navigate('UpdatePasien', { editItem: item })}
-                          >
-                            <MaterialCommunityIcons name="square-edit-outline" size={24} color="#EBC112" />
-                          </TouchableOpacity>
-                          <TouchableOpacity
-                            style={GlobalStyles.cardActionBtn}
-                            onPress={() => navigation.navigate('DeletePasien', { id: item.id_pasien, name: item.nama_pasien })}
-                          >
-                            <MaterialCommunityIcons name="trash-can-outline" size={24} color={Colors.primary} />
-                          </TouchableOpacity>
-                        </View>
-                      </View>
-                    );
-                  }}
-                  ListEmptyComponent={
-                    <View style={GlobalStyles.emptyContent}>
-                      <Text style={GlobalStyles.emptyText}>Data pasien tidak ditemukan</Text>
+            {/* BODY — no inner scroll, all rows rendered directly */}
+            {filteredData.length === 0 ? (
+              <View style={{ width: '100%', paddingVertical: 40, alignItems: 'center', justifyContent: 'center' }}>
+                <Text style={{ fontSize: 13, color: '#999', textAlign: 'center' }}>Data pasien tidak ditemukan</Text>
+              </View>
+            ) : (
+              filteredData.map((item) => (
+                <View key={item.id_pasien.toString()} style={[t.row, t.bodyBorder]}>
+                  <View style={t.cell}>
+                    <Text style={t.bTxt} numberOfLines={1}>{item.nama_pasien}</Text>
+                  </View>
+                  <View style={t.cell}>
+                    <Text style={t.bTxt}>{item.tgl_lahir}</Text>
+                  </View>
+                  <View style={t.cell}>
+                    <View style={[t.badge, { backgroundColor: item.jk === 'Laki-laki' ? '#D6E0E9' : '#E9D6D6' }]}>
+                      <Text style={{ fontSize: 11, fontWeight: '900', color: item.jk === 'Laki-laki' ? '#194580' : '#801919' }}>
+                        {item.jk === 'Laki-laki' ? 'LK' : 'PR'}
+                      </Text>
                     </View>
-                  }
-                />
-              </View>
-            </ScrollView>
+                  </View>
+                  <View style={t.cell}>
+                    <Text style={t.bTxt} numberOfLines={2}>{item.alamat}</Text>
+                  </View>
+                  <View style={t.cell}>
+                    <Text style={t.bTxt} numberOfLines={1}>{item.pekerjaan}</Text>
+                  </View>
+                  <View style={t.cell}>
+                    <Text style={t.bTxt}>{item.nope}</Text>
+                  </View>
+                  <View style={t.cell}>
+                    <Text style={t.bTxt}>{item.alergi_obat || '-'}</Text>
+                  </View>
+                  <View style={[t.cell, { flexDirection: 'row', gap: 6 }]}>
+                    <TouchableOpacity onPress={() => navigation.navigate('UpdatePasien', { editItem: item })}>
+                      <MaterialCommunityIcons name="square-edit-outline" size={20} color="#EBC112" />
+                    </TouchableOpacity>
+                    <TouchableOpacity onPress={() => navigation.navigate('ReadPasien', { id: item.id_pasien })}>
+                      <MaterialCommunityIcons name="information-outline" size={20} color="#4CAF50" />
+                    </TouchableOpacity>
+                    <TouchableOpacity onPress={() => navigation.navigate('DeletePasien', { id: item.id_pasien, name: item.nama_pasien })}>
+                      <MaterialCommunityIcons name="trash-can-outline" size={20} color="#D32F2F" />
+                    </TouchableOpacity>
+                  </View>
+                </View>
+              ))
+            )}
           </View>
-        </View>
+        </ScrollView>
       )}
     </AdminLayout>
   );
 }
+
+const t = StyleSheet.create({
+  row: {
+    flexDirection: 'row',
+  },
+  cell: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingVertical: 14,
+    paddingHorizontal: 6,
+  },
+  headerBg: {
+    backgroundColor: Colors.primary,
+  },
+  bodyBorder: {
+    borderBottomWidth: 1,
+    borderColor: '#EBEBEB',
+    backgroundColor: '#FFF',
+  },
+  hTxt: {
+    color: '#FFF',
+    fontWeight: 'bold',
+    fontSize: 13,
+    textAlign: 'center',
+  },
+  bTxt: {
+    color: '#222',
+    fontWeight: 'bold',
+    fontSize: 13,
+    textAlign: 'center',
+  },
+  badge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 15,
+  },
+});

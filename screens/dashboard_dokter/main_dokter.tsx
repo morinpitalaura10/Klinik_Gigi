@@ -9,7 +9,7 @@ import {
 } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { supabase } from '../../utils/supabase';
-import { Colors, DoctorDashboardStyles } from '../../styles/GlobalStyles';
+import { Colors, DoctorDashboardStyles, GlobalStyles } from '../../styles/GlobalStyles';
 import AdminLayout from '../../components/templates/AdminLayout';
 import { useFocusEffect, useNavigation } from '@react-navigation/native';
 import { AuthContext } from '../../context/AuthContext';
@@ -50,6 +50,7 @@ export default function MainDokter() {
                 jk
             )
         `)
+        .eq('tanggal', today)
         .eq('status', 'Diproses');
 
       if (user?.role === 'dokter' && user?.spesialisasi) {
@@ -106,7 +107,7 @@ export default function MainDokter() {
     >
       <ScrollView 
         style={DoctorDashboardStyles.mainContainer}
-        contentContainerStyle={{ paddingBottom: 40 }}
+        contentContainerStyle={GlobalStyles.pb40}
         showsVerticalScrollIndicator={false}
       >
         <View style={DoctorDashboardStyles.doctorInfoContainer}>
@@ -125,29 +126,29 @@ export default function MainDokter() {
             {/* Header */}
             <View style={DoctorDashboardStyles.tableHeaderRow}>
                 <View style={DoctorDashboardStyles.colName}>
-                    <Text style={[DoctorDashboardStyles.thText, { textAlign: 'left', paddingLeft: 10 }]}>Nama</Text>
+                    <Text style={[DoctorDashboardStyles.thText, GlobalStyles.textAlignLeft, GlobalStyles.pl10]}>Nama</Text>
                 </View>
                 <View style={DoctorDashboardStyles.colGender}>
-                    <Text style={[DoctorDashboardStyles.thText, { textAlign: 'center' }]}>Gender</Text>
+                    <Text style={[DoctorDashboardStyles.thText, GlobalStyles.textAlignCenter]}>Gender</Text>
                 </View>
                 <View style={DoctorDashboardStyles.colKeluhan}>
-                    <Text style={[DoctorDashboardStyles.thText, { textAlign: 'center' }]}>Keluhan</Text>
+                    <Text style={[DoctorDashboardStyles.thText, GlobalStyles.textAlignCenter]}>Keluhan</Text>
                 </View>
                 <View style={DoctorDashboardStyles.colAksi}>
-                    <Text style={[DoctorDashboardStyles.thText, { textAlign: 'center' }]}>Aksi</Text>
+                    <Text style={[DoctorDashboardStyles.thText, GlobalStyles.textAlignCenter]}>Aksi</Text>
                 </View>
             </View>
 
             {/* List */}
             {loading && !refreshing ? (
-                <ActivityIndicator size="large" color={Colors.primary} style={{ marginVertical: 30 }} />
+                <ActivityIndicator size="large" color={Colors.primary} style={GlobalStyles.mv30} />
             ) : (
                 <View>
                     {records.length > 0 ? (
                         records.map((item, index) => (
                             <View key={item.id_record} style={DoctorDashboardStyles.tableRow}>
                                 <View style={DoctorDashboardStyles.colName}>
-                                    <Text style={[DoctorDashboardStyles.tdText, { textAlign: 'left', paddingLeft: 10 }]} numberOfLines={2}>
+                                    <Text style={[DoctorDashboardStyles.tdText, GlobalStyles.textAlignLeft, GlobalStyles.pl10]} numberOfLines={2}>
                                         {item.tb_pasien?.nama_pasien}
                                     </Text>
                                 </View>
@@ -176,8 +177,8 @@ export default function MainDokter() {
                             </View>
                         ))
                     ) : (
-                        <View style={{ padding: 30, alignItems: 'center' }}>
-                            <Text style={{ color: '#999' }}>Tidak ada antrean pasien hari ini</Text>
+                        <View style={[GlobalStyles.p30, GlobalStyles.alignCenter]}>
+                            <Text style={GlobalStyles.textLightGray}>Tidak ada antrean pasien hari ini</Text>
                         </View>
                     )}
                 </View>

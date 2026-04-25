@@ -62,6 +62,7 @@ export function TampilRecordAdmin() {
                 jk
             )
         `)
+        .eq('tanggal', selectedDate)
         .order('id_record', { ascending: false });
 
       if (error) throw error;

@@ -6,6 +6,7 @@ import { MaterialCommunityIcons } from '@expo/vector-icons';
 import AdminLayout from '../../components/templates/AdminLayout';
 import { Colors, LayoutStyles, AdminDashboardStyles } from '../../styles/GlobalStyles';
 import { supabase } from '../../utils/supabase';
+import { useAlert } from '../../context/AlertContext';
 
 const MenuIcon = ({ title, icon, onPress }: { title: string, icon: string, onPress: () => void }) => (
   <TouchableOpacity style={AdminDashboardStyles.menuIconTouchable} onPress={onPress}>
@@ -20,6 +21,7 @@ const MenuIcon = ({ title, icon, onPress }: { title: string, icon: string, onPre
 
 export default function MainAdmin({ navigation }: any) {
   const { user, logout } = useContext(AuthContext);
+  const { showAlert } = useAlert();
   const [todayActivities, setTodayActivities] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -64,13 +66,22 @@ export default function MainAdmin({ navigation }: any) {
     }, [])
   );
 
+  const handleLogout = () => {
+    showAlert({
+      title: 'Logout Admin',
+      message: 'Apakah Anda yakin ingin keluar dari sistem?',
+      type: 'confirm',
+      onConfirm: logout
+    });
+  };
+
   return (
     <AdminLayout showBackButton={false} noScroll={true}>
       <View style={[LayoutStyles.flex1, AdminDashboardStyles.mainContainer]}>
         
         {/* Kolom Kiri: Menu Operasional */}
         <View style={AdminDashboardStyles.leftColumn}>
-          <ScrollView showsVerticalScrollIndicator={false}>
+          <ScrollView showsVerticalScrollIndicator={false} style={{ flex: 1 }}>
             
             <Text style={[AdminDashboardStyles.menuSectionTitle, AdminDashboardStyles.menuSectionTitleTop]}>LAYANAN OPERASIONAL</Text>
             <View style={AdminDashboardStyles.menuGridContainer}>
@@ -95,7 +106,7 @@ export default function MainAdmin({ navigation }: any) {
               <Text style={AdminDashboardStyles.userRoleText}>Admin</Text>
               <Text style={AdminDashboardStyles.userNameText}>{user?.nama || 'Pengguna'}</Text>
             </View>
-            <TouchableOpacity style={AdminDashboardStyles.logoutButton} onPress={logout}>
+            <TouchableOpacity style={AdminDashboardStyles.logoutButton} onPress={handleLogout}>
                <Text style={AdminDashboardStyles.logoutButtonText}>Logout</Text>
                <MaterialCommunityIcons name="logout" size={18} color="white" />
             </TouchableOpacity>
@@ -112,7 +123,7 @@ export default function MainAdmin({ navigation }: any) {
             <Text style={[AdminDashboardStyles.thCenter, AdminDashboardStyles.flex1_5]}>Status</Text>
           </View>
 
-          <ScrollView style={LayoutStyles.flex1}>
+          <ScrollView style={LayoutStyles.flex1} showsVerticalScrollIndicator={false}>
             {loading ? (
               <ActivityIndicator style={LayoutStyles.mt50} size="large" color={Colors.primary} />
             ) : todayActivities.length === 0 ? (

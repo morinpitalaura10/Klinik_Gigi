@@ -9,7 +9,7 @@ import {
   TouchableWithoutFeedback 
 } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-import { Colors, GlobalStyles } from '../../styles/GlobalStyles';
+import { Colors, GlobalStyles, LayoutStyles } from '../../styles/GlobalStyles';
 import TextLabel from '../atoms/TextLabel';
 
 interface Option {
@@ -24,6 +24,9 @@ interface Props {
   onValueChange: (value: string) => void;
   placeholder?: string;
   disabled?: boolean;
+  hideLabel?: boolean;
+  containerStyle?: any;
+  buttonStyle?: any;
 }
 
 export default function DropdownInput({ 
@@ -32,7 +35,10 @@ export default function DropdownInput({
   selectedValue, 
   onValueChange, 
   placeholder = "Pilih...",
-  disabled = false 
+  disabled = false,
+  hideLabel = false,
+  containerStyle,
+  buttonStyle
 }: Props) {
   const [modalVisible, setModalVisible] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
@@ -50,15 +56,15 @@ export default function DropdownInput({
   };
 
   return (
-    <View style={GlobalStyles.inputWrapper}>
-      <TextLabel style={GlobalStyles.inputLabel}>{label}</TextLabel>
+    <View style={[GlobalStyles.inputWrapper, hideLabel && GlobalStyles.mb0, containerStyle]}>
+      {!hideLabel && <TextLabel style={GlobalStyles.inputLabel}>{label}</TextLabel>}
       
       <TouchableOpacity 
-        style={[GlobalStyles.pickerButton, disabled && { opacity: 0.5, backgroundColor: '#EEE' }]} 
+        style={[GlobalStyles.pickerButton, buttonStyle, disabled && GlobalStyles.disabledInput]} 
         onPress={() => !disabled && setModalVisible(true)}
         activeOpacity={disabled ? 1 : 0.7}
       >
-        <View style={{ flex: 1, justifyContent: 'center' }}>
+        <View style={[LayoutStyles.flex1, GlobalStyles.justifyCenter]}>
           <Text 
             style={[GlobalStyles.pickerText, !selectedOption && GlobalStyles.pickerPlaceholder]}
             numberOfLines={1}
@@ -66,7 +72,7 @@ export default function DropdownInput({
             {selectedOption ? selectedOption.label : placeholder}
           </Text>
         </View>
-        <MaterialCommunityIcons name="chevron-down" size={24} color={disabled ? '#888' : Colors.primary} />
+        <MaterialCommunityIcons name="menu-down" size={24} color={disabled ? '#888' : '#801919'} />
       </TouchableOpacity>
 
       <Modal
@@ -85,19 +91,10 @@ export default function DropdownInput({
                 </TouchableOpacity>
               </View>
 
-              <View style={{ 
-                flexDirection: 'row', 
-                alignItems: 'center', 
-                backgroundColor: '#F5F5F5', 
-                borderRadius: 10, 
-                paddingHorizontal: 10, 
-                marginBottom: 15,
-                borderWidth: 1,
-                borderColor: '#DDD'
-              }}>
+              <View style={GlobalStyles.dropdownSearchContainer}>
                 <MaterialCommunityIcons name="magnify" size={20} color="#888" />
                 <TextInput 
-                  style={{ flex: 1, minHeight: 40, marginLeft: 5, color: '#333', paddingVertical: 5 }}
+                  style={GlobalStyles.dropdownSearchInput}
                   placeholder="Cari..."
                   value={searchQuery}
                   onChangeText={setSearchQuery}

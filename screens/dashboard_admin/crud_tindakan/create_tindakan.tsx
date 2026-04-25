@@ -9,7 +9,7 @@ import {
     Platform
 } from 'react-native';
 import { supabase } from '../../../utils/supabase';
-import { Colors, GlobalStyles, LayoutStyles } from '../../../styles/GlobalStyles';
+import { Colors, GlobalStyles, LayoutStyles, CreateRecordStyles } from '../../../styles/GlobalStyles';
 import AdminLayout from '../../../components/templates/AdminLayout';
 import LabeledInput from '../../../components/molecules/LabeledInput';
 import DropdownInput from '../../../components/molecules/DropdownInput';
@@ -55,49 +55,49 @@ export function CreateTindakan() {
     };
 
     return (
-        <AdminLayout
-            noScroll={true}
-            customRightTitle="Manajemen Tindakan"
-        >
-            <KeyboardAvoidingView
-                behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-                style={LayoutStyles.flex1}
-            >
-                <ScrollView contentContainerStyle={LayoutStyles.scrollContent}>
-                    <View style={GlobalStyles.formCard}>
-                        <Text style={GlobalStyles.formSectionTitle}>TAMBAH INFORMASI TINDAKAN</Text>
-                        <View style={GlobalStyles.formDivider} />
+        <AdminLayout noScroll={true} customRightTitle="Manajemen Tindakan">
+            <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={LayoutStyles.flex1}>
+                <ScrollView contentContainerStyle={CreateRecordStyles.mainContainer} showsVerticalScrollIndicator={false}>
+                    
+                    <View style={CreateRecordStyles.card}>
+                        <Text style={CreateRecordStyles.cardTitle}>INFORMASI TINDAKAN</Text>
+                        <View style={CreateRecordStyles.divider} />
 
-                        <LabeledInput
-                            label="Nama Tindakan"
-                            placeholder="Masukkan nama tindakan baru"
-                            value={namaTindakan}
-                            onChangeText={setNamaTindakan}
-                        />
+                        <View style={{ flexDirection: 'row', gap: 20 }}>
+                            <View style={{ flex: 1 }}>
+                                <Text style={CreateRecordStyles.fieldLabel}>Nama Tindakan</Text>
+                                <LabeledInput
+                                    label=""
+                                    placeholder="Masukkan nama tindakan"
+                                    value={namaTindakan}
+                                    onChangeText={setNamaTindakan}
+                                    hideLabel={true}
+                                    style={CreateRecordStyles.inputDropdown}
+                                />
+                            </View>
 
-                        <DropdownInput
-                            label="Kategori Perawatan"
-                            placeholder="Pilih (Umum / Ortodental)..."
-                            options={layananOptions}
-                            selectedValue={layanan}
-                            onValueChange={setLayanan}
-                        />
-
-                        <View style={[LayoutStyles.rowEnd, LayoutStyles.mt20]}>
-                            <TouchableOpacity
-                                style={GlobalStyles.btnBatal}
-                                onPress={() => navigation.goBack()}
-                            >
-                                <Text style={GlobalStyles.btnBatalText}>Batal</Text>
-                            </TouchableOpacity>
-
-                            <PrimaryButton
-                                title={loading ? "Menyimpan..." : "Tambah"}
-                                onPress={handleSave}
-                                style={GlobalStyles.btnSimpan}
-                                disabled={loading}
-                            />
+                            <View style={{ flex: 1 }}>
+                                <Text style={CreateRecordStyles.fieldLabel}>Kategori Perawatan</Text>
+                                <DropdownInput
+                                    label=""
+                                    placeholder="Pilih kategori..."
+                                    options={layananOptions}
+                                    selectedValue={layanan}
+                                    onValueChange={setLayanan}
+                                    hideLabel={true}
+                                    buttonStyle={CreateRecordStyles.inputDropdown}
+                                />
+                            </View>
                         </View>
+                    </View>
+
+                    <View style={[LayoutStyles.rowEnd, { marginTop: 15 }]}>
+                        <PrimaryButton
+                            title={loading ? "Menyimpan..." : "Simpan"}
+                            onPress={handleSave}
+                            style={[GlobalStyles.btnSimpan, { paddingHorizontal: 30 }]}
+                            disabled={loading}
+                        />
                     </View>
                 </ScrollView>
             </KeyboardAvoidingView>

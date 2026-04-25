@@ -6,13 +6,16 @@ import { GlobalStyles } from '../../styles/GlobalStyles';
 
 interface Props extends InputTextProps {
   label: string;
+  placeholder?: string;
   containerStyle?: StyleProp<ViewStyle>;
+  hideLabel?: boolean;
+  buttonStyle?: any;
 }
 
-export default function LabeledInput({ label, containerStyle, variant = 'form', ...props }: Props) {
+export default function LabeledInput({ label, containerStyle, hideLabel = false, variant = 'form', ...props }: Props) {
   return (
-    <View style={[GlobalStyles.inputWrapper, containerStyle]}>
-      <TextLabel style={GlobalStyles.inputLabel}>{label}</TextLabel>
+    <View style={[!hideLabel && GlobalStyles.inputWrapper, containerStyle]}>
+      {!hideLabel && <TextLabel style={GlobalStyles.inputLabel}>{label}</TextLabel>}
       <InputText variant={variant} {...props} />
     </View>
   );

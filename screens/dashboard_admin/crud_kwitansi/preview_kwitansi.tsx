@@ -18,6 +18,25 @@ export function PreviewKwitansi() {
 
   const isOrto = item.tb_rekam_medis?.layanan === 'Ortodental' || item.tujuan_pembayaran?.toLowerCase().includes('orto');
 
+  const terbilang = (n: number): string => {
+    const words = ["", "Satu", "Dua", "Tiga", "Empat", "Lima", "Enam", "Tujuh", "Delapan", "Sembilan", "Sepuluh", "Sebelas"];
+    if (n < 12) return words[n];
+    if (n < 20) return terbilang(n - 10) + " Belas";
+    if (n < 100) return terbilang(Math.floor(n / 10)) + " Puluh " + terbilang(n % 10);
+    if (n < 200) return "Seratus " + terbilang(n - 100);
+    if (n < 1000) return terbilang(Math.floor(n / 100)) + " Ratus " + terbilang(n % 100);
+    if (n < 2000) return "Seribu " + terbilang(n - 1000);
+    if (n < 1000000) return terbilang(Math.floor(n / 1000)) + " Ribu " + terbilang(n % 1000);
+    if (n < 1000000000) return terbilang(Math.floor(n / 1000000)) + " Juta " + terbilang(n % 1000000);
+    if (n < 1000000000000) return terbilang(Math.floor(n / 1000000000)) + " Miliar " + terbilang(n % 1000000000);
+    return "";
+  };
+
+  const getTerbilang = (num: number) => {
+    if (isNaN(num) || num === 0) return "-";
+    return (terbilang(num) + " Rupiah").replace(/\s+/g, ' ').trim();
+  };
+
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
     if (isNaN(date.getTime())) return dateString;
@@ -47,35 +66,76 @@ export function PreviewKwitansi() {
           <head>
             <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no" />
             <style>
-              @page { margin: 20px; size: A4 landscape; }
-              body { margin: 0; padding: 0; background-color: #ffffff; width: 100%; }
-              .receipt-container { background-color: white; padding: 30px; border: 2px solid #000; box-sizing: border-box; }
-              .header-container { display: flex; align-items: center; justify-content: space-between; margin-bottom: 5px; }
-              .logo-aligner { width: 80px; text-align: center; }
-              .logo-circle { width: 80px; height: 80px; display: flex; align-items: center; justify-content: center; }
+              @page { 
+                margin: 0; 
+                size: 21cm 11cm; 
+              }
+              body { 
+                margin: 0; 
+                padding: 0; 
+                background-color: #ffffff; 
+                width: 21cm; 
+                height: 11cm;
+              }
+              .receipt-container { 
+                background-color: white; 
+                padding: 20px 35px; 
+                border: 2px solid #000; 
+                box-sizing: border-box;
+                width: 100%;
+                height: 100%;
+                display: flex;
+                flex-direction: column;
+                justify-content: space-between;
+              }
+            <style>
+              @page { 
+                margin: 0; 
+                size: 21cm 11cm; 
+              }
+              body { 
+                margin: 0; 
+                padding: 0; 
+                background-color: #ffffff; 
+                width: 21cm; 
+                height: 11cm;
+              }
+              .receipt-container { 
+                background-color: white; 
+                padding: 15px 25px; 
+                border: 2px solid #000; 
+                box-sizing: border-box;
+                width: 100%;
+                height: 100%;
+                display: flex;
+                flex-direction: column;
+              }
+              .header-container { display: flex; align-items: center; justify-content: space-between; margin-bottom: 2px; }
+              .logo-aligner { width: 70px; text-align: center; }
+              .logo-circle { width: 70px; height: 70px; display: flex; align-items: center; justify-content: center; }
               .header-text-container { flex: 1; text-align: center; color: #000; }
-              .title-umum { font-size: 24px; font-weight: bold; font-family: serif; margin: 0; }
-              .doctor-name { font-size: 22px; font-weight: 900; margin: 5px 0; font-family: sans-serif; }
-              .sip-text { font-size: 14px; font-weight: bold; margin-bottom: 4px; font-family: sans-serif; }
-              .address-text { font-size: 14px; margin: 0; font-family: sans-serif; }
-              .double-line-container { margin-top: 15px; margin-bottom: 20px; }
-              .line-thick { height: 4px; background-color: #000; margin-bottom: 3px; }
+              .title-umum { font-size: 19px; font-weight: bold; font-family: serif; margin: 0; }
+              .doctor-name { font-size: 17px; font-weight: 900; margin: 1px 0; font-family: sans-serif; }
+              .sip-text { font-size: 11px; font-weight: bold; margin-bottom: 1px; font-family: sans-serif; }
+              .address-text { font-size: 11px; margin: 0; font-family: sans-serif; }
+              .double-line-container { margin-top: 5px; margin-bottom: 8px; }
+              .line-thick { height: 3px; background-color: #000; margin-bottom: 2px; }
               .line-thin { height: 1px; background-color: #000; }
-              .receipt-title-box { text-align: center; margin: 20px 0; }
-              .receipt-title { font-size: 22px; font-weight: bold; font-family: serif; margin: 0; }
-              .receipt-no { font-size: 20px; font-family: serif; margin-top: 5px; }
-              .info-row { display: flex; margin-bottom: 15px; }
-              .sub-info-row { display: flex; margin-bottom: 15px; margin-left: 50px; }
-              .label { width: 180px; font-size: 18px; font-family: serif; font-style: italic; font-weight: bold; }
-              .sub-label { width: 130px; font-size: 18px; font-family: serif; font-style: italic; font-weight: bold; }
-              .colon { width: 30px; font-size: 18px; font-family: serif; font-weight: bold; text-align: center; }
-              .value { flex: 1; font-size: 18px; font-family: serif; }
-              .footer { margin-top: 40px; }
+              .receipt-title-box { text-align: center; margin-bottom: 10px; display: flex; flex-direction: row; justify-content: center; align-items: baseline; gap: 30px; }
+              .receipt-title { font-size: 18px; font-weight: bold; font-family: serif; text-decoration: underline; margin: 0; }
+              .receipt-no { font-size: 16px; font-family: serif; margin: 0; }
+              .info-section { flex: 1; display: flex; flex-direction: column; gap: 8px; margin-top: 5px; }
+              .info-row { display: flex; align-items: flex-start; }
+              .label { width: 150px; font-size: 15px; font-family: serif; font-style: italic; font-weight: bold; }
+              .colon { width: 20px; font-size: 15px; font-family: serif; font-weight: bold; text-align: center; }
+              .value { flex: 1; font-size: 15px; font-family: serif; min-height: 20px; line-height: 1.3; }
+              .footer { margin-top: 10px; }
               .nominal-row { display: flex; justify-content: space-between; align-items: flex-end; }
               .nominal-box-wrapper { width: 45%; }
-              .nominal-text { font-size: 20px; font-family: serif; font-weight: bold; font-style: italic; margin: 8px 10px; }
-              .admin-sign { text-align: right; width: 45%; }
-              .date-info { font-size: 16px; font-family: serif; margin-bottom: 80px; }
+              .nominal-text { font-size: 18px; font-family: serif; font-weight: bold; font-style: italic; margin: 5px 10px; }
+              .admin-sign { text-align: center; width: 35%; padding-bottom: 5px; }
+              .date-info { font-size: 14px; font-family: serif; margin-bottom: 50px; }
+              .sign-name { font-size: 14px; font-family: serif; font-weight: bold; }
             </style>
           </head>
           <body>
@@ -83,41 +143,43 @@ export function PreviewKwitansi() {
               <div class="header-container">
                 <div class="logo-aligner">
                   <div class="logo-circle">
-                    <img src="${logoUri}" style="width: 80px; height: 80px; border-radius: 40px; object-fit: cover; border: 3px solid #C62828;" />
+                    <img src="${logoUri}" style="width: 60px; height: 60px; border-radius: 30px; object-fit: cover; border: 2px solid #C62828;" />
                   </div>
                 </div>
                 <div class="header-text-container">
                   ${isOrto ? headerContentOrto : headerContentUmum}
                 </div>
-                <div style="width: 80px;"></div>
+                <div style="width: 70px;"></div>
               </div>
-
+    
               <div class="double-line-container">
                 <div class="line-thick"></div>
                 <div class="line-thin"></div>
               </div>
-
+    
               <div class="receipt-title-box">
                 <div class="receipt-title">BUKTI PEMBAYARAN</div>
                 <div class="receipt-no">No: ${item.no_kwitansi || '...........................'}</div>
               </div>
-
-              <div class="info-row">
-                <div class="label">Telah terima dari</div><div class="colon">:</div><div class="value">${item.tb_pasien?.nama_pasien || ''}</div>
+    
+              <div class="info-section">
+                <div class="info-row">
+                  <div class="label">Telah terima dari</div><div class="colon">:</div><div class="value">${item.tb_pasien?.nama_pasien || ''}</div>
+                </div>
+                <div class="info-row">
+                  <div class="label">Banyaknya uang</div><div class="colon">:</div><div class="value">${getTerbilang(Number(item.rp))}</div>
+                </div>
+                <div class="info-row">
+                  <div class="label">Untuk Pembayaran</div><div class="colon">:</div><div class="value">${item.tujuan_pembayaran || ''}</div>
+                </div>
+                <div class="info-row">
+                  <div class="label">Diagnosis</div><div class="colon">:</div><div class="value">${item.tb_rekam_medis?.diagnosa || '-'}</div>
+                </div>
+                <div class="info-row">
+                  <div class="label">Obat</div><div class="colon">:</div><div class="value">${item.obat || '-'}</div>
+                </div>
               </div>
-              <div class="info-row">
-                <div class="label">Banyaknya uang</div><div class="colon">:</div><div class="value">${Number(item.rp).toLocaleString('id-ID')} Rupiah</div>
-              </div>
-              <div class="info-row">
-                <div class="label">Untuk Pembayaran</div><div class="colon">:</div><div class="value">${item.tujuan_pembayaran || ''}</div>
-              </div>
-              <div class="sub-info-row">
-                <div class="sub-label">Diagnosis</div><div class="colon">:</div><div class="value">${item.tb_rekam_medis?.diagnosa || '-'}</div>
-              </div>
-              <div class="sub-info-row">
-                <div class="sub-label">Obat</div><div class="colon">:</div><div class="value">${item.obat || '-'}</div>
-              </div>
-
+    
               <div class="footer">
                 <div class="nominal-row">
                   <div class="nominal-box-wrapper">
@@ -135,10 +197,14 @@ export function PreviewKwitansi() {
         </html>
       `;
 
-      const { uri } = await Print.printToFileAsync({ html: htmlContent, width: 1123, height: 794 });
+      const { uri } = await Print.printToFileAsync({ 
+        html: htmlContent, 
+        width: 794, // 21cm @ 96dpi
+        height: 415 // 11cm @ 96dpi
+      });
       if (uri) {
         await Sharing.shareAsync(uri, { UTI: '.pdf', mimeType: 'application/pdf', dialogTitle: 'Ekspor Kwitansi' });
-        navigation.popToTop();
+        navigation.goBack();
       }
     } catch (error: any) {
       Alert.alert('Gagal Mengekspor', error.message);
@@ -196,7 +262,7 @@ export function PreviewKwitansi() {
             <View style={GlobalStyles.receiptInfoRow}>
               <Text style={GlobalStyles.receiptLabel}>Banyaknya uang</Text>
               <Text style={GlobalStyles.receiptColon}>:</Text>
-              <Text style={GlobalStyles.receiptValue}>{item.rp.toLocaleString('id-ID')} Rupiah</Text>
+              <Text style={GlobalStyles.receiptValue}>{getTerbilang(item.rp)}</Text>
             </View>
             <View style={GlobalStyles.receiptInfoRow}>
               <Text style={GlobalStyles.receiptLabel}>Untuk Pembayaran</Text>

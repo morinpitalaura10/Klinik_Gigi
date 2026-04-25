@@ -77,8 +77,18 @@ export function CreateRecordAdmin() {
     );
 
     const handleSave = async () => {
-        if (!selectedPasienId || !diagnosa.trim() || !layanan) {
-            showAlert({ title: 'Peringatan', message: 'Harap isi semua data (Pasien, Layanan, dan Keluhan)!', type: 'warning' });
+        if (!selectedPasienId) {
+            showAlert({ title: 'Pasien Belum Dipilih', message: 'Harap pilih nama pasien dari daftar yang tersedia.', type: 'warning' });
+            return;
+        }
+
+        if (!layanan) {
+            showAlert({ title: 'Layanan Kosong', message: 'Harap pilih jenis layanan (Umum atau Ortodental).', type: 'warning' });
+            return;
+        }
+
+        if (!diagnosa.trim()) {
+            showAlert({ title: 'Keterangan Kosong', message: 'Harap isi bagian Keluhan/Diagnosis pasien.', type: 'warning' });
             return;
         }
 
@@ -88,7 +98,6 @@ export function CreateRecordAdmin() {
                 id_pasien: parseInt(selectedPasienId),
                 layanan: layanan,
                 diagnosa: diagnosa,
-                gigi: editItem?.gigi || '1',
                 tanggal: new Date().toLocaleDateString('en-CA'),
                 status: editItem?.status || 'Menunggu'
             };
@@ -109,9 +118,17 @@ export function CreateRecordAdmin() {
 
             if (error) throw error;
 
-            showAlert({ title: 'Berhasil', message: 'Dental record berhasil disimpan.', type: 'success', onConfirm: () => navigation.goBack() });
+            showAlert({ 
+                title: 'Berhasil Disimpan', 
+                message: editItem ? 'Perubahan rekam medis berhasil diperbarui.' : 'Rekam medis baru berhasil ditambahkan.', 
+                type: 'success', 
+                onConfirm: () => navigation.goBack() 
+            });
         } catch (error: any) {
-            showAlert({ title: 'Gagal', message: error.message, type: 'error' });
+            let errorMsg = 'Gagal menyimpan data rekam medis.';
+            if (error.message.includes('not-null')) errorMsg = 'Data wajib tidak boleh kosong.';
+            showAlert({ title: 'Simpan Gagal', message: errorMsg, type: 'error' });
+            console.error('Record Save Error:', error.message);
         } finally {
             setLoading(false);
         }
@@ -190,7 +207,7 @@ export function CreateRecordAdmin() {
                 <TouchableOpacity style={GlobalStyles.selectionModalOverlay} activeOpacity={1} onPress={() => setPasienModalVisible(false)}>
                     <View style={GlobalStyles.selectionModalContent}>
                         <Text style={GlobalStyles.selectionModalTitle}>Pilih Pasien</Text>
-                        <ScrollView style={{ maxHeight: 300, width: '100%' }}>
+                        <ScrollView style={GlobalStyles.modalScrollViewContent}>
                             {pasienList.map(p => (
                                 <TouchableOpacity
                                     key={p.id_pasien}

@@ -36,10 +36,10 @@ export default function CaptchaBox({ isChecked, onValidChange, containerStyle }:
   return (
     <View style={[GlobalStyles.captchaSection, containerStyle]}>
       <Text style={GlobalStyles.captchaText}>Verifikasi Keamanan:</Text>
-      <View style={[GlobalStyles.captchaMathBox, { marginTop: 8 }]}>
-         <View style={{flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between'}}>
+      <View style={[GlobalStyles.captchaMathBox, GlobalStyles.mt8]}>
+         <View style={GlobalStyles.captchaQuestionRow}>
            <Text style={GlobalStyles.captchaMathQuestion}>Berapa {num1} + {num2} = ?</Text>
-           <Text onPress={generateCaptcha} style={{color: '#007BFF', fontSize: 20, marginLeft: 10}}>↻</Text>
+           <Text onPress={generateCaptcha} style={GlobalStyles.captchaRefreshIcon}>↻</Text>
          </View>
          <TextInput 
             style={GlobalStyles.captchaMathInput}

@@ -11,7 +11,7 @@ import {
 } from 'react-native';
 import { MaterialCommunityIcons, Feather } from '@expo/vector-icons';
 import { supabase } from '../../../utils/supabase';
-import { Colors, GlobalStyles, LayoutStyles } from '../../../styles/GlobalStyles';
+import { Colors, GlobalStyles, LayoutStyles, PatientTableStyles } from '../../../styles/GlobalStyles';
 import AdminLayout from '../../../components/templates/AdminLayout';
 import { useFocusEffect, useNavigation } from '@react-navigation/native';
 
@@ -72,129 +72,102 @@ export function TampilUsers() {
       {loading && !refreshing ? (
         <ActivityIndicator size="large" color={Colors.black} style={LayoutStyles.mt50} />
       ) : (
-        <View style={LayoutStyles.flex1}>
-          <View style={LayoutStyles.pt10}>
-            <View style={[GlobalStyles.searchRow, LayoutStyles.ph20]}>
-              <View style={GlobalStyles.searchWrapper}>
-                <View style={GlobalStyles.listSearchContainer}>
-                  <Feather name="search" size={20} color="#888" style={GlobalStyles.inputIcon} />
-                  <TextInput
-                    style={GlobalStyles.listSearchInput}
-                    placeholder="Cari nama atau username..."
-                    value={searchQuery}
-                    onChangeText={setSearchQuery}
-                  />
-                </View>
+        <ScrollView 
+          style={LayoutStyles.flex1} 
+          contentContainerStyle={{ paddingBottom: 40 }}
+          showsVerticalScrollIndicator={true}
+        >
+          {/* Header Section */}
+          <View style={PatientTableStyles.headerContainer}>
+            <View style={PatientTableStyles.headerRow}>
+              <View>
+                <Text style={PatientTableStyles.headerTitle}>Manajemen User</Text>
+                <Text style={PatientTableStyles.headerSubtitle}>Kelola akses pengguna sistem</Text>
               </View>
-
-              <View style={GlobalStyles.listAddButtonContainer}>
-                <TouchableOpacity 
-                   style={GlobalStyles.listAddButton}
-                  onPress={() => navigation.navigate('CreateUser')}
-                >
-                  <MaterialCommunityIcons name="plus" size={24} color="white" />
-                  <Text style={GlobalStyles.listAddButtonText}>Tambah</Text>
-                </TouchableOpacity>
-              </View>
+              <TouchableOpacity
+                style={PatientTableStyles.btnNewPatient}
+                onPress={() => navigation.navigate('CreateUser')}
+              >
+                <MaterialCommunityIcons name="plus" size={20} color="#FFF" />
+                <Text style={PatientTableStyles.btnNewPatientText}>Tambah User</Text>
+              </TouchableOpacity>
             </View>
-            <View style={[GlobalStyles.listHeader, LayoutStyles.ph20, LayoutStyles.mt0, LayoutStyles.mb15]}>
-              <Text style={GlobalStyles.listTitle}>Daftar Pengguna</Text>
+
+            <View style={PatientTableStyles.searchContainer}>
+              <MaterialCommunityIcons name="magnify" size={24} color="#888" />
+              <TextInput
+                style={PatientTableStyles.searchInput}
+                placeholder="Cari nama atau username..."
+                value={searchQuery}
+                onChangeText={setSearchQuery}
+              />
             </View>
           </View>
-          <View style={[GlobalStyles.tableContainer, LayoutStyles.mh20]}>
-            <ScrollView horizontal={true} showsHorizontalScrollIndicator={false}>
-              <View style={[GlobalStyles.tableContentWrapper, LayoutStyles.tableFixed700]}>
-                <View style={GlobalStyles.tableHeader}>
-                  <View style={[GlobalStyles.tableHeaderCell, GlobalStyles.tableCellNo]}>
-                    <Text style={GlobalStyles.tableHeaderText}>No</Text>
-                  </View>
-                  <View style={[GlobalStyles.tableHeaderCell, GlobalStyles.tableCellName]}>
-                    <Text style={GlobalStyles.tableHeaderText}>Nama Pengguna</Text>
-                  </View>
-                  <View style={[GlobalStyles.tableHeaderCell, GlobalStyles.tableCellRole]}>
-                    <Text style={GlobalStyles.tableHeaderText}>Role</Text>
-                  </View>
-                  <View style={[GlobalStyles.tableHeaderCell, GlobalStyles.tableCellSpec]}>
-                    <Text style={GlobalStyles.tableHeaderText}>Spesialisasi</Text>
-                  </View>
-                  <View style={[GlobalStyles.tableHeaderCell, GlobalStyles.tableCellAction]}>
-                    <Text style={GlobalStyles.tableHeaderText}>Aksi</Text>
-                  </View>
-                </View>
 
-                <FlatList
-                  data={filteredUsers}
-                  keyExtractor={(item) => item.id_users.toString()}
-                  refreshing={refreshing}
-                  onRefresh={() => {
-                    setRefreshing(true);
-                    fetchUsers();
-                  }}
-                  renderItem={({ item, index }) => {
-                    const isLast = index === filteredUsers.length - 1;
-                    return (
-                      <View style={[
-                        GlobalStyles.tableRow,
-                        isLast && GlobalStyles.tableRowLast
-                      ]}>
-                        <View style={[GlobalStyles.tableCell, GlobalStyles.tableCellNo]}>
-                          <Text style={GlobalStyles.tableRowText}>{index + 1}</Text>
-                        </View>
-                        <View style={[GlobalStyles.tableCell, GlobalStyles.tableCellName]}>
-                          <View>
-                            <Text style={GlobalStyles.tableRowText}>{item.nama_users}</Text>
-                            <Text style={GlobalStyles.userRole}>@{item.us}</Text>
-                          </View>
-                        </View>
-                        <View style={[GlobalStyles.tableCell, GlobalStyles.tableCellRole]}>
-                          <Text style={[
-                            GlobalStyles.tableRowText, 
-                            LayoutStyles.textBold, 
-                            item.role === 'admin' && LayoutStyles.textPrimary
-                          ]}>
-                            {item.role === 'admin' ? 'Admin' : 'Dokter'}
+          <View style={PatientTableStyles.tableWrapper}>
+            <View style={{ width: '100%' }}>
+              {/* Header */}
+              <View style={{ flexDirection: 'row', backgroundColor: Colors.primary, paddingVertical: 14 }}>
+                <View style={{ flex: 0.4, justifyContent: 'center', alignItems: 'center' }}><Text style={{ color: '#FFF', fontWeight: 'bold', fontSize: 13, textAlign: 'center' }}>No</Text></View>
+                <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}><Text style={{ color: '#FFF', fontWeight: 'bold', fontSize: 13, textAlign: 'center' }}>Nama</Text></View>
+                <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}><Text style={{ color: '#FFF', fontWeight: 'bold', fontSize: 13, textAlign: 'center' }}>Username</Text></View>
+                <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}><Text style={{ color: '#FFF', fontWeight: 'bold', fontSize: 13, textAlign: 'center' }}>Email</Text></View>
+                <View style={{ flex: 0.7, justifyContent: 'center', alignItems: 'center' }}><Text style={{ color: '#FFF', fontWeight: 'bold', fontSize: 13, textAlign: 'center' }}>Role</Text></View>
+                <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}><Text style={{ color: '#FFF', fontWeight: 'bold', fontSize: 13, textAlign: 'center' }}>Spesialisasi</Text></View>
+                <View style={{ flex: 0.8, justifyContent: 'center', alignItems: 'center' }}><Text style={{ color: '#FFF', fontWeight: 'bold', fontSize: 13, textAlign: 'center' }}>Aksi</Text></View>
+              </View>
+
+              {/* Body */}
+              <View style={PatientTableStyles.tableBody}>
+                {filteredUsers.length > 0 ? (
+                  filteredUsers.map((item, index) => (
+                    <View key={item.id_users.toString()} style={{ flexDirection: 'row', borderBottomWidth: 1, borderColor: '#EBEBEB', paddingVertical: 14, alignItems: 'center', backgroundColor: '#FFF' }}>
+                      <View style={{ flex: 0.4, justifyContent: 'center', alignItems: 'center' }}>
+                        <Text style={{ fontSize: 13, fontWeight: 'bold', color: '#222', textAlign: 'center' }}>{index + 1}</Text>
+                      </View>
+                      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', paddingHorizontal: 6 }}>
+                        <Text style={{ fontSize: 13, fontWeight: 'bold', color: '#222', textAlign: 'center' }} numberOfLines={1}>{item.nama_users}</Text>
+                      </View>
+                      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', paddingHorizontal: 6 }}>
+                        <Text style={{ fontSize: 12, color: '#555', textAlign: 'center' }} numberOfLines={1}>@{item.us}</Text>
+                      </View>
+                      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', paddingHorizontal: 6 }}>
+                        <Text style={{ fontSize: 12, color: '#444', textAlign: 'center' }} numberOfLines={1}>{item.email_users || '-'}</Text>
+                      </View>
+                      <View style={{ flex: 0.7, justifyContent: 'center', alignItems: 'center' }}>
+                        <View style={{ backgroundColor: item.role === 'admin' ? '#E3F2FD' : '#E8F5E9', paddingHorizontal: 8, paddingVertical: 4, borderRadius: 10 }}>
+                          <Text style={{ fontSize: 10, fontWeight: '900', color: item.role === 'admin' ? '#1976D2' : '#2E7D32' }}>
+                            {item.role === 'admin' ? 'ADMIN' : 'DOKTER'}
                           </Text>
-                        </View>
-                        <View style={[GlobalStyles.tableCell, GlobalStyles.tableCellSpec]}>
-                          <Text style={GlobalStyles.tableRowText}>
-                            {item.role === 'dokter' 
-                              ? (item.tb_dokter && item.tb_dokter[0]?.spesialisasi) || 'Umum' 
-                              : '-'}
-                          </Text>
-                        </View>
-                        <View style={[GlobalStyles.tableCell, GlobalStyles.tableCellAction]}>
-                          <TouchableOpacity 
-                            style={GlobalStyles.cardActionBtn}
-                            onPress={() => navigation.navigate('ReadUser', { id: item.id_users })}
-                          >
-                            <MaterialCommunityIcons name="eye-outline" size={24} color="#2E50D4" />
-                          </TouchableOpacity>
-                          <TouchableOpacity 
-                            style={GlobalStyles.cardActionBtn}
-                            onPress={() => navigation.navigate('UpdateUser', { editUser: item })}
-                          >
-                            <MaterialCommunityIcons name="square-edit-outline" size={24} color="#EBC112" />
-                          </TouchableOpacity>
-                          <TouchableOpacity 
-                            style={GlobalStyles.cardActionBtn}
-                            onPress={() => navigation.navigate('DeleteUser', { id: item.id_users, name: item.nama_users })}
-                          >
-                            <MaterialCommunityIcons name="trash-can-outline" size={24} color={Colors.primary} />
-                          </TouchableOpacity>
                         </View>
                       </View>
-                    );
-                  }}
-                  ListEmptyComponent={
-                    <View style={GlobalStyles.emptyContent}>
-                      <Text style={GlobalStyles.emptyText}>Data tidak ditemukan</Text>
+                      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', paddingHorizontal: 6 }}>
+                        <Text style={{ fontSize: 13, fontWeight: 'bold', color: '#222', textAlign: 'center' }} numberOfLines={1}>
+                          {item.role === 'dokter' ? (item.tb_dokter && item.tb_dokter[0]?.spesialisasi) || 'Umum' : '-'}
+                        </Text>
+                      </View>
+                      <View style={{ flex: 0.8, flexDirection: 'row', justifyContent: 'center', alignItems: 'center', gap: 6 }}>
+                        <TouchableOpacity onPress={() => navigation.navigate('UpdateUser', { editUser: item })}>
+                          <MaterialCommunityIcons name="square-edit-outline" size={20} color="#EBC112" />
+                        </TouchableOpacity>
+                        <TouchableOpacity onPress={() => navigation.navigate('ReadUser', { id: item.id_users })}>
+                          <MaterialCommunityIcons name="information-outline" size={20} color="#4CAF50" />
+                        </TouchableOpacity>
+                        <TouchableOpacity onPress={() => navigation.navigate('DeleteUser', { id: item.id_users, name: item.nama_users })}>
+                          <MaterialCommunityIcons name="trash-can-outline" size={20} color="#D32F2F" />
+                        </TouchableOpacity>
+                      </View>
                     </View>
-                  }
-                />
+                  ))
+                ) : (
+                  <View style={{ width: '100%', height: 100, alignItems: 'center', justifyContent: 'center' }}>
+                    <Text style={[GlobalStyles.emptyText, { textAlign: 'center' }]}>Data pengguna tidak ditemukan</Text>
+                  </View>
+                )}
               </View>
-            </ScrollView>
+            </View>
           </View>
-        </View>
+        </ScrollView>
       )}
     </AdminLayout>
   );

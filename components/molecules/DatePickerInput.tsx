@@ -10,11 +10,12 @@ interface Props {
   value: string;
   onChange: (date: string) => void;
   placeholder?: string;
+  hideLabel?: boolean;
+  buttonStyle?: any;
 }
 
-export default function DatePickerInput({ label, value, onChange, placeholder = "Pilih tanggal..." }: Props) {
+export default function DatePickerInput({ label, value, onChange, placeholder = "Pilih tanggal...", hideLabel = false, buttonStyle }: Props) {
   const [show, setShow] = useState(false);
-
 
   const getDateObject = (dateString: string) => {
     if (!dateString) return new Date();
@@ -35,11 +36,11 @@ export default function DatePickerInput({ label, value, onChange, placeholder = 
   };
 
   return (
-    <View style={GlobalStyles.inputWrapper}>
-      <TextLabel style={GlobalStyles.inputLabel}>{label}</TextLabel>
+    <View style={!hideLabel && GlobalStyles.inputWrapper}>
+      {!hideLabel && <TextLabel style={GlobalStyles.inputLabel}>{label}</TextLabel>}
       
       <TouchableOpacity 
-        style={GlobalStyles.pickerButton} 
+        style={[GlobalStyles.pickerButton, buttonStyle]} 
         onPress={() => setShow(true)}
         activeOpacity={0.7}
       >

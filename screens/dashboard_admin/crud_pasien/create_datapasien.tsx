@@ -3,18 +3,16 @@ import {
     View,
     Text,
     ScrollView,
-    Alert,
     TouchableOpacity,
     KeyboardAvoidingView,
     Platform
 } from 'react-native';
 import { supabase } from '../../../utils/supabase';
-import { GlobalStyles, LayoutStyles } from '../../../styles/GlobalStyles';
+import { LayoutStyles, CreateRecordStyles, Colors } from '../../../styles/GlobalStyles';
 import AdminLayout from '../../../components/templates/AdminLayout';
 import LabeledInput from '../../../components/molecules/LabeledInput';
 import DropdownInput from '../../../components/molecules/DropdownInput';
 import DatePickerInput from '../../../components/molecules/DatePickerInput';
-import PrimaryButton from '../../../components/atoms/PrimaryButton';
 import { useNavigation } from '@react-navigation/native';
 import { useAlert } from '../../../context/AlertContext';
 
@@ -38,8 +36,27 @@ export function CreatePasien() {
     ];
 
     const handleSave = async () => {
-        if (!nama || !tglLahir || !jk || !nope || !alamat) {
-            showAlert({ title: 'Peringatan', message: 'Harap isi kolom wajib (Nama, Tgl Lahir, JK, No HP, Alamat)!', type: 'warning' });
+        if (!nama.trim()) {
+            showAlert({ title: 'Nama Kosong', message: 'Harap masukkan nama lengkap pasien.', type: 'warning' });
+            return;
+        }
+        if (!tglLahir) {
+            showAlert({ title: 'Tanggal Lahir', message: 'Harap pilih tanggal lahir pasien.', type: 'warning' });
+            return;
+        }
+        if (!jk) {
+            showAlert({ title: 'Jenis Kelamin', message: 'Harap pilih jenis kelamin pasien.', type: 'warning' });
+            return;
+        }
+
+        const cleanedNope = nope.replace(/[^0-9]/g, '');
+        if (!cleanedNope) {
+            showAlert({ title: 'Nomor HP Salah', message: 'Harap masukkan nomor HP pasien dengan angka saja.', type: 'warning' });
+            return;
+        }
+
+        if (!alamat.trim()) {
+            showAlert({ title: 'Alamat Kosong', message: 'Harap isi alamat lengkap pasien.', type: 'warning' });
             return;
         }
 
@@ -54,103 +71,120 @@ export function CreatePasien() {
                     jk: jk,
                     alamat: alamat,
                     pekerjaan: pekerjaan,
-                    nope: nope,
+                    nope: cleanedNope,
                     alergi_obat: alergi
                 });
 
             if (error) throw error;
-            showAlert({ title: 'Berhasil', message: 'Data pasien baru berhasil ditambahkan.', type: 'success', onConfirm: () => navigation.goBack() });
+            showAlert({ title: 'Berhasil', message: 'Data pasien baru berhasil ditambahkan ke sistem.', type: 'success', onConfirm: () => navigation.goBack() });
         } catch (error: any) {
-            showAlert({ title: 'Gagal Menyimpan', message: error.message, type: 'error' });
+            let userMsg = 'Gagal menyimpan data pasien.';
+            if (error.message.includes('unique constraint')) userMsg = 'Nomor HP atau data pasien sudah terdaftar.';
+            showAlert({ title: 'Gagal Menyimpan', message: userMsg, type: 'error' });
+            console.error('Pasien Save Error:', error.message);
         } finally {
             setLoading(false);
         }
     };
 
     return (
-        <AdminLayout
-            noScroll={true}
-            customRightTitle="Manajemen Pasien"
-        >
+        <AdminLayout noScroll={true} customRightTitle="Admin">
             <KeyboardAvoidingView
                 behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
                 style={LayoutStyles.flex1}
             >
-                <ScrollView contentContainerStyle={LayoutStyles.scrollContent}>
-                    <View style={GlobalStyles.formCard}>
-                        <Text style={GlobalStyles.formSectionTitle}>TAMBAH DATA PASIEN</Text>
-                        <View style={GlobalStyles.formDivider} />
+                <ScrollView contentContainerStyle={CreateRecordStyles.mainContainer} showsVerticalScrollIndicator={false}>
+                    <View style={CreateRecordStyles.card}>
+                        <Text style={CreateRecordStyles.cardTitle}>TAMBAH DATA PASIEN BARU</Text>
+                        <View style={CreateRecordStyles.divider} />
 
+                        <Text style={CreateRecordStyles.fieldLabel}>Nama Pasien</Text>
                         <LabeledInput
-                            label="Nama Pasien"
+                            label=""
                             placeholder="Masukkan nama lengkap"
                             value={nama}
                             onChangeText={setNama}
+                            hideLabel={true}
+                            style={CreateRecordStyles.inputDropdown}
                         />
 
-                        <View style={LayoutStyles.rowBetween}>
-                            <View style={LayoutStyles.w50p}>
+                        <View style={{ flexDirection: 'row', gap: 15 }}>
+                            <View style={{ flex: 1 }}>
+                                <Text style={CreateRecordStyles.fieldLabel}>Tanggal Lahir</Text>
                                 <DatePickerInput
-                                    label="Tanggal Lahir"
+                                    label=""
                                     value={tglLahir}
                                     onChange={setTglLahir}
+                                    hideLabel={true}
+                                    buttonStyle={CreateRecordStyles.inputDropdown}
                                 />
                             </View>
-                            <View style={[LayoutStyles.w50p, { paddingLeft: 10 }]}>
+                            <View style={{ flex: 1 }}>
+                                <Text style={CreateRecordStyles.fieldLabel}>Jenis Kelamin</Text>
                                 <DropdownInput
-                                    label="Jenis Kelamin"
+                                    label=""
                                     options={jkOptions}
                                     selectedValue={jk}
                                     onValueChange={setJk}
+                                    hideLabel={true}
+                                    buttonStyle={CreateRecordStyles.inputDropdown}
                                 />
                             </View>
                         </View>
 
+                        <Text style={CreateRecordStyles.fieldLabel}>Nomor HP / WhatsApp</Text>
                         <LabeledInput
-                            label="Nomor HP / WhatsApp"
+                            label=""
                             placeholder="Contoh: 08123456789"
                             value={nope}
                             onChangeText={setNope}
                             keyboardType="phone-pad"
+                            hideLabel={true}
+                            style={CreateRecordStyles.inputDropdown}
                         />
 
+                        <Text style={CreateRecordStyles.fieldLabel}>Pekerjaan</Text>
                         <LabeledInput
-                            label="Pekerjaan"
+                            label=""
                             placeholder="Contoh: Pegawai Swasta"
                             value={pekerjaan}
                             onChangeText={setPekerjaan}
+                            hideLabel={true}
+                            style={CreateRecordStyles.inputDropdown}
                         />
 
+                        <Text style={CreateRecordStyles.fieldLabel}>Alamat Lengkap</Text>
                         <LabeledInput
-                            label="Alamat Lengkap"
+                            label=""
                             placeholder="Masukkan alamat tinggal"
                             value={alamat}
                             onChangeText={setAlamat}
                             multiline={true}
-                            numberOfLines={3}
+                            numberOfLines={1}
+                            hideLabel={true}
+                            style={[CreateRecordStyles.inputDropdown, { height: 60 }]}
                         />
 
+                        <Text style={CreateRecordStyles.fieldLabel}>Riwayat Alergi Obat</Text>
                         <LabeledInput
-                            label="Riwayat Alergi Obat"
+                            label=""
                             placeholder="Tulis '-' jika tidak ada"
                             value={alergi}
                             onChangeText={setAlergi}
+                            hideLabel={true}
+                            style={CreateRecordStyles.inputDropdown}
                         />
 
-                        <View style={[LayoutStyles.rowEnd, LayoutStyles.mt20]}>
+                        <View style={CreateRecordStyles.btnSimpanContainer}>
                             <TouchableOpacity
-                                style={GlobalStyles.btnBatal}
-                                onPress={() => navigation.goBack()}
-                            >
-                                <Text style={GlobalStyles.btnBatalText}>Batal</Text>
-                            </TouchableOpacity>
-
-                            <PrimaryButton
-                                title={loading ? "Menyimpan..." : "Tambah"}
+                                style={CreateRecordStyles.btnSimpan}
                                 onPress={handleSave}
-                                style={GlobalStyles.btnSimpan}
                                 disabled={loading}
-                            />
+                            >
+                                <Text style={CreateRecordStyles.btnSimpanText}>
+                                    {loading ? 'Menyimpan...' : 'Simpan'}
+                                </Text>
+                            </TouchableOpacity>
                         </View>
                     </View>
                 </ScrollView>

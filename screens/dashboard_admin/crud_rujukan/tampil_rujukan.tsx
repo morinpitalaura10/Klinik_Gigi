@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, FlatList, TouchableOpacity, Alert, ActivityIndicator } from 'react-native';
+import { View, Text, FlatList, TouchableOpacity, Alert, ActivityIndicator, ScrollView } from 'react-native';
 import { supabase } from '../../../utils/supabase';
 import { GlobalStyles, LayoutStyles, Colors } from '../../../styles/GlobalStyles';
 import AdminLayout from '../../../components/templates/AdminLayout';
@@ -12,6 +12,24 @@ export function TampilRujukan() {
   const [loading, setLoading] = useState(true);
   const navigation = useNavigation<any>();
   const { showAlert } = useAlert();
+  
+  const calculateUmur = (tglLahir: string) => {
+    if (!tglLahir) return '';
+    try {
+      const today = new Date();
+      const birthDate = new Date(tglLahir);
+      if (isNaN(birthDate.getTime())) return '';
+      let age = today.getFullYear() - birthDate.getFullYear();
+      const m = today.getMonth() - birthDate.getMonth();
+      if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) {
+        age--;
+      }
+      return age.toString() + ' Tahun';
+    } catch (e) {
+      return '';
+    }
+  };
+
 
   useFocusEffect(
     React.useCallback(() => {
@@ -27,7 +45,7 @@ export function TampilRujukan() {
         .from('tb_rujukan')
         .select(`
           *,
-          tb_pasien (nama_pasien),
+          tb_pasien (nama_pasien, jk, tgl_lahir, alamat),
           tb_rekam_medis (layanan, gigi, diagnosa, tanggal)
         `)
         .order('tgl', { ascending: false });
@@ -56,10 +74,12 @@ export function TampilRujukan() {
             ...item,
             detail_pasien: {
               nama_pasien: item.tb_pasien?.nama_pasien,
-
+              jenis_kelamin: item.tb_pasien?.jk,
+              umur: calculateUmur(item.tb_pasien?.tgl_lahir),
+              alamat: item.tb_pasien?.alamat
             },
             detail_medis: {
-              keluhan_rujukan: item.keluhan,
+              keluhan_rujukan: item.keluhan_rujukan || item.keluhan,
               diagnosa: item.tb_rekam_medis?.diagnosa
             },
             isOrto: item.tb_rekam_medis?.layanan === 'Ortodental'
@@ -75,7 +95,11 @@ export function TampilRujukan() {
 
   return (
     <AdminLayout noScroll={true} customRightTitle="Arsip Rujukan">
-      <View style={[LayoutStyles.flex1, LayoutStyles.ph20, LayoutStyles.pt10]}>
+      <ScrollView 
+        style={[LayoutStyles.flex1, LayoutStyles.ph20, LayoutStyles.pt10]}
+        contentContainerStyle={{ paddingBottom: 40 }}
+        showsVerticalScrollIndicator={true}
+      >
         <View style={[LayoutStyles.rowBetween, LayoutStyles.mb15]}>
           <Text style={GlobalStyles.formSectionTitle}>ARSIP RUJUKAN</Text>
           <TouchableOpacity
@@ -98,16 +122,16 @@ export function TampilRujukan() {
             <Text style={GlobalStyles.emptyText}>Belum ada histori rujukan.</Text>
           </View>
         ) : (
-          <FlatList
-            data={records}
-            keyExtractor={(item) => item.id_rujukan.toString()}
-            renderItem={renderItem}
-            contentContainerStyle={{ paddingBottom: 25, paddingTop: 5 }}
-            showsVerticalScrollIndicator={false}
-          />
+          <View>
+            {records.map((item) => (
+              <View key={item.id_rujukan.toString()}>
+                 {renderItem({ item })}
+              </View>
+            ))}
+          </View>
         )}
 
-      </View>
+      </ScrollView>
     </AdminLayout>
   );
 }
