@@ -33,7 +33,7 @@ export default function AuthTemplate({ children }: Props) {
             
             <View style={AuthStyles.bottomFull}>
               <ScrollView
-                style={{ width: '100%' }}
+                style={AuthStyles.w100p}
                 contentContainerStyle={AuthStyles.formContent}
                 showsVerticalScrollIndicator={false}
                 keyboardShouldPersistTaps="handled"

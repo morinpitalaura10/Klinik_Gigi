@@ -1,7 +1,7 @@
 import React, { createContext, useState, ReactNode, useContext } from 'react';
 import { Modal, View, Text, TouchableOpacity, StyleSheet, Animated } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-import { GlobalStyles, Colors } from '../styles/GlobalStyles';
+import { GlobalStyles, Colors, AlertStyles, LayoutStyles } from '../styles/GlobalStyles';
 
 type AlertType = 'success' | 'error' | 'info' | 'warning' | 'confirm';
 
@@ -79,23 +79,23 @@ export const AlertProvider = ({ children }: { children: ReactNode }) => {
         onRequestClose={hideAlert}
       >
         <View style={GlobalStyles.modalBackdrop}>
-          <View style={[GlobalStyles.modalBox, { paddingBottom: 20 }]}>
+          <View style={[GlobalStyles.modalBox, LayoutStyles.pb20]}>
             <MaterialCommunityIcons 
               name={icon.name as any} 
               size={60} 
               color={icon.color} 
-              style={{ marginBottom: 15 }} 
+              style={AlertStyles.icon} 
             />
             
             <Text style={GlobalStyles.modalText}>{options?.title}</Text>
-            <Text style={[GlobalStyles.modalText, { fontWeight: 'normal', fontSize: 14, marginTop: -10, marginBottom: 25 }]}>
+            <Text style={[GlobalStyles.modalText, AlertStyles.message]}>
               {options?.message}
             </Text>
 
             <View style={GlobalStyles.modalActionRow}>
               {options?.type === 'confirm' && (
                 <TouchableOpacity 
-                   style={[GlobalStyles.btnModalBatal, { borderRadius: 15 }]} 
+                   style={[GlobalStyles.btnModalBatal, AlertStyles.btnConfirm]} 
                    onPress={handleCancel}
                 >
                   <Text style={GlobalStyles.btnModalText}>{options.cancelText || 'Batal'}</Text>
@@ -105,11 +105,11 @@ export const AlertProvider = ({ children }: { children: ReactNode }) => {
               <TouchableOpacity 
                 style={[
                   GlobalStyles.btnModalHapus, 
+                  AlertStyles.btnConfirm,
                   { 
                     backgroundColor: options?.type === 'error' ? '#F44336' : (options?.type === 'success' ? '#4CAF50' : Colors.primary),
-                    borderRadius: 15,
-                    marginLeft: options?.type === 'confirm' ? 10 : 0
-                  }
+                  },
+                  options?.type === 'confirm' && AlertStyles.btnWithMargin
                 ]} 
                 onPress={handleConfirm}
               >

@@ -12,7 +12,7 @@ import {
 } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { supabase } from '../../utils/supabase';
-import { GlobalStyles, LayoutStyles, Colors, CreateRecordStyles } from '../../styles/GlobalStyles';
+import { GlobalStyles, LayoutStyles, Colors, CreateRecordStyles, DoctorStyles } from '../../styles/GlobalStyles';
 import AdminLayout from '../../components/templates/AdminLayout';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import { AuthContext } from '../../context/AuthContext';
@@ -137,21 +137,21 @@ export function IsiRekamMedis() {
                         {fetchingTindakan ? (
                             <ActivityIndicator size="small" color={Colors.primary} style={LayoutStyles.mv10} />
                         ) : (
-                            <View style={[LayoutStyles.flexRow, LayoutStyles.flexWrap, { marginBottom: 10 }]}>
+                            <View style={[LayoutStyles.flexRow, LayoutStyles.flexWrap, DoctorStyles.treatmentSelectionContainer]}>
                                 {tindakanList.map((t) => {
                                     const tIdStr = t.id_tindakan.toString();
                                     const isChecked = selectedTindakanIds.includes(tIdStr);
                                     return (
                                         <TouchableOpacity 
                                             key={tIdStr} 
-                                            style={{ marginRight: 15, marginBottom: 12 }} 
+                                            style={DoctorStyles.treatmentItem} 
                                             onPress={() => toggleTindakan(tIdStr, t.nama_tindakan)}
                                         >
-                                            <View style={[LayoutStyles.flexRow, LayoutStyles.alignCenter, { backgroundColor: isChecked ? '#FFF0F0' : '#F9F9F9', paddingHorizontal: 12, paddingVertical: 8, borderRadius: 10, borderWidth: 1, borderColor: isChecked ? Colors.primary : '#EEE' }]}>
-                                                <View style={[CreateRecordStyles.checkbox, isChecked && CreateRecordStyles.checkboxChecked, { marginRight: 8 }]}>
+                                            <View style={[LayoutStyles.flexRow, LayoutStyles.alignCenter, DoctorStyles.treatmentBadge, isChecked && DoctorStyles.treatmentBadgeChecked]}>
+                                                <View style={[CreateRecordStyles.checkbox, isChecked && CreateRecordStyles.checkboxChecked, DoctorStyles.checkboxInner]}>
                                                     {isChecked && <MaterialCommunityIcons name="check" size={12} color="#FFF" />}
                                                 </View>
-                                                <Text style={[CreateRecordStyles.checkboxLabel, { color: isChecked ? Colors.primary : '#444', fontWeight: isChecked ? 'bold' : 'normal' }]}>{t.nama_tindakan}</Text>
+                                                <Text style={[CreateRecordStyles.checkboxLabel, isChecked ? DoctorStyles.checkboxCheckedText : DoctorStyles.checkboxUncheckedText]}>{t.nama_tindakan}</Text>
                                             </View>
                                         </TouchableOpacity>
                                     );

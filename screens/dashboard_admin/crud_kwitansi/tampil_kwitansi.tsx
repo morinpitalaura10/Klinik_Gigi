@@ -159,7 +159,7 @@ export function TampilKwitansi() {
               <Text style={styles.infoValue} numberOfLines={2}>{item.tujuan_pembayaran || '-'}</Text>
             </View>
 
-            <View style={{ flexDirection: 'row', gap: 8, alignItems: 'center' }}>
+            <View style={[LayoutStyles.flexRow, LayoutStyles.gap8, LayoutStyles.alignCenter]}>
               <TouchableOpacity
                 style={styles.printButton}
                 onPress={() => navigation.navigate('PreviewKwitansi', { 

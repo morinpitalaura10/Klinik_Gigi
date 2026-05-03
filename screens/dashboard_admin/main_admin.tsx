@@ -149,20 +149,20 @@ export default function MainAdmin({ navigation }: any) {
         </View>
 
         {/* Kolom Kanan: Aktifitas Hari Ini */}
-        <View style={{ flex: 2 }}>
+        <View style={AdminDashboardStyles.rightColumnWrapper}>
           
-          <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10, paddingHorizontal: 5 }}>
-            <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-               <Text style={{ fontSize: 15, fontWeight: 'bold', color: Colors.primary }}>Hari : </Text>
-               <Text style={{ fontSize: 15, fontWeight: 'bold', color: '#333' }}>{getDateTimeParts().day}</Text>
+          <View style={AdminDashboardStyles.dateTimeContainer}>
+            <View style={AdminDashboardStyles.dateTimeItem}>
+               <Text style={AdminDashboardStyles.dateTimeLabel}>Hari : </Text>
+               <Text style={AdminDashboardStyles.dateTimeValue}>{getDateTimeParts().day}</Text>
             </View>
-            <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-               <Text style={{ fontSize: 15, fontWeight: 'bold', color: Colors.primary }}>Tanggal : </Text>
-               <Text style={{ fontSize: 15, fontWeight: 'bold', color: '#333' }}>{getDateTimeParts().date}</Text>
+            <View style={AdminDashboardStyles.dateTimeItem}>
+               <Text style={AdminDashboardStyles.dateTimeLabel}>Tanggal : </Text>
+               <Text style={AdminDashboardStyles.dateTimeValue}>{getDateTimeParts().date}</Text>
             </View>
-            <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-               <Text style={{ fontSize: 15, fontWeight: 'bold', color: Colors.primary }}>Jam : </Text>
-               <Text style={{ fontSize: 15, fontWeight: 'bold', color: '#333' }}>{getDateTimeParts().time}</Text>
+            <View style={AdminDashboardStyles.dateTimeItem}>
+               <Text style={AdminDashboardStyles.dateTimeLabel}>Jam : </Text>
+               <Text style={AdminDashboardStyles.dateTimeValue}>{getDateTimeParts().time}</Text>
             </View>
           </View>
 

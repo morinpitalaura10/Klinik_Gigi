@@ -183,7 +183,7 @@ export function TampilRujukan() {
               <Text style={styles.infoValue}>{item.user_klinik || '-'}</Text>
             </View>
 
-            <View style={{ flexDirection: 'row', gap: 8, alignItems: 'center' }}>
+            <View style={[LayoutStyles.flexRow, LayoutStyles.gap8, LayoutStyles.alignCenter]}>
               <TouchableOpacity
                 style={styles.printButton}
                 onPress={() => navigation.navigate('PreviewRujukan', { item: previewItem })}

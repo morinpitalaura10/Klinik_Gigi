@@ -111,7 +111,9 @@ export function ReadUser() {
               <View style={[PatientDetailStyles.gridRow, { borderBottomWidth: 0 }]}>
                   <View style={PatientDetailStyles.gridCell}>
                       <Text style={PatientDetailStyles.infoLabel}>Spesialisasi Dokter</Text>
-                      <Text style={PatientDetailStyles.infoValue}>{doctorData?.spesialisasi || 'Umum'}</Text>
+                      <Text style={PatientDetailStyles.infoValue}>
+                        {(doctorData?.spesialisasi || 'umum').charAt(0).toUpperCase() + (doctorData?.spesialisasi || 'umum').slice(1)}
+                      </Text>
                   </View>
                   <View style={[PatientDetailStyles.gridCell, PatientDetailStyles.gridCellLast]}>
                       <Text style={PatientDetailStyles.infoLabel}>Pasien Ditangani</Text>

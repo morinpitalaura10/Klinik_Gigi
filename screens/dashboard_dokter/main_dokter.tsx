@@ -9,7 +9,7 @@ import {
 } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { supabase } from '../../utils/supabase';
-import { Colors, DoctorDashboardStyles, GlobalStyles } from '../../styles/GlobalStyles';
+import { Colors, DoctorDashboardStyles, GlobalStyles, LayoutStyles } from '../../styles/GlobalStyles';
 import AdminLayout from '../../components/templates/AdminLayout';
 import { useFocusEffect, useNavigation } from '@react-navigation/native';
 import { AuthContext } from '../../context/AuthContext';
@@ -130,7 +130,7 @@ export default function MainDokter() {
                 drg. {user?.nama || 'Dokter'}
             </Text>
             <Text style={DoctorDashboardStyles.doctorSpec}>
-                Spesialisasi : {user?.spesialisasi || '-'}
+                Spesialisasi: {(user?.spesialisasi || 'umum').charAt(0).toUpperCase() + (user?.spesialisasi || 'umum').slice(1)}
             </Text>
             <Text style={DoctorDashboardStyles.currentDate}>
                 {getFormattedDate()}
@@ -181,9 +181,9 @@ export default function MainDokter() {
                                 </View>
 
                                 <View style={DoctorDashboardStyles.colAksi}>
-                                    <View style={{ gap: 8 }}>
+                                    <View style={LayoutStyles.gap8}>
                                         <TouchableOpacity 
-                                            style={[DoctorDashboardStyles.btnEdit, { backgroundColor: '#1E88E5' }]}
+                                            style={[DoctorDashboardStyles.btnEdit, DoctorDashboardStyles.btnBlueInfo]}
                                             onPress={() => navigation.navigate('ReadPasien', { id: item.id_pasien })}
                                         >
                                             <MaterialCommunityIcons name="history" size={16} color="#FFF" />

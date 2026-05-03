@@ -105,46 +105,48 @@ export function TampilUsers() {
           </View>
 
           <View style={ManagementStyles.tableContainer}>
-            <View style={{ width: '100%' }}>
+            <View style={LayoutStyles.w100p}>
               <View style={ManagementStyles.tableHeaderPrimary}>
-                <View style={[ManagementStyles.colCenter, { flex: 0.4 }]}><Text style={ManagementStyles.thText}>No</Text></View>
-                <View style={[ManagementStyles.colCenter, { flex: 1 }]}><Text style={ManagementStyles.thText}>Nama</Text></View>
-                <View style={[ManagementStyles.colCenter, { flex: 1 }]}><Text style={ManagementStyles.thText}>Username</Text></View>
-                <View style={[ManagementStyles.colCenter, { flex: 1 }]}><Text style={ManagementStyles.thText}>Email</Text></View>
-                <View style={[ManagementStyles.colCenter, { flex: 0.7 }]}><Text style={ManagementStyles.thText}>Role</Text></View>
-                <View style={[ManagementStyles.colCenter, { flex: 1 }]}><Text style={ManagementStyles.thText}>Spesialisasi</Text></View>
-                <View style={[ManagementStyles.colCenter, { flex: 0.8 }]}><Text style={ManagementStyles.thText}>Aksi</Text></View>
+                <View style={[ManagementStyles.colCenter, ManagementStyles.flex04]}><Text style={ManagementStyles.thText}>No</Text></View>
+                <View style={[ManagementStyles.colCenter, ManagementStyles.flex1]}><Text style={ManagementStyles.thText}>Nama</Text></View>
+                <View style={[ManagementStyles.colCenter, ManagementStyles.flex1]}><Text style={ManagementStyles.thText}>Username</Text></View>
+                <View style={[ManagementStyles.colCenter, ManagementStyles.flex1]}><Text style={ManagementStyles.thText}>Email</Text></View>
+                <View style={[ManagementStyles.colCenter, ManagementStyles.flex07]}><Text style={ManagementStyles.thText}>Role</Text></View>
+                <View style={[ManagementStyles.colCenter, ManagementStyles.flex1]}><Text style={ManagementStyles.thText}>Spesialisasi</Text></View>
+                <View style={[ManagementStyles.colCenter, ManagementStyles.flex08]}><Text style={ManagementStyles.thText}>Aksi</Text></View>
               </View>
 
               <View style={PatientTableStyles.tableBody}>
                 {filteredUsers.length > 0 ? (
                   filteredUsers.map((item, index) => (
                     <View key={item.id_users.toString()} style={ManagementStyles.tableRow}>
-                      <View style={[ManagementStyles.colCenter, { flex: 0.4 }]}>
+                      <View style={[ManagementStyles.colCenter, ManagementStyles.flex04]}>
                         <Text style={ManagementStyles.tdText}>{index + 1}</Text>
                       </View>
-                      <View style={[ManagementStyles.colCenter, ManagementStyles.paddingH6, { flex: 1 }]}>
+                      <View style={[ManagementStyles.colCenter, ManagementStyles.paddingH6, ManagementStyles.flex1]}>
                         <Text style={ManagementStyles.tdText} numberOfLines={1}>{item.nama_users}</Text>
                       </View>
-                      <View style={[ManagementStyles.colCenter, ManagementStyles.paddingH6, { flex: 1 }]}>
+                      <View style={[ManagementStyles.colCenter, ManagementStyles.paddingH6, ManagementStyles.flex1]}>
                         <Text style={ManagementStyles.tdTextSmall} numberOfLines={1}>@{item.us}</Text>
                       </View>
-                      <View style={[ManagementStyles.colCenter, ManagementStyles.paddingH6, { flex: 1 }]}>
-                        <Text style={[ManagementStyles.tdTextSmall, { color: '#444' }]} numberOfLines={1}>{item.email_users || '-'}</Text>
+                      <View style={[ManagementStyles.colCenter, ManagementStyles.paddingH6, ManagementStyles.flex1]}>
+                        <Text style={[ManagementStyles.tdTextSmall, ManagementStyles.tdEmail]} numberOfLines={1}>{item.email_users || '-'}</Text>
                       </View>
-                      <View style={[ManagementStyles.colCenter, { flex: 0.7 }]}>
-                        <View style={[ManagementStyles.roleBadge, { backgroundColor: item.role === 'admin' ? '#E3F2FD' : '#E8F5E9' }]}>
-                          <Text style={[ManagementStyles.roleBadgeText, { color: item.role === 'admin' ? '#1976D2' : '#2E7D32' }]}>
+                      <View style={[ManagementStyles.colCenter, ManagementStyles.flex07]}>
+                        <View style={[ManagementStyles.roleBadge, item.role === 'admin' ? ManagementStyles.badgeAdmin : ManagementStyles.badgeDokter]}>
+                          <Text style={[ManagementStyles.roleBadgeText, item.role === 'admin' ? ManagementStyles.badgeAdminText : ManagementStyles.badgeDokterText]}>
                             {item.role === 'admin' ? 'ADMIN' : 'DOKTER'}
                           </Text>
                         </View>
                       </View>
-                      <View style={[ManagementStyles.colCenter, ManagementStyles.paddingH6, { flex: 1 }]}>
+                      <View style={[ManagementStyles.colCenter, ManagementStyles.paddingH6, ManagementStyles.flex1]}>
                         <Text style={ManagementStyles.tdText} numberOfLines={1}>
-                          {item.role === 'dokter' ? (item.tb_dokter && item.tb_dokter[0]?.spesialisasi) || 'Umum' : '-'}
+                          {item.role === 'dokter' 
+                            ? (((item.tb_dokter && item.tb_dokter[0]?.spesialisasi) || 'umum').charAt(0).toUpperCase() + ((item.tb_dokter && item.tb_dokter[0]?.spesialisasi) || 'umum').slice(1)) 
+                            : '-'}
                         </Text>
                       </View>
-                      <View style={[ManagementStyles.actionCell, { flex: 0.8 }]}>
+                      <View style={[ManagementStyles.actionCell, ManagementStyles.flex08]}>
                         <TouchableOpacity onPress={() => navigation.navigate('UpdateUser', { editUser: item })}>
                           <MaterialCommunityIcons name="square-edit-outline" size={20} color="#EBC112" />
                         </TouchableOpacity>
@@ -158,8 +160,8 @@ export function TampilUsers() {
                     </View>
                   ))
                 ) : (
-                  <View style={{ width: '100%', height: 100, alignItems: 'center', justifyContent: 'center' }}>
-                    <Text style={[GlobalStyles.emptyText, { textAlign: 'center' }]}>Data pengguna tidak ditemukan</Text>
+                  <View style={ManagementStyles.emptyUsersContainer}>
+                    <Text style={[GlobalStyles.emptyText, LayoutStyles.centerText]}>Data pengguna tidak ditemukan</Text>
                   </View>
                 )}
               </View>

@@ -52,6 +52,9 @@ export const AuthStyles = StyleSheet.create({
     paddingBottom: 40,
     alignSelf: 'center',
   },
+  w100p: {
+    width: '100%',
+  },
 });
 
 
@@ -138,6 +141,7 @@ export const LayoutStyles = StyleSheet.create({
   ph30: { paddingHorizontal: 30 },
   pt10: { paddingTop: 10 },
   p20: { padding: 20 },
+  pb20: { paddingBottom: 20 },
   mb5: { marginBottom: 5 },
   mb10: { marginBottom: 10 },
   mt30: { marginTop: 30 },
@@ -173,6 +177,7 @@ export const LayoutStyles = StyleSheet.create({
   w700: { width: 700 },
   w900: { width: 900 },
   w1100: { width: 1100 },
+  w1160: { width: 1160 },
   minW250: { minWidth: 250 },
   alignSelfCenter: { alignSelf: 'center' },
   textPlaceholder: { color: Colors.placeholder },
@@ -240,6 +245,9 @@ export const LayoutStyles = StyleSheet.create({
   gap15: {
     gap: 15,
   },
+  gap8: {
+    gap: 8,
+  },
   gap20: {
     gap: 20,
   },
@@ -270,6 +278,21 @@ export const LayoutStyles = StyleSheet.create({
   },
   borderR0: {
     borderRightWidth: 0,
+  },
+  rowBetweenMB25W100p: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 25,
+    width: '100%',
+  },
+  maxH400_w100p: {
+    maxHeight: 400,
+    width: '100%',
+  },
+  maxH300_w100p: {
+    maxHeight: 300,
+    width: '100%',
   },
 });
 
@@ -401,6 +424,120 @@ export const ManagementStyles = StyleSheet.create({
   },
   paddingH6: {
     paddingHorizontal: 6,
+  },
+  ph15: {
+    paddingHorizontal: 15,
+  },
+  flex05: {
+    flex: 0.5,
+  },
+  flex08: {
+    flex: 0.8,
+  },
+  flex12: {
+    flex: 1.2,
+  },
+  flex2: {
+    flex: 2,
+  },
+  thText14: {
+    color: '#FFF',
+    fontWeight: 'bold',
+    fontSize: 14,
+    textAlign: 'center',
+  },
+  thTextLeft14: {
+    color: '#FFF',
+    fontWeight: 'bold',
+    fontSize: 14,
+    textAlign: 'left',
+  },
+  tdNo: {
+    fontSize: 14,
+    color: '#000',
+    fontWeight: '500',
+    textAlign: 'center',
+  },
+  badgeLayanan: {
+    alignSelf: 'flex-start',
+    backgroundColor: '#EADCDA',
+    paddingHorizontal: 12,
+    paddingVertical: 4,
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: '#C8A2A0',
+  },
+  badgeLayananText: {
+    color: '#801919',
+    fontSize: 12,
+    fontWeight: 'bold',
+  },
+  tdNamaTindakan: {
+    fontSize: 13,
+    color: '#000',
+    fontWeight: 'bold',
+  },
+  emptyStateContainer: {
+    padding: 30,
+    alignItems: 'center',
+  },
+  emptyStateText: {
+    color: '#888',
+    fontSize: 14,
+  },
+  flex04: {
+    flex: 0.4,
+  },
+  flex07: {
+    flex: 0.7,
+  },
+  flex1: {
+    flex: 1,
+  },
+  badgeAdmin: {
+    backgroundColor: '#E3F2FD',
+  },
+  badgeAdminText: {
+    color: '#1976D2',
+  },
+  badgeDokter: {
+    backgroundColor: '#E8F5E9',
+  },
+  badgeDokterText: {
+    color: '#2E7D32',
+  },
+  tdEmail: {
+    color: '#444',
+  },
+  emptyUsersContainer: {
+    width: '100%',
+    height: 100,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  flex15: {
+    flex: 1.5,
+  },
+  badgeLK: {
+    backgroundColor: '#D6E0E9',
+  },
+  badgeLKText: {
+    color: '#194580',
+  },
+  badgePR: {
+    backgroundColor: '#E9D6D6',
+  },
+  badgePRText: {
+    color: '#801919',
+  },
+  tdTextLeft: {
+    textAlign: 'left',
+  },
+  emptyPasienContainer: {
+    width: '100%',
+    paddingVertical: 40,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
 });
 
@@ -752,6 +889,9 @@ export const GlobalStyles = StyleSheet.create({
     borderRadius: 8,
     alignItems: 'center',
     justifyContent: 'center',
+  },
+  btnBlueInfo: {
+    backgroundColor: '#1E88E5',
   },
   btnActionDelete: {
     backgroundColor: Colors.primary,
@@ -2211,6 +2351,30 @@ export const AdminDashboardStyles = StyleSheet.create({
     fontWeight: 'bold',
     lineHeight: 12,
   },
+  rightColumnWrapper: {
+    flex: 2,
+  },
+  dateTimeContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 10,
+    paddingHorizontal: 5,
+  },
+  dateTimeItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  dateTimeLabel: {
+    fontSize: 15,
+    fontWeight: 'bold',
+    color: Colors.primary,
+  },
+  dateTimeValue: {
+    fontSize: 15,
+    fontWeight: 'bold',
+    color: '#333',
+  },
 });
 
 export const DentalRecordStyles = StyleSheet.create({
@@ -2353,6 +2517,29 @@ export const DentalRecordStyles = StyleSheet.create({
     paddingHorizontal: 12,
     borderRadius: 6,
     elevation: 1,
+  },
+  modalContentPremium: {
+    borderColor: Colors.primary,
+    borderWidth: 2,
+    borderRadius: 30,
+    padding: 25,
+    backgroundColor: 'white',
+  },
+  modalTitleLeft: {
+    marginBottom: 0,
+    color: Colors.primary,
+    fontWeight: 'bold',
+    fontSize: 20,
+    textAlign: 'left',
+  },
+  modalCloseBtn: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    borderWidth: 1,
+    borderColor: Colors.primary,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   btnEditActionText: {
     color: '#FFF',
@@ -2643,6 +2830,9 @@ export const DoctorDashboardStyles = StyleSheet.create({
   colGender: { flex: 1.5 },
   colKeluhan: { flex: 3 },
   colAksi: { flex: 1 },
+  btnBlueInfo: {
+    backgroundColor: '#1E88E5',
+  },
 });
 
 export const PatientTableStyles = StyleSheet.create({
@@ -2992,5 +3182,56 @@ export const PatientDetailStyles = StyleSheet.create({
     color: '#FFFFFF',
     fontSize: 12,
     fontWeight: 'bold',
+  },
+});
+
+export const DoctorStyles = StyleSheet.create({
+  treatmentSelectionContainer: {
+    marginBottom: 10,
+  },
+  treatmentItem: {
+    marginRight: 15,
+    marginBottom: 12,
+  },
+  treatmentBadge: {
+    backgroundColor: '#F9F9F9',
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: 10,
+    borderWidth: 1,
+    borderColor: '#EEE',
+  },
+  treatmentBadgeChecked: {
+    backgroundColor: '#FFF0F0',
+    borderColor: Colors.primary,
+  },
+  checkboxInner: {
+    marginRight: 8,
+  },
+  checkboxCheckedText: {
+    color: Colors.primary,
+    fontWeight: 'bold',
+  },
+  checkboxUncheckedText: {
+    color: '#444',
+    fontWeight: 'normal',
+  },
+});
+
+export const AlertStyles = StyleSheet.create({
+  icon: {
+    marginBottom: 15,
+  },
+  message: {
+    fontWeight: 'normal',
+    fontSize: 14,
+    marginTop: -10,
+    marginBottom: 25,
+  },
+  btnConfirm: {
+    borderRadius: 15,
+  },
+  btnWithMargin: {
+    marginLeft: 10,
   },
 });

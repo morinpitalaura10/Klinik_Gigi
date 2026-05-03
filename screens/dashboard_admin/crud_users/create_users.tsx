@@ -38,8 +38,8 @@ export function CreateUser() {
   ];
 
   const spesialisasiOptions = [
-    { label: 'Umum', value: 'Umum' },
-    { label: 'Ortodental', value: 'Ortodental' },
+    { label: 'Umum', value: 'umum' },
+    { label: 'Ortodonti', value: 'ortodonti' },
   ];
 
   const handleSave = async () => {

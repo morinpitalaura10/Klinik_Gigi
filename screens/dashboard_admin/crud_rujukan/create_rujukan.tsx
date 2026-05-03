@@ -270,7 +270,7 @@ export function CreateRujukan() {
                             />
                         </View>
 
-                        <ScrollView style={{ maxHeight: 400, width: '100%' }} keyboardShouldPersistTaps="handled">
+                        <ScrollView style={LayoutStyles.maxH400_w100p} keyboardShouldPersistTaps="handled">
                             {availableRecords.filter(r => r.tb_pasien?.nama_pasien?.toLowerCase().includes(recordSearch.toLowerCase())).map(r => (
                                 <TouchableOpacity
                                     key={r.id_record}
@@ -304,10 +304,11 @@ export function CreateRujukan() {
                             />
                         </View>
 
-                        <ScrollView style={{ maxHeight: 300, width: '100%' }} keyboardShouldPersistTaps="handled">
+                        <ScrollView style={LayoutStyles.maxH300_w100p} keyboardShouldPersistTaps="handled">
                             {availableUsers.filter(u => u.nama_users.toLowerCase().includes(penandatanganSearch.toLowerCase())).map(u => {
                                 const spec = u.tb_dokter?.[0]?.spesialisasi || u.tb_dokter?.spesialisasi;
-                                const roleDisplay = u.role === 'dokter' ? (spec || 'Dokter') : 'Admin';
+                                const capitalizedSpec = spec ? (spec.charAt(0).toUpperCase() + spec.slice(1)) : 'Dokter';
+                                const roleDisplay = u.role === 'dokter' ? capitalizedSpec : 'Admin';
                                 const formattedName = `${u.nama_users} (${roleDisplay})`;
                                 
                                 return (

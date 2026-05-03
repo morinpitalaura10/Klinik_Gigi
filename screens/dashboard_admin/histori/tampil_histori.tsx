@@ -411,7 +411,7 @@ export function TampilHistori() {
                     <>
                     <View style={GlobalStyles.historyTableContainerPremium}>
                     <ScrollView horizontal showsHorizontalScrollIndicator={true}>
-                        <View style={{ width: 1160 }}>
+                        <View style={LayoutStyles.w1160}>
                             
                             <View style={GlobalStyles.historyTableHeaderMaron}>
                                 <View style={[GlobalStyles.tableCellAtomic, GlobalStyles.tableCellFirst, GlobalStyles.historyTableCellTgl, { borderBottomWidth: 0 }, GlobalStyles.historyHeaderCellBorder]}><Text style={[GlobalStyles.tableThText, { color: 'white' }]}>Tgl</Text></View>

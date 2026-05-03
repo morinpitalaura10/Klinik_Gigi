@@ -227,23 +227,10 @@ export function TampilRecordAdmin() {
                 activeOpacity={1} 
                 onPress={() => setStatusModalVisible(false)}
             >
-                <View style={[DentalRecordStyles.modalContent, { 
-                    borderColor: Colors.primary, 
-                    borderWidth: 2, 
-                    borderRadius: 30,
-                    padding: 25
-                }]}>
-                    <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 25, width: '100%' }}>
-                        <Text style={[DentalRecordStyles.modalTitle, { marginBottom: 0, color: Colors.primary, fontWeight: 'bold', fontSize: 20, textAlign: 'left' }]}>Ubah Status</Text>
-                        <TouchableOpacity onPress={() => setStatusModalVisible(false)} style={{ 
-                            width: 40, 
-                            height: 40, 
-                            borderRadius: 20, 
-                            borderWidth: 1, 
-                            borderColor: Colors.primary,
-                            justifyContent: 'center',
-                            alignItems: 'center'
-                        }}>
+                <View style={[DentalRecordStyles.modalContent, DentalRecordStyles.modalContentPremium]}>
+                    <View style={LayoutStyles.rowBetweenMB25W100p}>
+                        <Text style={[DentalRecordStyles.modalTitle, DentalRecordStyles.modalTitleLeft]}>Ubah Status</Text>
+                        <TouchableOpacity onPress={() => setStatusModalVisible(false)} style={DentalRecordStyles.modalCloseBtn}>
                             <MaterialCommunityIcons name="close" size={22} color={Colors.primary} />
                         </TouchableOpacity>
                     </View>
