@@ -156,8 +156,8 @@ export function UpdateUser() {
               style={CreateRecordStyles.inputDropdown}
             />
 
-            <View style={{ flexDirection: 'row', gap: 15 }}>
-              <View style={{ flex: 1 }}>
+            <View style={[LayoutStyles.flexRow, LayoutStyles.gap15]}>
+              <View style={LayoutStyles.flex1}>
                 <Text style={CreateRecordStyles.fieldLabel}>Username</Text>
                 <LabeledInput
                   label=""
@@ -169,7 +169,7 @@ export function UpdateUser() {
                   style={CreateRecordStyles.inputDropdown}
                 />
               </View>
-              <View style={{ flex: 1 }}>
+              <View style={LayoutStyles.flex1}>
                 <Text style={CreateRecordStyles.fieldLabel}>Role</Text>
                 <DropdownInput
                   label=""

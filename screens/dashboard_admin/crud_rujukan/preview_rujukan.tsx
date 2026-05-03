@@ -46,17 +46,20 @@ export function PreviewRujukan() {
               }
               body {
                 margin: 0;
-                padding: 0;
+                padding: 0.1cm;
                 background-color: #ffffff;
                 width: 15cm;
                 height: 21cm;
+                box-sizing: border-box;
+                overflow: hidden;
               }
               .receipt-container {
                 background-color: white;
-                padding: 30px 40px;
+                padding: 0.3cm 2cm 0.5cm 2cm;
+                border: 1.5px solid #000;
                 box-sizing: border-box;
                 width: 100%;
-                height: 100%;
+                height: calc(21cm - 0.3cm);
                 display: flex;
                 flex-direction: column;
               }
@@ -258,7 +261,7 @@ export function PreviewRujukan() {
       <ScrollView contentContainerStyle={[LayoutStyles.scrollContent, LayoutStyles.alignCenter]}>
 
 
-        <View style={GlobalStyles.receiptContainer}>
+        <View style={[GlobalStyles.receiptContainer, GlobalStyles.rujukanContainer]}>
 
           <View style={[GlobalStyles.receiptHeaderContainer, GlobalStyles.flexRowAlignCenter]}>
             <Image
@@ -274,12 +277,12 @@ export function PreviewRujukan() {
             </View>
           </View>
 
-          <View style={[GlobalStyles.receiptDoubleLineContainer, LayoutStyles.mt10, LayoutStyles.mb5]}>
+          <View style={[GlobalStyles.receiptDoubleLineContainer, LayoutStyles.mt5, LayoutStyles.mb5]}>
             <View style={GlobalStyles.receiptLineThick} />
             <View style={GlobalStyles.receiptLineThin} />
           </View>
 
-          <View style={[LayoutStyles.alignCenter, LayoutStyles.mt15, LayoutStyles.mb25]}>
+          <View style={[LayoutStyles.alignCenter, LayoutStyles.mt10, LayoutStyles.mb15]}>
             <Text style={GlobalStyles.receiptTitle}>SURAT RUJUKAN</Text>
           </View>
 

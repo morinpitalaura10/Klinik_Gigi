@@ -2,178 +2,186 @@ import React, { useState, useCallback } from 'react';
 import {
   View,
   Text,
-  FlatList,
   TouchableOpacity,
-  TextInput,
   ActivityIndicator,
-  Alert,
   ScrollView,
-  Platform,
+  TextInput,
   StyleSheet,
 } from 'react-native';
-import DateTimePicker from '@react-native-community/datetimepicker';
-import { MaterialCommunityIcons, Feather } from '@expo/vector-icons';
 import { supabase } from '../../../utils/supabase';
-import { Colors, GlobalStyles, LayoutStyles } from '../../../styles/GlobalStyles';
+import { GlobalStyles, LayoutStyles, Colors } from '../../../styles/GlobalStyles';
 import AdminLayout from '../../../components/templates/AdminLayout';
-import { useFocusEffect, useNavigation } from '@react-navigation/native';
-
-interface PendingBill {
-  id_record: number;
-  tanggal: string;
-  layanan: string;
-  diagnosa: string;
-  keterangan: string;
-  id_tindakan: number;
-  doctor_id: number;
-  tb_pasien: {
-    nama_pasien: string;
-    nope: string;
-  };
-  tb_users: {
-    nama_users: string;
-  } | null;
-  tb_tindakan: {
-    nama_tindakan: string;
-  } | null;
-}
+import { useNavigation, useFocusEffect } from '@react-navigation/native';
+import { MaterialCommunityIcons, Feather } from '@expo/vector-icons';
+import { useAlert } from '../../../context/AlertContext';
 
 export function TampilKwitansi() {
   const navigation = useNavigation<any>();
-  const [pendingBills, setPendingBills] = useState<PendingBill[]>([]);
+  const { showAlert } = useAlert();
+  const [records, setRecords] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
-  const [refreshing, setRefreshing] = useState(false);
-  const [tindakanList, setTindakanList] = useState<any[]>([]);
 
-  const getLocalDate = () => {
+  const formatDate = (dateStr: string) => {
+    if (!dateStr) return '-';
+    const d = new Date(dateStr);
+    if (isNaN(d.getTime())) return dateStr;
+    return d.toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' });
+  };
+
+  const getLocalDate = (offset = 0) => {
     const d = new Date();
+    d.setDate(d.getDate() - offset);
     return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
   };
 
-  const [selectedDate, setSelectedDate] = useState<string>(getLocalDate());
-  const [showPicker, setShowPicker] = useState(false);
+  type FilterKey = 'today' | 'yesterday' | '7days' | '30days' | 'all';
+  const [activeFilter, setActiveFilter] = useState<FilterKey>('today');
 
-  const parsedDate = new Date(selectedDate);
-
-  const formatDisplayDate = (dateStr: string) => {
-    const d = new Date(dateStr);
-    if (isNaN(d.getTime())) return dateStr;
-    return d.toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
-  };
-
-  const formatShortDate = (dateStr: string) => {
-    const d = new Date(dateStr);
-    if (isNaN(d.getTime())) return dateStr;
-    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'];
-    return `${d.getDate()} ${months[d.getMonth()]} ${d.getFullYear()}`;
-  };
-
-  const fetchPendingBills = async () => {
-    try {
-      setLoading(true);
-
-      const { data, error } = await supabase
-        .from('tb_rekam_medis')
-        .select(`
-          *,
-          tb_pasien (nama_pasien, nope),
-          tb_users!fk_rekam_medis_doctor (nama_users)
-        `)
-        .eq('tanggal', selectedDate)
-        .eq('status', 'Selesai')
-        .order('id_record', { ascending: false });
-
-      if (error) throw error;
-      setPendingBills(data || []);
-    } catch (error: any) {
-      Alert.alert('Error', error.message);
-    } finally {
-      setLoading(false);
-      setRefreshing(false);
-    }
-  };
-
-  const fetchMasterData = async () => {
-    try {
-      const { data } = await supabase.from('tb_tindakan').select('*');
-      if (data) setTindakanList(data);
-    } catch (_) {}
-  };
+  const filterOptions: { key: FilterKey; label: string }[] = [
+    { key: 'today', label: 'Hari Ini' },
+    { key: 'yesterday', label: 'Kemarin' },
+    { key: '7days', label: '7 Hari' },
+    { key: '30days', label: '30 Hari' },
+    { key: 'all', label: 'Semua' },
+  ];
 
   useFocusEffect(
     useCallback(() => {
-      fetchMasterData();
-      fetchPendingBills();
-    }, [selectedDate])
+      fetchRecords();
+    }, [activeFilter])
   );
 
-  const filteredData = pendingBills.filter(item =>
-    item.tb_pasien?.nama_pasien.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  const fetchRecords = async () => {
+    try {
+      setLoading(true);
+      let query = supabase
+        .from('tb_kwitansi')
+        .select(`
+          *,
+          tb_rekam_medis!record_id (
+            diagnosa, 
+            layanan, 
+            id_tindakan,
+            tb_pasien!id_pasien (nama_pasien, tgl_lahir, jk, alamat)
+          )
+        `)
+        .order('id_kwitansi', { ascending: false });
 
-  const renderBillCard = ({ item }: { item: PendingBill }) => {
-    const isOrto = item.layanan === 'Ortodental';
+      if (activeFilter !== 'all') {
+        const dateLimit = activeFilter === 'today' ? getLocalDate(0) :
+                         activeFilter === 'yesterday' ? getLocalDate(1) :
+                         activeFilter === '7days' ? getLocalDate(7) :
+                         getLocalDate(30);
+        
+        if (activeFilter === 'today' || activeFilter === 'yesterday') {
+            query = query.eq('tgl', dateLimit);
+        } else {
+            query = query.gte('tgl', dateLimit);
+        }
+      }
 
+      const { data, error } = await query;
+      if (error) throw error;
+      setRecords(data || []);
+    } catch (error: any) {
+      showAlert({ title: 'Error', message: error.message, type: 'error' });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleDelete = (id: number, noKwitansi: string) => {
+    showAlert({
+      title: 'Hapus Kwitansi',
+      message: `Yakin ingin menghapus kwitansi ${noKwitansi}?`,
+      type: 'confirm',
+      onConfirm: async () => {
+        try {
+          const { error } = await supabase
+            .from('tb_kwitansi')
+            .delete()
+            .eq('id_kwitansi', id);
+          if (error) throw error;
+          setRecords(prev => prev.filter(r => r.id_kwitansi !== id));
+          showAlert({ title: 'Berhasil', message: 'Kwitansi berhasil dihapus.', type: 'success' });
+        } catch (e: any) {
+          showAlert({ title: 'Gagal', message: e.message, type: 'error' });
+        }
+      }
+    });
+  };
+
+  const filteredData = records.filter(item => {
+    const searchLower = searchQuery.toLowerCase();
+    const patientName = item.tb_rekam_medis?.tb_pasien?.nama_pasien || '';
+    const matchesName = patientName.toLowerCase().includes(searchLower);
+    const matchesNo = item.no_kwitansi?.toLowerCase().includes(searchLower);
+    return matchesName || matchesNo;
+  });
+
+  const renderCard = (item: any) => {
     return (
-      <View style={styles.card}>
+      <View key={item.id_kwitansi?.toString()} style={styles.card}>
         <View style={styles.cardHeader}>
-          <Text style={styles.doctorName}>{item.tb_users?.nama_users || 'Dokter tidak diketahui'}</Text>
-          <Text style={styles.cardDate}>{formatDisplayDate(item.tanggal)}</Text>
+          <View style={styles.cardHeaderLeft}>
+            <Text style={styles.patientName}>{item.tb_rekam_medis?.tb_pasien?.nama_pasien || 'Pasien'}</Text>
+            <Text style={styles.receiptDate}>{formatDate(item.tgl)}</Text>
+          </View>
+          <View style={styles.cardHeaderRight}>
+            <View style={[styles.layananBadge, { backgroundColor: item.tb_rekam_medis?.layanan === 'Ortodental' ? '#E3F2FD' : '#FDECEC' }]}>
+              <Text style={[styles.layananBadgeText, { color: item.tb_rekam_medis?.layanan === 'Ortodental' ? '#1E88E5' : '#8B4A4A' }]}>
+                {item.tb_rekam_medis?.layanan || 'Umum'}
+              </Text>
+            </View>
+          </View>
         </View>
 
         <View style={styles.cardDivider} />
 
         <View style={styles.cardBody}>
-          <View style={styles.cardContentLeft}>
+          <View style={styles.cardBodyLeft}>
             <View style={styles.infoBlock}>
-              <Text style={styles.infoLabel}>NAMA PASIEN</Text>
-              <Text style={styles.infoValue}>{item.tb_pasien?.nama_pasien}</Text>
+              <Text style={styles.infoLabel}>NOMOR KWITANSI</Text>
+              <Text style={[styles.infoValue, { fontWeight: 'bold' }]}>{item.no_kwitansi || '-'}</Text>
             </View>
-
             <View style={styles.infoBlock}>
-              <Text style={styles.infoLabel}>KELUHAN / DIAGNOSIS</Text>
-              <Text style={styles.infoValue}>{item.diagnosa || '-'}</Text>
-            </View>
-
-            <View style={styles.infoBlock}>
-              <Text style={styles.infoLabel}>KETERANGAN</Text>
-              <Text style={styles.infoValue}>{item.keterangan || '-'}</Text>
+              <Text style={styles.infoLabel}>NOMINAL</Text>
+              <Text style={[styles.infoValue, { color: '#2E7D32', fontWeight: 'bold' }]}>
+                Rp {item.rp?.toLocaleString('id-ID')}
+              </Text>
             </View>
           </View>
 
-          <View style={styles.cardContentCenter}>
-            <View style={styles.treatmentBlock}>
-              <Text style={styles.infoLabelCenter}>PERAWATAN</Text>
-              <View style={styles.treatmentBadge}>
-                <Text style={styles.treatmentText}>
-                  {item.id_tindakan ? (
-                    item.id_tindakan.toString().split(',').map((id: string) => {
-                      const t = tindakanList.find(x => x.id_tindakan.toString() === id.trim());
-                      return t ? t.nama_tindakan : '';
-                    }).filter(Boolean).join(', ') || '-'
-                  ) : '-'}
-                </Text>
-              </View>
+          <View style={styles.cardBodyRight}>
+            <View style={styles.infoBlock}>
+              <Text style={styles.infoLabel}>PEMBAYARAN UNTUK</Text>
+              <Text style={styles.infoValue} numberOfLines={2}>{item.tujuan_pembayaran || '-'}</Text>
             </View>
-          </View>
 
-          <View style={styles.cardContentRight}>
-            <TouchableOpacity
-              style={[styles.printButton, { backgroundColor: isOrto ? '#2B58D1' : '#3E58C1' }]} // Using a premium blue shade
-              onPress={() => navigation.navigate('CreateKwitansi', { record: item })}
-            >
-              <View style={styles.printButtonContent}>
-                <MaterialCommunityIcons name="file-document-outline" size={32} color="white" />
-                <View style={styles.printButtonTextWrapper}>
-                  <Text style={styles.printButtonSmallText}>Cetak Kwitansi</Text>
-                  <Text style={styles.printButtonBoldText}>{isOrto ? 'Ortodental' : 'Umum'}</Text>
+            <View style={{ flexDirection: 'row', gap: 8, alignItems: 'center' }}>
+              <TouchableOpacity
+                style={styles.printButton}
+                onPress={() => navigation.navigate('PreviewKwitansi', { 
+                  item: { ...item, tb_pasien: item.tb_rekam_medis?.tb_pasien } 
+                })}
+              >
+                <View style={styles.printButtonContent}>
+                  <MaterialCommunityIcons name="printer-eye" size={24} color="white" />
+                  <View style={styles.printButtonTextWrapper}>
+                    <Text style={styles.printButtonSmallText}>Lihat / Cetak</Text>
+                    <Text style={styles.printButtonBoldText}>Kwitansi</Text>
+                  </View>
                 </View>
-                <View style={styles.arrowIconWrapper}>
-                  <MaterialCommunityIcons name="arrow-top-right" size={14} color="white" />
-                </View>
-              </View>
-            </TouchableOpacity>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                style={styles.deleteBtn}
+                onPress={() => handleDelete(item.id_kwitansi, item.no_kwitansi)}
+              >
+                <MaterialCommunityIcons name="trash-can-outline" size={20} color="#C62828" />
+              </TouchableOpacity>
+            </View>
           </View>
         </View>
       </View>
@@ -181,18 +189,18 @@ export function TampilKwitansi() {
   };
 
   return (
-    <AdminLayout noScroll={true} title="Admin">
-      <ScrollView 
+    <AdminLayout noScroll={true} customRightTitle="Arsip Kwitansi">
+      <ScrollView
         style={[LayoutStyles.flex1, { backgroundColor: '#F8F9FA' }]}
         contentContainerStyle={{ paddingBottom: 40 }}
         showsVerticalScrollIndicator={true}
       >
         <View style={styles.filterContainer}>
           <View style={styles.searchWrapper}>
-            <Feather name="search" size={24} color="#A0A0A0" style={styles.searchIcon} />
+            <Feather name="search" size={22} color="#A0A0A0" style={styles.searchIcon} />
             <TextInput
               style={styles.searchInput}
-              placeholder="Cari nama pasien..."
+              placeholder="Cari pasien atau no kwitansi..."
               placeholderTextColor="#A0A0A0"
               value={searchQuery}
               onChangeText={setSearchQuery}
@@ -200,48 +208,40 @@ export function TampilKwitansi() {
           </View>
 
           <TouchableOpacity
-            style={styles.dateSelector}
-            onPress={() => setShowPicker(true)}
+            style={styles.addButton}
+            onPress={() => navigation.navigate('ListPendingKwitansi')}
           >
-            <View style={styles.calendarIconWrapper}>
-              <MaterialCommunityIcons name="calendar-month" size={28} color="white" />
-            </View>
-            <Text style={styles.dateSelectorText}>{formatShortDate(selectedDate)}</Text>
+            <MaterialCommunityIcons name="plus-circle-outline" size={22} color="white" />
+            <Text style={styles.addButtonText}>Tambah Kwitansi</Text>
           </TouchableOpacity>
         </View>
 
-        {showPicker && (
-          <DateTimePicker
-            value={parsedDate}
-            mode="date"
-            display={Platform.OS === 'ios' ? 'inline' : 'calendar'}
-            onChange={(event, date) => {
-              setShowPicker(false);
-              if (date) {
-                const y = date.getFullYear();
-                const m = String(date.getMonth() + 1).padStart(2, '0');
-                const d = String(date.getDate()).padStart(2, '0');
-                setSelectedDate(`${y}-${m}-${d}`);
-              }
-            }}
-          />
-        )}
+        <View style={styles.chipsRow}>
+          {filterOptions.map(opt => (
+            <TouchableOpacity
+              key={opt.key}
+              style={[styles.chip, activeFilter === opt.key && styles.chipActive]}
+              onPress={() => setActiveFilter(opt.key)}
+            >
+              <Text style={[styles.chipText, activeFilter === opt.key && styles.chipTextActive]}>
+                {opt.label}
+              </Text>
+            </TouchableOpacity>
+          ))}
+        </View>
 
-        {loading && !refreshing ? (
+        {loading ? (
           <ActivityIndicator size="large" color={Colors.primary} style={LayoutStyles.mt50} />
+        ) : filteredData.length === 0 ? (
+          <View style={GlobalStyles.emptyContent}>
+            <MaterialCommunityIcons name="receipt" size={60} color="#CCC" />
+            <Text style={GlobalStyles.emptyText}>
+              {searchQuery ? 'Tidak ada hasil pencarian.' : 'Belum ada arsip kwitansi.'}
+            </Text>
+          </View>
         ) : (
           <View style={styles.listContent}>
-            {filteredData.length > 0 ? (
-              filteredData.map((item) => (
-                <View key={item.id_record.toString()}>
-                   {renderBillCard({ item })}
-                </View>
-              ))
-            ) : (
-              <View style={GlobalStyles.emptyContent}>
-                <Text style={GlobalStyles.emptyText}>Tidak ada tagihan tertunda hari ini</Text>
-              </View>
-            )}
+            {filteredData.map((item) => renderCard(item))}
           </View>
         )}
       </ScrollView>
@@ -252,10 +252,9 @@ export function TampilKwitansi() {
 const styles = StyleSheet.create({
   filterContainer: {
     flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: 25,
-    paddingVertical: 20,
-    gap: 15,
+    padding: 25,
+    paddingBottom: 15,
+    gap: 12,
   },
   searchWrapper: {
     flex: 1,
@@ -263,50 +262,62 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     backgroundColor: 'white',
     borderRadius: 15,
-    height: 60,
-    paddingHorizontal: 20,
-    borderWidth: 1,
-    borderColor: '#801919',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.05,
-    shadowRadius: 5,
-    elevation: 2,
-  },
-  searchIcon: {
-    marginRight: 12,
-  },
-  searchInput: {
-    flex: 1,
-    fontSize: 16,
-    color: '#333',
-  },
-  dateSelector: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#801919',
-    borderRadius: 15,
-    height: 60,
-    paddingRight: 20,
+    paddingHorizontal: 15,
+    height: 55,
+    elevation: 3,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 5,
-    elevation: 3,
   },
-  calendarIconWrapper: {
-    backgroundColor: 'rgba(255,255,255,0.15)',
-    height: 60,
-    width: 60,
-    borderRadius: 15,
-    justifyContent: 'center',
-    alignItems: 'center',
+  searchIcon: {
     marginRight: 10,
   },
-  dateSelectorText: {
+  searchInput: {
+    flex: 1,
+    fontSize: 15,
+    color: '#333',
+  },
+  addButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#1E88E5',
+    borderRadius: 15,
+    height: 55,
+    paddingHorizontal: 18,
+    gap: 8,
+    elevation: 3,
+  },
+  addButtonText: {
     color: 'white',
-    fontSize: 18,
+    fontSize: 15,
     fontWeight: 'bold',
+  },
+  chipsRow: {
+    flexDirection: 'row',
+    paddingHorizontal: 25,
+    paddingBottom: 15,
+    gap: 10,
+    flexWrap: 'wrap',
+  },
+  chip: {
+    paddingHorizontal: 18,
+    paddingVertical: 8,
+    borderRadius: 20,
+    borderWidth: 1.5,
+    borderColor: '#801919',
+    backgroundColor: 'white',
+  },
+  chipActive: {
+    backgroundColor: '#801919',
+  },
+  chipText: {
+    fontSize: 13,
+    fontWeight: '600',
+    color: '#801919',
+  },
+  chipTextActive: {
+    color: 'white',
   },
   listContent: {
     paddingHorizontal: 25,
@@ -315,131 +326,113 @@ const styles = StyleSheet.create({
   card: {
     backgroundColor: 'white',
     borderRadius: 20,
-    marginBottom: 20,
+    marginBottom: 15,
+    elevation: 3,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    overflow: 'hidden',
     borderWidth: 1,
     borderColor: '#801919',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.1,
-    shadowRadius: 8,
-    elevation: 4,
-    overflow: 'hidden',
   },
   cardHeader: {
-    paddingHorizontal: 20,
-    paddingVertical: 15,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    padding: 15,
+    backgroundColor: '#FBFBFB',
   },
-  doctorName: {
+  cardHeaderLeft: {
+    flex: 1,
+  },
+  cardHeaderRight: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+  },
+  patientName: {
     fontSize: 18,
     fontWeight: 'bold',
-    color: '#4A1C1C',
+    color: '#333',
   },
-  cardDate: {
-    fontSize: 13,
-    color: '#A45D5D',
+  receiptDate: {
+    fontSize: 12,
+    color: '#666',
     marginTop: 2,
+  },
+  layananBadge: {
+    paddingHorizontal: 12,
+    paddingVertical: 4,
+    borderRadius: 8,
+  },
+  layananBadgeText: {
+    fontSize: 11,
+    fontWeight: 'bold',
   },
   cardDivider: {
     height: 1,
-    backgroundColor: '#F0E0E0',
+    backgroundColor: '#F0F0F0',
   },
   cardBody: {
     flexDirection: 'row',
-    padding: 20,
-    alignItems: 'center',
+    padding: 15,
+    gap: 15,
   },
-  cardContentLeft: {
-    flex: 2,
-    paddingRight: 10,
-  },
-  cardContentCenter: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingHorizontal: 10,
-  },
-  cardContentRight: {
+  cardBodyLeft: {
     flex: 1.2,
+  },
+  cardBodyRight: {
+    flex: 1.5,
     alignItems: 'flex-end',
-    justifyContent: 'center',
+    gap: 12,
   },
   infoBlock: {
-    marginBottom: 12,
+    marginBottom: 8,
   },
   infoLabel: {
-    fontSize: 10,
+    fontSize: 9,
+    color: '#999',
     fontWeight: 'bold',
-    color: '#8B4A4A',
-    marginBottom: 4,
-    letterSpacing: 0.5,
-  },
-  infoLabelCenter: {
-    fontSize: 10,
-    fontWeight: 'bold',
-    color: '#8B4A4A',
-    marginBottom: 8,
-    textAlign: 'center',
     letterSpacing: 0.5,
   },
   infoValue: {
-    fontSize: 14,
+    fontSize: 13,
     color: '#444',
-    lineHeight: 18,
-  },
-  treatmentBlock: {
-    alignItems: 'center',
-  },
-  treatmentBadge: {
-    backgroundColor: '#FDECEC',
-    borderWidth: 1,
-    borderColor: '#8B4A4A',
-    borderRadius: 10,
-    paddingVertical: 6,
-    paddingHorizontal: 15,
-  },
-  treatmentText: {
-    color: '#8B4A4A',
-    fontSize: 12,
-    fontWeight: 'bold',
-    textAlign: 'center',
   },
   printButton: {
-    width: 170, // Fixed width to prevent it from being too big
+    backgroundColor: '#2196F3',
     borderRadius: 12,
-    paddingVertical: 10,
-    paddingHorizontal: 12,
-    shadowColor: '#007AFF',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.2,
-    shadowRadius: 6,
-    elevation: 5,
+    paddingHorizontal: 15,
+    paddingVertical: 8,
+    minWidth: 130,
   },
   printButtonContent: {
     flexDirection: 'row',
     alignItems: 'center',
+    gap: 8,
   },
   printButtonTextWrapper: {
     flex: 1,
-    marginLeft: 8,
   },
   printButtonSmallText: {
     color: 'white',
-    fontSize: 9,
+    fontSize: 8,
     opacity: 0.9,
   },
   printButtonBoldText: {
     color: 'white',
-    fontSize: 13,
+    fontSize: 12,
     fontWeight: 'bold',
   },
-  arrowIconWrapper: {
-    width: 15,
-    height: 15,
-    alignItems: 'flex-end',
-    justifyContent: 'flex-end',
+  deleteBtn: {
+    width: 40,
+    height: 40,
+    borderRadius: 10,
+    borderWidth: 1.5,
+    borderColor: '#C62828',
+    backgroundColor: '#FFEBEE',
+    justifyContent: 'center',
+    alignItems: 'center',
   },
 });
-
-
-
-

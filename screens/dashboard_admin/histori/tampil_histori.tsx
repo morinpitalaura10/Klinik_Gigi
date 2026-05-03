@@ -7,6 +7,7 @@ import {
     ActivityIndicator,
     TouchableOpacity,
     Image,
+    StyleSheet,
 } from 'react-native';
 import { supabase } from '../../../utils/supabase';
 import { Colors, GlobalStyles, LayoutStyles } from '../../../styles/GlobalStyles';
@@ -49,6 +50,8 @@ export function TampilHistori() {
     const [diagnosaList, setDiagnosaList] = useState<string[]>([]);
     const [doctorMap, setDoctorMap] = useState<Record<number, string> >({});
     const [isExporting, setIsExporting] = useState(false);
+    const [currentPage, setCurrentPage] = useState(1);
+    const ITEMS_PER_PAGE = 10;
 
 
     const [filterBulan, setFilterBulan] = useState('');
@@ -115,7 +118,8 @@ export function TampilHistori() {
                     )
                 `)
                 .eq('status', 'Selesai')
-                .order('tanggal', { ascending: false });
+                .order('tanggal', { ascending: false })
+                .order('id_record', { ascending: false });
 
             if (error) throw error;
 
@@ -151,6 +155,7 @@ export function TampilHistori() {
         }
 
         setFiltered(result);
+        setCurrentPage(1); // Reset to first page when filtering
     };
 
     const onFilterChange = (key: 'bulan' | 'layanan' | 'tindakan' | 'diagnosa', val: string) => {
@@ -403,6 +408,7 @@ export function TampilHistori() {
                     <ActivityIndicator size="large" color={Colors.primary} style={LayoutStyles.mt50} />
                 ) : (
                     <>
+                    <>
                     <View style={GlobalStyles.historyTableContainerPremium}>
                     <ScrollView horizontal showsHorizontalScrollIndicator={true}>
                         <View style={{ width: 1160 }}>
@@ -424,7 +430,9 @@ export function TampilHistori() {
                                         <Text style={GlobalStyles.emptyText}>Tidak ada data ditemukan</Text>
                                     </View>
                                 ) : (
-                                    filtered.map((item, index) => (
+                                    filtered
+                                        .slice((currentPage - 1) * ITEMS_PER_PAGE, currentPage * ITEMS_PER_PAGE)
+                                        .map((item, index) => (
                                         <View key={item.id_record} style={[GlobalStyles.tableRowAtomic, index % 2 === 1 && GlobalStyles.historyTableRowAlt]}>
                                             <View style={[GlobalStyles.tableCellAtomic, GlobalStyles.tableCellFirst, GlobalStyles.historyTableCellTgl, GlobalStyles.historyBodyCellBorder]}><Text style={GlobalStyles.tableTdText} numberOfLines={1}>{formatTanggal(item.tanggal)}</Text></View>
                                             <View style={[GlobalStyles.tableCellAtomic, GlobalStyles.historyTableCellNama, GlobalStyles.historyBodyCellBorder]}><Text style={GlobalStyles.tableTdText}>{item.tb_pasien?.nama_pasien || '-'}</Text></View>
@@ -450,13 +458,43 @@ export function TampilHistori() {
                             </View>
                         </ScrollView>
                     </View>
+
+                    {/* Pagination Controls */}
+                    {filtered.length > ITEMS_PER_PAGE && (
+                        <View style={styles.paginationContainer}>
+                            <TouchableOpacity 
+                                style={[styles.pageButton, currentPage === 1 && styles.pageButtonDisabled]}
+                                onPress={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+                                disabled={currentPage === 1}
+                            >
+                                <MaterialCommunityIcons name="chevron-left" size={24} color={currentPage === 1 ? "#CCC" : "#801919"} />
+                            </TouchableOpacity>
+
+                            <View style={styles.pageIndicator}>
+                                <Text style={styles.pageText}>Halaman</Text>
+                                <View style={styles.pageNumberBadge}>
+                                    <Text style={styles.pageNumberText}>{currentPage}</Text>
+                                </View>
+                                <Text style={styles.pageText}>dari {Math.ceil(filtered.length / ITEMS_PER_PAGE)}</Text>
+                            </View>
+
+                            <TouchableOpacity 
+                                style={[styles.pageButton, currentPage === Math.ceil(filtered.length / ITEMS_PER_PAGE) && styles.pageButtonDisabled]}
+                                onPress={() => setCurrentPage(prev => Math.min(Math.ceil(filtered.length / ITEMS_PER_PAGE), prev + 1))}
+                                disabled={currentPage === Math.ceil(filtered.length / ITEMS_PER_PAGE)}
+                            >
+                                <MaterialCommunityIcons name="chevron-right" size={24} color={currentPage === Math.ceil(filtered.length / ITEMS_PER_PAGE) ? "#CCC" : "#801919"} />
+                            </TouchableOpacity>
+                        </View>
+                    )}
+                    </>
                     </>
                 )}
 
                 
                 {!loading && (
                     <View style={GlobalStyles.historyFooterCount}>
-                        <Text style={GlobalStyles.historyFooterText}>Menampilkan {filtered.length} dari {records.length} data</Text>
+                        <Text style={GlobalStyles.historyFooterText}>Menampilkan {Math.min(filtered.length, ITEMS_PER_PAGE)} dari {filtered.length} data</Text>
                         {(filterBulan || filterLayanan || filterTindakan || filterDiagnosa) && (
                             <TouchableOpacity onPress={() => {
                                 setFilterBulan('');
@@ -475,3 +513,51 @@ export function TampilHistori() {
     );
 }
 
+const styles = StyleSheet.create({
+    paginationContainer: {
+        flexDirection: 'row',
+        justifyContent: 'center',
+        alignItems: 'center',
+        marginTop: 20,
+        marginBottom: 10,
+        gap: 20,
+    },
+    pageButton: {
+        width: 44,
+        height: 44,
+        borderRadius: 22,
+        backgroundColor: 'white',
+        justifyContent: 'center',
+        alignItems: 'center',
+        elevation: 3,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.1,
+        shadowRadius: 4,
+    },
+    pageButtonDisabled: {
+        backgroundColor: '#F5F5F5',
+        elevation: 0,
+    },
+    pageIndicator: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 8,
+    },
+    pageText: {
+        fontSize: 14,
+        color: '#666',
+        fontWeight: '500',
+    },
+    pageNumberBadge: {
+        backgroundColor: '#801919',
+        paddingHorizontal: 12,
+        paddingVertical: 4,
+        borderRadius: 12,
+    },
+    pageNumberText: {
+        color: 'white',
+        fontSize: 14,
+        fontWeight: 'bold',
+    },
+});

@@ -63,8 +63,8 @@ export function CreateTindakan() {
                         <Text style={CreateRecordStyles.cardTitle}>INFORMASI TINDAKAN</Text>
                         <View style={CreateRecordStyles.divider} />
 
-                        <View style={{ flexDirection: 'row', gap: 20 }}>
-                            <View style={{ flex: 1 }}>
+                        <View style={[LayoutStyles.flexRow, LayoutStyles.gap20]}>
+                            <View style={LayoutStyles.flex1}>
                                 <Text style={CreateRecordStyles.fieldLabel}>Nama Tindakan</Text>
                                 <LabeledInput
                                     label=""
@@ -76,7 +76,7 @@ export function CreateTindakan() {
                                 />
                             </View>
 
-                            <View style={{ flex: 1 }}>
+                            <View style={LayoutStyles.flex1}>
                                 <Text style={CreateRecordStyles.fieldLabel}>Kategori Perawatan</Text>
                                 <DropdownInput
                                     label=""
@@ -91,11 +91,11 @@ export function CreateTindakan() {
                         </View>
                     </View>
 
-                    <View style={[LayoutStyles.rowEnd, { marginTop: 15 }]}>
+                    <View style={[LayoutStyles.rowEnd, LayoutStyles.mt15]}>
                         <PrimaryButton
                             title={loading ? "Menyimpan..." : "Simpan"}
                             onPress={handleSave}
-                            style={[GlobalStyles.btnSimpan, { paddingHorizontal: 30 }]}
+                            style={[GlobalStyles.btnSimpan, LayoutStyles.ph30]}
                             disabled={loading}
                         />
                     </View>

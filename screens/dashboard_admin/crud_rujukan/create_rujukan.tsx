@@ -32,6 +32,9 @@ export function CreateRujukan() {
     const [penandatangan, setPenandatangan] = useState('');
     const [penandatanganModalVisible, setPenandatanganModalVisible] = useState(false);
     const [recordModalVisible, setRecordModalVisible] = useState(false);
+    
+    const [recordSearch, setRecordSearch] = useState('');
+    const [penandatanganSearch, setPenandatanganSearch] = useState('');
 
     const calculateUmur = (tglLahir: string) => {
         if (!tglLahir) return '';
@@ -64,7 +67,7 @@ export function CreateRujukan() {
                     .order('tanggal', { ascending: false }),
                 supabase
                     .from('tb_users')
-                    .select('id_users, nama_users')
+                    .select('id_users, nama_users, role, tb_dokter(spesialisasi)')
                     .order('nama_users', { ascending: true })
             ]);
 
@@ -255,8 +258,20 @@ export function CreateRujukan() {
                 <TouchableOpacity style={GlobalStyles.selectionModalOverlay} activeOpacity={1} onPress={() => setRecordModalVisible(false)}>
                     <View style={GlobalStyles.selectionModalContent}>
                         <Text style={GlobalStyles.selectionModalTitle}>Pilih Rekam Medis</Text>
-                        <ScrollView style={{ maxHeight: 400, width: '100%' }}>
-                            {availableRecords.map(r => (
+                        
+                        <View style={GlobalStyles.dropdownSearchContainer}>
+                            <MaterialCommunityIcons name="magnify" size={20} color="#999" />
+                            <TextInput
+                                style={GlobalStyles.dropdownSearchInput}
+                                placeholder="Cari nama pasien..."
+                                placeholderTextColor="#999"
+                                value={recordSearch}
+                                onChangeText={setRecordSearch}
+                            />
+                        </View>
+
+                        <ScrollView style={{ maxHeight: 400, width: '100%' }} keyboardShouldPersistTaps="handled">
+                            {availableRecords.filter(r => r.tb_pasien?.nama_pasien?.toLowerCase().includes(recordSearch.toLowerCase())).map(r => (
                                 <TouchableOpacity
                                     key={r.id_record}
                                     style={GlobalStyles.selectionOptionItem}
@@ -277,19 +292,37 @@ export function CreateRujukan() {
                 <TouchableOpacity style={GlobalStyles.selectionModalOverlay} activeOpacity={1} onPress={() => setPenandatanganModalVisible(false)}>
                     <View style={GlobalStyles.selectionModalContent}>
                         <Text style={GlobalStyles.selectionModalTitle}>Pilih Penandatangan</Text>
-                        <ScrollView style={{ maxHeight: 300, width: '100%' }}>
-                            {availableUsers.map(u => (
-                                <TouchableOpacity
-                                    key={u.id_users}
-                                    style={GlobalStyles.selectionOptionItem}
-                                    onPress={() => {
-                                        setPenandatangan(u.nama_users);
-                                        setPenandatanganModalVisible(false);
-                                    }}
-                                >
-                                    <Text style={GlobalStyles.tableRowText}>{u.nama_users}</Text>
-                                </TouchableOpacity>
-                            ))}
+                        
+                        <View style={GlobalStyles.dropdownSearchContainer}>
+                            <MaterialCommunityIcons name="magnify" size={20} color="#999" />
+                            <TextInput
+                                style={GlobalStyles.dropdownSearchInput}
+                                placeholder="Cari penandatangan..."
+                                placeholderTextColor="#999"
+                                value={penandatanganSearch}
+                                onChangeText={setPenandatanganSearch}
+                            />
+                        </View>
+
+                        <ScrollView style={{ maxHeight: 300, width: '100%' }} keyboardShouldPersistTaps="handled">
+                            {availableUsers.filter(u => u.nama_users.toLowerCase().includes(penandatanganSearch.toLowerCase())).map(u => {
+                                const spec = u.tb_dokter?.[0]?.spesialisasi || u.tb_dokter?.spesialisasi;
+                                const roleDisplay = u.role === 'dokter' ? (spec || 'Dokter') : 'Admin';
+                                const formattedName = `${u.nama_users} (${roleDisplay})`;
+                                
+                                return (
+                                    <TouchableOpacity
+                                        key={u.id_users}
+                                        style={GlobalStyles.selectionOptionItem}
+                                        onPress={() => {
+                                            setPenandatangan(formattedName);
+                                            setPenandatanganModalVisible(false);
+                                        }}
+                                    >
+                                        <Text style={GlobalStyles.tableRowText}>{formattedName}</Text>
+                                    </TouchableOpacity>
+                                );
+                            })}
                         </ScrollView>
                     </View>
                 </TouchableOpacity>

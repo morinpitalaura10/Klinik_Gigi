@@ -11,7 +11,7 @@ import {
 } from 'react-native';
 import { MaterialCommunityIcons, Feather } from '@expo/vector-icons';
 import { supabase } from '../../../utils/supabase';
-import { Colors, GlobalStyles, LayoutStyles, PatientTableStyles } from '../../../styles/GlobalStyles';
+import { Colors, GlobalStyles, LayoutStyles, PatientTableStyles, ManagementStyles } from '../../../styles/GlobalStyles';
 import AdminLayout from '../../../components/templates/AdminLayout';
 import { useFocusEffect, useNavigation } from '@react-navigation/native';
 
@@ -104,49 +104,47 @@ export function TampilUsers() {
             </View>
           </View>
 
-          <View style={PatientTableStyles.tableWrapper}>
+          <View style={ManagementStyles.tableContainer}>
             <View style={{ width: '100%' }}>
-              {/* Header */}
-              <View style={{ flexDirection: 'row', backgroundColor: Colors.primary, paddingVertical: 14 }}>
-                <View style={{ flex: 0.4, justifyContent: 'center', alignItems: 'center' }}><Text style={{ color: '#FFF', fontWeight: 'bold', fontSize: 13, textAlign: 'center' }}>No</Text></View>
-                <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}><Text style={{ color: '#FFF', fontWeight: 'bold', fontSize: 13, textAlign: 'center' }}>Nama</Text></View>
-                <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}><Text style={{ color: '#FFF', fontWeight: 'bold', fontSize: 13, textAlign: 'center' }}>Username</Text></View>
-                <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}><Text style={{ color: '#FFF', fontWeight: 'bold', fontSize: 13, textAlign: 'center' }}>Email</Text></View>
-                <View style={{ flex: 0.7, justifyContent: 'center', alignItems: 'center' }}><Text style={{ color: '#FFF', fontWeight: 'bold', fontSize: 13, textAlign: 'center' }}>Role</Text></View>
-                <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}><Text style={{ color: '#FFF', fontWeight: 'bold', fontSize: 13, textAlign: 'center' }}>Spesialisasi</Text></View>
-                <View style={{ flex: 0.8, justifyContent: 'center', alignItems: 'center' }}><Text style={{ color: '#FFF', fontWeight: 'bold', fontSize: 13, textAlign: 'center' }}>Aksi</Text></View>
+              <View style={ManagementStyles.tableHeaderPrimary}>
+                <View style={[ManagementStyles.colCenter, { flex: 0.4 }]}><Text style={ManagementStyles.thText}>No</Text></View>
+                <View style={[ManagementStyles.colCenter, { flex: 1 }]}><Text style={ManagementStyles.thText}>Nama</Text></View>
+                <View style={[ManagementStyles.colCenter, { flex: 1 }]}><Text style={ManagementStyles.thText}>Username</Text></View>
+                <View style={[ManagementStyles.colCenter, { flex: 1 }]}><Text style={ManagementStyles.thText}>Email</Text></View>
+                <View style={[ManagementStyles.colCenter, { flex: 0.7 }]}><Text style={ManagementStyles.thText}>Role</Text></View>
+                <View style={[ManagementStyles.colCenter, { flex: 1 }]}><Text style={ManagementStyles.thText}>Spesialisasi</Text></View>
+                <View style={[ManagementStyles.colCenter, { flex: 0.8 }]}><Text style={ManagementStyles.thText}>Aksi</Text></View>
               </View>
 
-              {/* Body */}
               <View style={PatientTableStyles.tableBody}>
                 {filteredUsers.length > 0 ? (
                   filteredUsers.map((item, index) => (
-                    <View key={item.id_users.toString()} style={{ flexDirection: 'row', borderBottomWidth: 1, borderColor: '#EBEBEB', paddingVertical: 14, alignItems: 'center', backgroundColor: '#FFF' }}>
-                      <View style={{ flex: 0.4, justifyContent: 'center', alignItems: 'center' }}>
-                        <Text style={{ fontSize: 13, fontWeight: 'bold', color: '#222', textAlign: 'center' }}>{index + 1}</Text>
+                    <View key={item.id_users.toString()} style={ManagementStyles.tableRow}>
+                      <View style={[ManagementStyles.colCenter, { flex: 0.4 }]}>
+                        <Text style={ManagementStyles.tdText}>{index + 1}</Text>
                       </View>
-                      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', paddingHorizontal: 6 }}>
-                        <Text style={{ fontSize: 13, fontWeight: 'bold', color: '#222', textAlign: 'center' }} numberOfLines={1}>{item.nama_users}</Text>
+                      <View style={[ManagementStyles.colCenter, ManagementStyles.paddingH6, { flex: 1 }]}>
+                        <Text style={ManagementStyles.tdText} numberOfLines={1}>{item.nama_users}</Text>
                       </View>
-                      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', paddingHorizontal: 6 }}>
-                        <Text style={{ fontSize: 12, color: '#555', textAlign: 'center' }} numberOfLines={1}>@{item.us}</Text>
+                      <View style={[ManagementStyles.colCenter, ManagementStyles.paddingH6, { flex: 1 }]}>
+                        <Text style={ManagementStyles.tdTextSmall} numberOfLines={1}>@{item.us}</Text>
                       </View>
-                      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', paddingHorizontal: 6 }}>
-                        <Text style={{ fontSize: 12, color: '#444', textAlign: 'center' }} numberOfLines={1}>{item.email_users || '-'}</Text>
+                      <View style={[ManagementStyles.colCenter, ManagementStyles.paddingH6, { flex: 1 }]}>
+                        <Text style={[ManagementStyles.tdTextSmall, { color: '#444' }]} numberOfLines={1}>{item.email_users || '-'}</Text>
                       </View>
-                      <View style={{ flex: 0.7, justifyContent: 'center', alignItems: 'center' }}>
-                        <View style={{ backgroundColor: item.role === 'admin' ? '#E3F2FD' : '#E8F5E9', paddingHorizontal: 8, paddingVertical: 4, borderRadius: 10 }}>
-                          <Text style={{ fontSize: 10, fontWeight: '900', color: item.role === 'admin' ? '#1976D2' : '#2E7D32' }}>
+                      <View style={[ManagementStyles.colCenter, { flex: 0.7 }]}>
+                        <View style={[ManagementStyles.roleBadge, { backgroundColor: item.role === 'admin' ? '#E3F2FD' : '#E8F5E9' }]}>
+                          <Text style={[ManagementStyles.roleBadgeText, { color: item.role === 'admin' ? '#1976D2' : '#2E7D32' }]}>
                             {item.role === 'admin' ? 'ADMIN' : 'DOKTER'}
                           </Text>
                         </View>
                       </View>
-                      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', paddingHorizontal: 6 }}>
-                        <Text style={{ fontSize: 13, fontWeight: 'bold', color: '#222', textAlign: 'center' }} numberOfLines={1}>
+                      <View style={[ManagementStyles.colCenter, ManagementStyles.paddingH6, { flex: 1 }]}>
+                        <Text style={ManagementStyles.tdText} numberOfLines={1}>
                           {item.role === 'dokter' ? (item.tb_dokter && item.tb_dokter[0]?.spesialisasi) || 'Umum' : '-'}
                         </Text>
                       </View>
-                      <View style={{ flex: 0.8, flexDirection: 'row', justifyContent: 'center', alignItems: 'center', gap: 6 }}>
+                      <View style={[ManagementStyles.actionCell, { flex: 0.8 }]}>
                         <TouchableOpacity onPress={() => navigation.navigate('UpdateUser', { editUser: item })}>
                           <MaterialCommunityIcons name="square-edit-outline" size={20} color="#EBC112" />
                         </TouchableOpacity>

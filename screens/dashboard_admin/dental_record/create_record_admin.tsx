@@ -35,6 +35,7 @@ export function CreateRecordAdmin() {
     const [pasienList, setPasienList] = useState<Pasien[]>([]);
     const [selectedPasienId, setSelectedPasienId] = useState<string>(editItem?.id_pasien?.toString() || '');
     const [selectedPasienName, setSelectedPasienName] = useState<string>('Masukkan nama pasien');
+    const [pasienSearch, setPasienSearch] = useState('');
     const [layanan, setLayanan] = useState(editItem?.layanan || '');
 
     // Keluhan state (mapped to 'keluhan' column in DB)
@@ -207,8 +208,20 @@ export function CreateRecordAdmin() {
                 <TouchableOpacity style={GlobalStyles.selectionModalOverlay} activeOpacity={1} onPress={() => setPasienModalVisible(false)}>
                     <View style={GlobalStyles.selectionModalContent}>
                         <Text style={GlobalStyles.selectionModalTitle}>Pilih Pasien</Text>
-                        <ScrollView style={GlobalStyles.modalScrollViewContent}>
-                            {pasienList.map(p => (
+                        
+                        <View style={GlobalStyles.dropdownSearchContainer}>
+                            <MaterialCommunityIcons name="magnify" size={20} color="#999" />
+                            <TextInput
+                                style={GlobalStyles.dropdownSearchInput}
+                                placeholder="Cari nama pasien..."
+                                placeholderTextColor="#999"
+                                value={pasienSearch}
+                                onChangeText={setPasienSearch}
+                            />
+                        </View>
+
+                        <ScrollView style={GlobalStyles.modalScrollViewContent} keyboardShouldPersistTaps="handled">
+                            {pasienList.filter(p => p.nama_pasien.toLowerCase().includes(pasienSearch.toLowerCase())).map(p => (
                                 <TouchableOpacity
                                     key={p.id_pasien}
                                     style={GlobalStyles.selectionOptionItem}

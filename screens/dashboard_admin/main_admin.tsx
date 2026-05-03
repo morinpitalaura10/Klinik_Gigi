@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useContext } from 'react';
+import React, { useState, useCallback, useContext, useEffect } from 'react';
 import { View, Text, TouchableOpacity, ScrollView, ActivityIndicator } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
 import { AuthContext } from '../../context/AuthContext';
@@ -24,6 +24,31 @@ export default function MainAdmin({ navigation }: any) {
   const { showAlert } = useAlert();
   const [todayActivities, setTodayActivities] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [currentTime, setCurrentTime] = useState(new Date());
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setCurrentTime(new Date());
+    }, 1000);
+    return () => clearInterval(timer);
+  }, []);
+
+  const getDateTimeParts = () => {
+    const days = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
+    const months = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
+    const dayName = days[currentTime.getDay()];
+    const date = currentTime.getDate();
+    const month = months[currentTime.getMonth()];
+    const year = currentTime.getFullYear();
+    const hours = String(currentTime.getHours()).padStart(2, '0');
+    const minutes = String(currentTime.getMinutes()).padStart(2, '0');
+    const seconds = String(currentTime.getSeconds()).padStart(2, '0');
+    return {
+      day: dayName,
+      date: `${date} ${month} ${year}`,
+      time: `${hours}:${minutes}:${seconds}`
+    };
+  };
 
   const fetchTodayActivities = async () => {
     try {
@@ -66,6 +91,16 @@ export default function MainAdmin({ navigation }: any) {
     }, [])
   );
 
+  const getStatusStyle = (status: string) => {
+    switch (status) {
+      case 'Menunggu': return { bg: '#F0F0F0', text: '#666' };
+      case 'Diproses': return { bg: '#FFF9E6', text: '#D4A017' };
+      case 'Selesai': return { bg: '#E8F5E9', text: '#2E7D32' };
+      case 'Batal': return { bg: '#FFEBEE', text: '#C62828' };
+      default: return { bg: '#FFF', text: '#000' };
+    }
+  };
+
   const handleLogout = () => {
     showAlert({
       title: 'Logout Admin',
@@ -81,12 +116,12 @@ export default function MainAdmin({ navigation }: any) {
         
         {/* Kolom Kiri: Menu Operasional */}
         <View style={AdminDashboardStyles.leftColumn}>
-          <ScrollView showsVerticalScrollIndicator={false} style={{ flex: 1 }}>
+          <ScrollView showsVerticalScrollIndicator={false} style={LayoutStyles.flex1}>
             
             <Text style={[AdminDashboardStyles.menuSectionTitle, AdminDashboardStyles.menuSectionTitleTop]}>LAYANAN OPERASIONAL</Text>
             <View style={AdminDashboardStyles.menuGridContainer}>
               <MenuIcon title={"Dental\nRecord"} icon="account-details" onPress={() => navigation.navigate('TampilRecordAdmin')} />
-              <MenuIcon title={"Cetak\nRujukan"} icon="file-export-outline" onPress={() => navigation.navigate('CreateRujukan')} />
+              <MenuIcon title={"Cetak\nRujukan"} icon="file-export-outline" onPress={() => navigation.navigate('TampilRujukan')} />
               <MenuIcon title={"Cetak\nKwitansi"} icon="receipt" onPress={() => navigation.navigate('TampilKwitansi')} />
               <MenuIcon title={"Seluruh\nAktifitas"} icon="history" onPress={() => navigation.navigate('TampilHistori')} />
             </View>
@@ -114,9 +149,25 @@ export default function MainAdmin({ navigation }: any) {
         </View>
 
         {/* Kolom Kanan: Aktifitas Hari Ini */}
-        <View style={AdminDashboardStyles.rightColumn}>
+        <View style={{ flex: 2 }}>
           
-          <View style={AdminDashboardStyles.tableHeader}>
+          <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10, paddingHorizontal: 5 }}>
+            <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+               <Text style={{ fontSize: 15, fontWeight: 'bold', color: Colors.primary }}>Hari : </Text>
+               <Text style={{ fontSize: 15, fontWeight: 'bold', color: '#333' }}>{getDateTimeParts().day}</Text>
+            </View>
+            <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+               <Text style={{ fontSize: 15, fontWeight: 'bold', color: Colors.primary }}>Tanggal : </Text>
+               <Text style={{ fontSize: 15, fontWeight: 'bold', color: '#333' }}>{getDateTimeParts().date}</Text>
+            </View>
+            <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+               <Text style={{ fontSize: 15, fontWeight: 'bold', color: Colors.primary }}>Jam : </Text>
+               <Text style={{ fontSize: 15, fontWeight: 'bold', color: '#333' }}>{getDateTimeParts().time}</Text>
+            </View>
+          </View>
+
+          <View style={[AdminDashboardStyles.rightColumn, { flex: 1 }]}>
+            <View style={AdminDashboardStyles.tableHeader}>
             <Text style={AdminDashboardStyles.thName}>Nama</Text>
             <Text style={[AdminDashboardStyles.thCenter, AdminDashboardStyles.flex1_5]}>Gender</Text>
             <Text style={[AdminDashboardStyles.thCenter, AdminDashboardStyles.flex2]}>Status Layanan</Text>
@@ -142,8 +193,8 @@ export default function MainAdmin({ navigation }: any) {
                   <Text style={AdminDashboardStyles.tdLayanan}>{item.layanan || '-'}</Text>
                   
                   <View style={AdminDashboardStyles.tdCenterContainer}>
-                    <View style={AdminDashboardStyles.badgeContainer}>
-                      <Text style={AdminDashboardStyles.badgeText}>{item.status}</Text>
+                    <View style={[AdminDashboardStyles.badgeContainer, { backgroundColor: getStatusStyle(item.status).bg, borderWidth: 1, borderColor: getStatusStyle(item.status).text }]}>
+                      <Text style={[AdminDashboardStyles.badgeText, { color: getStatusStyle(item.status).text }]}>{item.status}</Text>
                     </View>
                   </View>
                 </View>
@@ -151,6 +202,7 @@ export default function MainAdmin({ navigation }: any) {
             )}
           </ScrollView>
 
+          </View>
         </View>
 
       </View>

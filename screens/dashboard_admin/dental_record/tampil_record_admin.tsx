@@ -114,7 +114,7 @@ export function TampilRecordAdmin() {
   );
 
   return (
-    <AdminLayout noScroll={true} customRightTitle="Dental Record">
+    <AdminLayout customRightTitle="Dental Record">
       {loading && !refreshing ? (
         <ActivityIndicator size="large" color={Colors.black} style={LayoutStyles.mt50} />
       ) : (
@@ -156,70 +156,64 @@ export function TampilRecordAdmin() {
               <Text style={[DentalRecordStyles.thText, DentalRecordStyles.thCenter, DentalRecordStyles.colAksi]}>Aksi</Text>
             </View>
 
-            <FlatList
-              data={filteredData}
-              keyExtractor={(item) => item.id_record.toString()}
-              refreshing={refreshing}
-              onRefresh={() => {
-                setRefreshing(true);
-                fetchRecords();
-              }}
-              renderItem={({ item }) => {
-                const statusStyle = getStatusStyle(item.status);
-                return (
-                  <View style={DentalRecordStyles.tableRow}>
-                    <Text style={[DentalRecordStyles.tdText, DentalRecordStyles.colNama]} numberOfLines={1}>
-                      {item.tb_pasien?.nama_pasien || '-'}
-                    </Text>
-                    
-                    <View style={[DentalRecordStyles.colGender, DentalRecordStyles.badgeContainerOuter]}>
-                      <View style={DentalRecordStyles.badgeContainer}>
-                        <Text style={DentalRecordStyles.badgeText}>{item.tb_pasien?.jk || '-'}</Text>
-                      </View>
-                    </View>
-
-                    <Text 
-                      style={[DentalRecordStyles.tdCenterText, DentalRecordStyles.colKeluhan, { fontSize: 13, color: '#444' }]} 
-                      numberOfLines={2}
-                    >
-                      {item.diagnosa || '-'}
-                    </Text>
-
-                    <Text style={[DentalRecordStyles.tdCenterText, DentalRecordStyles.colLayanan]}>
-                      {item.layanan || '-'}
-                    </Text>
-                    
-                    <View style={[DentalRecordStyles.colStatus, DentalRecordStyles.badgeContainerOuter]}>
-                      <TouchableOpacity 
-                        style={DentalRecordStyles.badgeContainer}
-                        onPress={() => {
-                          setActiveRecordId(item.id_record);
-                          setStatusModalVisible(true);
-                        }}
-                      >
-                        <Text style={[DentalRecordStyles.badgeText, { marginRight: 5 }]}>{item.status}</Text>
-                        <MaterialCommunityIcons name="menu-down" size={16} color={Colors.primary} />
-                      </TouchableOpacity>
-                    </View>
-
-                    <View style={[DentalRecordStyles.colAksi, { alignItems: 'center' }]}>
-                      <TouchableOpacity
-                        style={DentalRecordStyles.btnEditAction}
-                        onPress={() => navigation.navigate('CreateRecordAdmin', { editItem: item })}
-                      >
-                        <Feather name="edit" size={14} color="#FFF" />
-                        <Text style={DentalRecordStyles.btnEditActionText}>Edit</Text>
-                      </TouchableOpacity>
-                    </View>
-                  </View>
-                );
-              }}
-              ListEmptyComponent={
+            <View>
+              {filteredData.length === 0 ? (
                 <View style={[GlobalStyles.emptyContent, { paddingVertical: 40 }]}>
                   <Text style={GlobalStyles.emptyText}>Tidak ada record kunjungan hari ini</Text>
                 </View>
-              }
-            />
+              ) : (
+                filteredData.map((item) => {
+                  const statusStyle = getStatusStyle(item.status);
+                  return (
+                    <View key={item.id_record.toString()} style={DentalRecordStyles.tableRow}>
+                      <Text style={[DentalRecordStyles.tdText, DentalRecordStyles.colNama]} numberOfLines={1}>
+                        {item.tb_pasien?.nama_pasien || '-'}
+                      </Text>
+                      
+                      <View style={[DentalRecordStyles.colGender, DentalRecordStyles.badgeContainerOuter]}>
+                        <View style={DentalRecordStyles.badgeContainer}>
+                          <Text style={DentalRecordStyles.badgeText}>{item.tb_pasien?.jk || '-'}</Text>
+                        </View>
+                      </View>
+
+                      <Text 
+                        style={[DentalRecordStyles.tdCenterText, DentalRecordStyles.colKeluhan, { fontSize: 13, color: '#444' }]} 
+                        numberOfLines={2}
+                      >
+                        {item.diagnosa || '-'}
+                      </Text>
+
+                      <Text style={[DentalRecordStyles.tdCenterText, DentalRecordStyles.colLayanan]}>
+                        {item.layanan || '-'}
+                      </Text>
+                      
+                      <View style={[DentalRecordStyles.colStatus, DentalRecordStyles.badgeContainerOuter]}>
+                        <TouchableOpacity 
+                          style={[DentalRecordStyles.badgeContainer, { backgroundColor: statusStyle.bg, borderWidth: 1, borderColor: statusStyle.text }]}
+                          onPress={() => {
+                            setActiveRecordId(item.id_record);
+                            setStatusModalVisible(true);
+                          }}
+                        >
+                          <Text style={[DentalRecordStyles.badgeText, { marginRight: 5, color: statusStyle.text }]}>{item.status}</Text>
+                          <MaterialCommunityIcons name="menu-down" size={16} color={statusStyle.text} />
+                        </TouchableOpacity>
+                      </View>
+
+                      <View style={[DentalRecordStyles.colAksi, { alignItems: 'center' }]}>
+                        <TouchableOpacity
+                          style={DentalRecordStyles.btnEditAction}
+                          onPress={() => navigation.navigate('CreateRecordAdmin', { editItem: item })}
+                        >
+                          <Feather name="edit" size={14} color="#FFF" />
+                          <Text style={DentalRecordStyles.btnEditActionText}>Edit</Text>
+                        </TouchableOpacity>
+                      </View>
+                    </View>
+                  );
+                })
+              )}
+            </View>
           </View>
 
           <Modal
@@ -233,26 +227,39 @@ export function TampilRecordAdmin() {
                 activeOpacity={1} 
                 onPress={() => setStatusModalVisible(false)}
             >
-                <View style={DentalRecordStyles.modalContent}>
-                    <Text style={DentalRecordStyles.modalTitle}>Ubah Status</Text>
+                <View style={[DentalRecordStyles.modalContent, { 
+                    borderColor: Colors.primary, 
+                    borderWidth: 2, 
+                    borderRadius: 30,
+                    padding: 25
+                }]}>
+                    <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 25, width: '100%' }}>
+                        <Text style={[DentalRecordStyles.modalTitle, { marginBottom: 0, color: Colors.primary, fontWeight: 'bold', fontSize: 20, textAlign: 'left' }]}>Ubah Status</Text>
+                        <TouchableOpacity onPress={() => setStatusModalVisible(false)} style={{ 
+                            width: 40, 
+                            height: 40, 
+                            borderRadius: 20, 
+                            borderWidth: 1, 
+                            borderColor: Colors.primary,
+                            justifyContent: 'center',
+                            alignItems: 'center'
+                        }}>
+                            <MaterialCommunityIcons name="close" size={22} color={Colors.primary} />
+                        </TouchableOpacity>
+                    </View>
                     
-                    {['Menunggu', 'Diproses', 'Selesai', 'Batal'].map((opt) => {
-                        let colorStr = '#666';
-                        if (opt === 'Menunggu') colorStr = '#666';
-                        if (opt === 'Diproses') colorStr = '#FFD700'; // Pure bright yellow
-                        if (opt === 'Selesai') colorStr = '#4CAF50';  // Green
-                        if (opt === 'Batal') colorStr = Colors.primary; // Maroon
-
-                        return (
-                          <TouchableOpacity 
-                              key={opt}
-                              style={[DentalRecordStyles.modalOptionBtn, { borderColor: colorStr }]}
-                              onPress={() => activeRecordId && updateStatus(activeRecordId, opt)}
-                          >
-                              <Text style={[DentalRecordStyles.modalOptionText, { color: colorStr }]}>{opt}</Text>
-                          </TouchableOpacity>
-                        );
-                    })}
+                    <TouchableOpacity 
+                        style={[DentalRecordStyles.modalOptionBtn, { 
+                            backgroundColor: Colors.primary,
+                            borderColor: Colors.primary,
+                            borderRadius: 15,
+                            paddingVertical: 15,
+                            width: '100%'
+                        }]}
+                        onPress={() => activeRecordId && updateStatus(activeRecordId, 'Batal')}
+                    >
+                        <Text style={[DentalRecordStyles.modalOptionText, { color: '#FFF', fontWeight: 'bold', fontSize: 16 }]}>Batal</Text>
+                    </TouchableOpacity>
                 </View>
             </TouchableOpacity>
           </Modal>

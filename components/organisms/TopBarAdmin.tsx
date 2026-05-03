@@ -1,24 +1,29 @@
-import React from 'react';
+import React, { useContext } from 'react';
 import { View, Text, TouchableOpacity, Image } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { Colors, LayoutStyles, GlobalStyles } from '../../styles/GlobalStyles';
 import { useNavigation } from '@react-navigation/native';
+import { AuthContext } from '../../context/AuthContext';
 
 interface Props {
-  title: string;
-  role: string;
+  title?: string;
+  role?: string;
   customLeftTitle?: string;
   customRightTitle?: string;
   showBackButton?: boolean;
   onLogout?: () => void;
 }
 
-export default function TopBarAdmin({ title, role, customLeftTitle, customRightTitle, showBackButton = true, onLogout }: Props) {
+export default function TopBarAdmin({ showBackButton = true, onLogout }: Props) {
   const navigation = useNavigation();
+  const { user } = useContext(AuthContext);
+
+  const displayRole = user?.role === 'admin' ? 'Admin' : (user?.role === 'dokter' ? 'Dokter' : 'Pengguna');
+  const displayName = user?.nama || 'Guest';
 
   return (
     <View style={GlobalStyles.topBarContainer}>
-      <View style={GlobalStyles.topBarLeft}>
+      <View style={[GlobalStyles.topBarLeft, { flex: 1 }]}>
         {showBackButton && (
           <TouchableOpacity 
             style={GlobalStyles.backButton} 
@@ -35,21 +40,19 @@ export default function TopBarAdmin({ title, role, customLeftTitle, customRightT
             resizeMode="cover"
           />
         </View>
-        <View>
-          <Text style={LayoutStyles.clinicName}>Galeri Ortodental</Text>
-          <Text style={LayoutStyles.clinicAddress}>Cipto Park Jl. Dr. Cipto Mangunkusumo No. 54 Cirebon</Text>
+        <View style={LayoutStyles.flex1}>
+          <Text style={LayoutStyles.clinicName} numberOfLines={1}>Galeri Ortodental</Text>
+          <Text style={LayoutStyles.clinicAddress} numberOfLines={1}>Cipto Park Jl. Dr. Cipto Mangunkusumo No. 54 Cirebon</Text>
         </View>
       </View>
 
       <View style={[GlobalStyles.topBarRightContent, GlobalStyles.alignEnd]}>
         <View style={[GlobalStyles.topBarRightTextWrapper, { marginRight: onLogout ? 15 : 0 }]}>
-            {customRightTitle && (
-            <Text style={GlobalStyles.topBarTextRightBold}>
-                {customRightTitle}
+            <Text style={GlobalStyles.topBarTextRightBold} numberOfLines={1}>
+                {displayRole}
             </Text>
-            )}
-            <Text style={GlobalStyles.topBarTextRight}>
-            {title}
+            <Text style={GlobalStyles.topBarTextRight} numberOfLines={1}>
+                {displayName}
             </Text>
         </View>
 

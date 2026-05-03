@@ -10,7 +10,7 @@ import {
 } from 'react-native';
 import { MaterialCommunityIcons, Feather } from '@expo/vector-icons';
 import { supabase } from '../../../utils/supabase';
-import { Colors, GlobalStyles, LayoutStyles } from '../../../styles/GlobalStyles';
+import { Colors, GlobalStyles, LayoutStyles, ManagementStyles } from '../../../styles/GlobalStyles';
 import AdminLayout from '../../../components/templates/AdminLayout';
 import { useFocusEffect, useNavigation } from '@react-navigation/native';
 
@@ -69,28 +69,24 @@ export function TampilTindakan() {
           contentContainerStyle={{ paddingBottom: 40 }}
           showsVerticalScrollIndicator={true}
         >
-          <View style={[LayoutStyles.pt10, LayoutStyles.ph20, { paddingBottom: 10 }]}>
-            <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 15 }}>
+          <View style={ManagementStyles.container}>
+            <View style={ManagementStyles.headerRow}>
               <View>
-                <Text style={{ fontSize: 24, fontWeight: 'bold', color: '#000', marginBottom: 4 }}>Manajemen Perawatan</Text>
-                <Text style={{ fontSize: 13, color: '#555' }}>Kelola daftar tindakan & perawatan klinik</Text>
+                <Text style={ManagementStyles.title}>Manajemen Perawatan</Text>
+                <Text style={ManagementStyles.subtitle}>Kelola daftar tindakan & perawatan klinik</Text>
               </View>
               <TouchableOpacity
-                style={{ backgroundColor: '#2D5DD1', paddingHorizontal: 12, paddingVertical: 8, borderRadius: 8, shadowColor: '#000', shadowOffset: { width: 0, height: 1 }, shadowOpacity: 0.2, shadowRadius: 2, elevation: 2 }}
+                style={ManagementStyles.btnBlue}
                 onPress={() => navigation.navigate('CreateTindakan')}
               >
-                <Text style={{ color: '#FFF', fontWeight: 'bold', fontSize: 13 }}>+Tindakan Baru</Text>
+                <Text style={ManagementStyles.btnBlueText}>+Tindakan Baru</Text>
               </TouchableOpacity>
             </View>
 
-            <View style={{
-                flexDirection: 'row', alignItems: 'center', backgroundColor: '#FFF',
-                borderWidth: 1.5, borderColor: '#E2E8F0', borderRadius: 12, paddingHorizontal: 15, height: 45,
-                shadowColor: '#000', shadowOffset: { width: 0, height: 1 }, shadowOpacity: 0.05, shadowRadius: 3, elevation: 1
-            }}>
+            <View style={ManagementStyles.searchBar}>
               <Feather name="search" size={20} color="#94A3B8" />
               <TextInput
-                style={{ flex: 1, marginLeft: 10, fontSize: 14, color: '#333' }}
+                style={ManagementStyles.searchInput}
                 placeholder="Cari nama tindakan..."
                 placeholderTextColor="#94A3B8"
                 value={searchQuery}
@@ -99,20 +95,20 @@ export function TampilTindakan() {
             </View>
           </View>
 
-          <View style={[LayoutStyles.mh20, { backgroundColor: '#FFF', borderRadius: 12, borderWidth: 1.5, borderColor: '#E2E8F0', overflow: 'hidden', shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.05, shadowRadius: 8, elevation: 3 }]}>
+          <View style={ManagementStyles.tableContainer}>
             <View style={{ width: '100%' }}>
-              <View style={{ flexDirection: 'row', backgroundColor: '#801919', paddingVertical: 14 }}>
-                <View style={[{ flex: 0.5, paddingHorizontal: 15, justifyContent: 'center', alignItems: 'center' }]}>
-                  <Text style={{ color: '#FFF', fontWeight: 'bold', fontSize: 14 }}>No</Text>
+              <View style={ManagementStyles.tableHeaderMaron}>
+                <View style={[ManagementStyles.colCenter, { flex: 0.5, paddingHorizontal: 15 }]}>
+                  <Text style={[ManagementStyles.thText, { fontSize: 14 }]}>No</Text>
                 </View>
-                <View style={[{ flex: 1.2, paddingHorizontal: 15 }]}>
-                  <Text style={{ color: '#FFF', fontWeight: 'bold', fontSize: 14 }}>Dokter</Text>
+                <View style={[{ flex: 1.2, paddingHorizontal: 15, justifyContent: 'center' }]}>
+                  <Text style={[ManagementStyles.thText, { fontSize: 14, textAlign: 'left' }]}>Dokter</Text>
                 </View>
-                <View style={[{ flex: 2, paddingHorizontal: 15 }]}>
-                  <Text style={{ color: '#FFF', fontWeight: 'bold', fontSize: 14 }}>Nama Tindakan</Text>
+                <View style={[{ flex: 2, paddingHorizontal: 15, justifyContent: 'center' }]}>
+                  <Text style={[ManagementStyles.thText, { fontSize: 14, textAlign: 'left' }]}>Nama Tindakan</Text>
                 </View>
-                <View style={[{ flex: 0.8, paddingHorizontal: 15, alignItems: 'center' }]}>
-                  <Text style={{ color: '#FFF', fontWeight: 'bold', fontSize: 14 }}>Aksi</Text>
+                <View style={[ManagementStyles.colCenter, { flex: 0.8, paddingHorizontal: 15 }]}>
+                  <Text style={[ManagementStyles.thText, { fontSize: 14 }]}>Aksi</Text>
                 </View>
               </View>
 
@@ -121,8 +117,8 @@ export function TampilTindakan() {
                     filteredData.map((item, index) => {
                       const isLast = index === filteredData.length - 1;
                       return (
-                        <View key={item.id_tindakan.toString()} style={[{ flexDirection: 'row', alignItems: 'center', backgroundColor: '#FFF', paddingVertical: 14, borderBottomWidth: isLast ? 0 : 1, borderBottomColor: '#E2E8F0' }]}>
-                          <View style={[{ flex: 0.5, paddingHorizontal: 15, justifyContent: 'center', alignItems: 'center' }]}>
+                        <View key={item.id_tindakan.toString()} style={[ManagementStyles.tableRow, { borderBottomWidth: isLast ? 0 : 1, borderBottomColor: '#E2E8F0' }]}>
+                          <View style={[ManagementStyles.colCenter, { flex: 0.5, paddingHorizontal: 15 }]}>
                             <Text style={{ fontSize: 14, color: '#000', fontWeight: '500' }}>{index + 1}</Text>
                           </View>
                           <View style={[{ flex: 1.2, paddingHorizontal: 15 }]}>
@@ -133,7 +129,7 @@ export function TampilTindakan() {
                           <View style={[{ flex: 2, paddingHorizontal: 15 }]}>
                             <Text style={{ fontSize: 13, color: '#000', fontWeight: 'bold' }}>{item.nama_tindakan}</Text>
                           </View>
-                          <View style={[{ flex: 0.8, paddingHorizontal: 15, flexDirection: 'row', justifyContent: 'center', gap: 15 }]}>
+                          <View style={[ManagementStyles.actionCell, { flex: 0.8, paddingHorizontal: 15, gap: 15 }]}>
                             <TouchableOpacity
                               onPress={() => navigation.navigate('UpdateTindakan', { editItem: item })}
                             >

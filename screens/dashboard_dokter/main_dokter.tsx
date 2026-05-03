@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useContext } from 'react';
+import React, { useState, useCallback, useContext, useEffect } from 'react';
 import { 
   View, 
   Text, 
@@ -17,6 +17,7 @@ import { useAlert } from '../../context/AlertContext';
 
 interface DentalRecord {
   id_record: number;
+  id_pasien: number;
   tanggal: string;
   layanan: string;
   status: string;
@@ -35,6 +36,14 @@ export default function MainDokter() {
   const [records, setRecords] = useState<DentalRecord[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
+  const [currentTime, setCurrentTime] = useState(new Date());
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setCurrentTime(new Date());
+    }, 1000);
+    return () => clearInterval(timer);
+  }, []);
   
   const today = new Date().toLocaleDateString('en-CA');
 
@@ -51,7 +60,7 @@ export default function MainDokter() {
             )
         `)
         .eq('tanggal', today)
-        .eq('status', 'Diproses');
+        .in('status', ['Menunggu', 'Diproses']);
 
       if (user?.role === 'dokter' && user?.spesialisasi) {
           const spec = user.spesialisasi.toLowerCase();
@@ -85,8 +94,14 @@ export default function MainDokter() {
   const getFormattedDate = () => {
     const days = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
     const months = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
-    const d = new Date();
-    return `${days[d.getDay()]}, ${d.getDate()} ${months[d.getMonth()]} ${d.getFullYear()}`;
+    const dayName = days[currentTime.getDay()];
+    const date = currentTime.getDate();
+    const month = months[currentTime.getMonth()];
+    const year = currentTime.getFullYear();
+    const hours = String(currentTime.getHours()).padStart(2, '0');
+    const minutes = String(currentTime.getMinutes()).padStart(2, '0');
+    const seconds = String(currentTime.getSeconds()).padStart(2, '0');
+    return `${dayName}, ${date} ${month} ${year} • ${hours}:${minutes}:${seconds}`;
   };
 
   const handleLogout = () => {
@@ -166,13 +181,23 @@ export default function MainDokter() {
                                 </View>
 
                                 <View style={DoctorDashboardStyles.colAksi}>
-                                    <TouchableOpacity 
-                                        style={DoctorDashboardStyles.btnEdit}
-                                        onPress={() => navigation.navigate('IsiRekamMedis', { record: item })}
-                                    >
-                                        <MaterialCommunityIcons name="square-edit-outline" size={16} color="#FFF" />
-                                        <Text style={DoctorDashboardStyles.btnEditText}>Edit</Text>
-                                    </TouchableOpacity>
+                                    <View style={{ gap: 8 }}>
+                                        <TouchableOpacity 
+                                            style={[DoctorDashboardStyles.btnEdit, { backgroundColor: '#1E88E5' }]}
+                                            onPress={() => navigation.navigate('ReadPasien', { id: item.id_pasien })}
+                                        >
+                                            <MaterialCommunityIcons name="history" size={16} color="#FFF" />
+                                            <Text style={DoctorDashboardStyles.btnEditText}>Riwayat</Text>
+                                        </TouchableOpacity>
+
+                                        <TouchableOpacity 
+                                            style={DoctorDashboardStyles.btnEdit}
+                                            onPress={() => navigation.navigate('IsiRekamMedis', { record: item })}
+                                        >
+                                            <MaterialCommunityIcons name="stethoscope" size={16} color="#FFF" />
+                                            <Text style={DoctorDashboardStyles.btnEditText}>Tindakan</Text>
+                                        </TouchableOpacity>
+                                    </View>
                                 </View>
                             </View>
                         ))

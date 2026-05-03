@@ -108,8 +108,8 @@ export function CreatePasien() {
                             style={CreateRecordStyles.inputDropdown}
                         />
 
-                        <View style={{ flexDirection: 'row', gap: 15 }}>
-                            <View style={{ flex: 1 }}>
+                        <View style={[LayoutStyles.flexRow, LayoutStyles.gap15]}>
+                            <View style={LayoutStyles.flex1}>
                                 <Text style={CreateRecordStyles.fieldLabel}>Tanggal Lahir</Text>
                                 <DatePickerInput
                                     label=""
@@ -119,7 +119,7 @@ export function CreatePasien() {
                                     buttonStyle={CreateRecordStyles.inputDropdown}
                                 />
                             </View>
-                            <View style={{ flex: 1 }}>
+                            <View style={LayoutStyles.flex1}>
                                 <Text style={CreateRecordStyles.fieldLabel}>Jenis Kelamin</Text>
                                 <DropdownInput
                                     label=""

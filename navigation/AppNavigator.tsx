@@ -37,6 +37,7 @@ import { IsiRekamMedis } from '../screens/dashboard_dokter/isi_rekam_medis';
 
 
 import { TampilKwitansi } from '../screens/dashboard_admin/crud_kwitansi/tampil_kwitansi';
+import { ListPendingKwitansi } from '../screens/dashboard_admin/crud_kwitansi/list_pending_kwitansi';
 import { CreateKwitansi } from '../screens/dashboard_admin/crud_kwitansi/create_kwitansi';
 import { PreviewKwitansi } from '../screens/dashboard_admin/crud_kwitansi/preview_kwitansi';
 
@@ -76,7 +77,8 @@ export type RootStackParamList = {
   IsiRekamMedis: { record: any };
 
   TampilKwitansi: undefined;
-  CreateKwitansi: undefined;
+  ListPendingKwitansi: undefined;
+  CreateKwitansi: { record: any };
   PreviewKwitansi: { item: any };
 
   TampilRujukan: undefined;
@@ -154,6 +156,7 @@ export default function AppNavigator() {
 
           
           <Stack.Screen name="TampilKwitansi" component={TampilKwitansi} />
+          <Stack.Screen name="ListPendingKwitansi" component={ListPendingKwitansi} />
           <Stack.Screen name="CreateKwitansi" component={CreateKwitansi} />
           <Stack.Screen name="PreviewKwitansi" component={PreviewKwitansi} />
 
@@ -173,6 +176,7 @@ export default function AppNavigator() {
         >
           <Stack.Screen name="MainDokter" component={MainDokter} />
           <Stack.Screen name="IsiRekamMedis" component={IsiRekamMedis} />
+          <Stack.Screen name="ReadPasien" component={ReadPasien} />
         </Stack.Navigator>
       )}
     </NavigationContainer>

@@ -10,7 +10,7 @@ import {
 } from 'react-native';
 import { MaterialCommunityIcons, Feather } from '@expo/vector-icons';
 import { supabase } from '../../../utils/supabase';
-import { Colors, GlobalStyles, LayoutStyles, DentalRecordStyles } from '../../../styles/GlobalStyles';
+import { Colors, GlobalStyles, LayoutStyles, DentalRecordStyles, ManagementStyles } from '../../../styles/GlobalStyles';
 import AdminLayout from '../../../components/templates/AdminLayout';
 import { useFocusEffect, useNavigation } from '@react-navigation/native';
 
@@ -66,98 +66,116 @@ export function TampilPasien() {
         <ActivityIndicator size="large" color={Colors.primary} style={LayoutStyles.mt50} />
       ) : (
         <ScrollView
-          style={{ flex: 1, backgroundColor: '#F5F5F5' }}
+          style={LayoutStyles.flex1}
           contentContainerStyle={{ paddingBottom: 40 }}
         >
-          {/* Top Section */}
-          <View style={DentalRecordStyles.topSection}>
-            <View style={DentalRecordStyles.headerRow}>
+          <View style={ManagementStyles.container}>
+            <View style={ManagementStyles.headerRow}>
               <View>
-                <Text style={DentalRecordStyles.headerTitle}>Data Pasien</Text>
-                <Text style={DentalRecordStyles.headerSubtitle}>Kelola informasi pasien klinik</Text>
+                <Text style={ManagementStyles.title}>Data Pasien</Text>
+                <Text style={ManagementStyles.subtitle}>Kelola informasi pasien klinik</Text>
               </View>
               <TouchableOpacity
-                style={DentalRecordStyles.btnRecordBaru}
+                style={ManagementStyles.btnBlue}
                 onPress={() => navigation.navigate('CreatePasien')}
               >
-                <MaterialCommunityIcons name="plus" size={18} color="#FFF" />
-                <Text style={DentalRecordStyles.btnRecordBaruText}>Pasien Baru</Text>
+                <Text style={ManagementStyles.btnBlueText}>Pasien Baru</Text>
               </TouchableOpacity>
             </View>
 
-            <View style={DentalRecordStyles.searchContainer}>
-              <Feather name="search" size={20} color="#AAA" />
+            <View style={ManagementStyles.searchBar}>
+              <Feather name="search" size={20} color="#94A3B8" />
               <TextInput
-                style={DentalRecordStyles.searchInput}
+                style={ManagementStyles.searchInput}
                 placeholder="Cari nama pasien..."
+                placeholderTextColor="#94A3B8"
                 value={searchQuery}
                 onChangeText={setSearchQuery}
-                placeholderTextColor="#AAA"
               />
             </View>
           </View>
 
-          {/* Table */}
-          <View style={DentalRecordStyles.tableWrapper}>
-            {/* HEADER */}
-            <View style={t.row}>
-              <View style={[t.cell, t.headerBg]}><Text style={t.hTxt}>Nama</Text></View>
-              <View style={[t.cell, t.headerBg]}><Text style={t.hTxt}>Tgl Lahir</Text></View>
-              <View style={[t.cell, t.headerBg]}><Text style={t.hTxt}>Gender</Text></View>
-              <View style={[t.cell, t.headerBg]}><Text style={t.hTxt}>Alamat</Text></View>
-              <View style={[t.cell, t.headerBg]}><Text style={t.hTxt}>Pekerjaan</Text></View>
-              <View style={[t.cell, t.headerBg]}><Text style={t.hTxt}>No. HP</Text></View>
-              <View style={[t.cell, t.headerBg]}><Text style={t.hTxt}>Alergi Obat</Text></View>
-              <View style={[t.cell, t.headerBg]}><Text style={t.hTxt}>Aksi</Text></View>
-            </View>
-
-            {/* BODY — no inner scroll, all rows rendered directly */}
-            {filteredData.length === 0 ? (
-              <View style={{ width: '100%', paddingVertical: 40, alignItems: 'center', justifyContent: 'center' }}>
-                <Text style={{ fontSize: 13, color: '#999', textAlign: 'center' }}>Data pasien tidak ditemukan</Text>
-              </View>
-            ) : (
-              filteredData.map((item) => (
-                <View key={item.id_pasien.toString()} style={[t.row, t.bodyBorder]}>
-                  <View style={t.cell}>
-                    <Text style={t.bTxt} numberOfLines={1}>{item.nama_pasien}</Text>
-                  </View>
-                  <View style={t.cell}>
-                    <Text style={t.bTxt}>{item.tgl_lahir}</Text>
-                  </View>
-                  <View style={t.cell}>
-                    <View style={[t.badge, { backgroundColor: item.jk === 'Laki-laki' ? '#D6E0E9' : '#E9D6D6' }]}>
-                      <Text style={{ fontSize: 11, fontWeight: '900', color: item.jk === 'Laki-laki' ? '#194580' : '#801919' }}>
-                        {item.jk === 'Laki-laki' ? 'LK' : 'PR'}
-                      </Text>
-                    </View>
-                  </View>
-                  <View style={t.cell}>
-                    <Text style={t.bTxt} numberOfLines={2}>{item.alamat}</Text>
-                  </View>
-                  <View style={t.cell}>
-                    <Text style={t.bTxt} numberOfLines={1}>{item.pekerjaan}</Text>
-                  </View>
-                  <View style={t.cell}>
-                    <Text style={t.bTxt}>{item.nope}</Text>
-                  </View>
-                  <View style={t.cell}>
-                    <Text style={t.bTxt}>{item.alergi_obat || '-'}</Text>
-                  </View>
-                  <View style={[t.cell, { flexDirection: 'row', gap: 6 }]}>
-                    <TouchableOpacity onPress={() => navigation.navigate('UpdatePasien', { editItem: item })}>
-                      <MaterialCommunityIcons name="square-edit-outline" size={20} color="#EBC112" />
-                    </TouchableOpacity>
-                    <TouchableOpacity onPress={() => navigation.navigate('ReadPasien', { id: item.id_pasien })}>
-                      <MaterialCommunityIcons name="information-outline" size={20} color="#4CAF50" />
-                    </TouchableOpacity>
-                    <TouchableOpacity onPress={() => navigation.navigate('DeletePasien', { id: item.id_pasien, name: item.nama_pasien })}>
-                      <MaterialCommunityIcons name="trash-can-outline" size={20} color="#D32F2F" />
-                    </TouchableOpacity>
-                  </View>
+          <View style={ManagementStyles.tableContainer}>
+            <View style={{ width: '100%' }}>
+              <View style={ManagementStyles.tableHeaderMaron}>
+                <View style={[ManagementStyles.colCenter, { flex: 1.5, paddingHorizontal: 15 }]}>
+                  <Text style={ManagementStyles.thText}>Nama</Text>
                 </View>
-              ))
-            )}
+                <View style={[ManagementStyles.colCenter, { flex: 1.2, paddingHorizontal: 15 }]}>
+                  <Text style={ManagementStyles.thText}>Tgl Lahir</Text>
+                </View>
+                <View style={[ManagementStyles.colCenter, { flex: 0.8, paddingHorizontal: 15 }]}>
+                  <Text style={ManagementStyles.thText}>Gen</Text>
+                </View>
+                <View style={[ManagementStyles.colCenter, { flex: 1.5, paddingHorizontal: 15 }]}>
+                  <Text style={ManagementStyles.thText}>Alamat</Text>
+                </View>
+                <View style={[ManagementStyles.colCenter, { flex: 1, paddingHorizontal: 15 }]}>
+                  <Text style={ManagementStyles.thText}>Pekerjaan</Text>
+                </View>
+                <View style={[ManagementStyles.colCenter, { flex: 1, paddingHorizontal: 15 }]}>
+                  <Text style={ManagementStyles.thText}>No. HP</Text>
+                </View>
+                <View style={[ManagementStyles.colCenter, { flex: 1, paddingHorizontal: 15 }]}>
+                  <Text style={ManagementStyles.thText}>Alergi</Text>
+                </View>
+                <View style={[ManagementStyles.colCenter, { flex: 1.2, paddingHorizontal: 15 }]}>
+                  <Text style={ManagementStyles.thText}>Aksi</Text>
+                </View>
+              </View>
+
+              <View>
+                {filteredData.length === 0 ? (
+                  <View style={{ width: '100%', paddingVertical: 40, alignItems: 'center', justifyContent: 'center' }}>
+                    <Text style={[ManagementStyles.tdTextSmall, { textAlign: 'center' }]}>Data pasien tidak ditemukan</Text>
+                  </View>
+                ) : (
+                  filteredData.map((item, index) => {
+                    const isLast = index === filteredData.length - 1;
+                    return (
+                      <View key={item.id_pasien.toString()} style={[ManagementStyles.tableRow, { borderBottomWidth: isLast ? 0 : 1 }]}>
+                        <View style={[{ flex: 1.5, paddingHorizontal: 15, justifyContent: 'center' }]}>
+                          <Text style={[ManagementStyles.tdText, { textAlign: 'left' }]} numberOfLines={1}>{item.nama_pasien}</Text>
+                        </View>
+                        <View style={[ManagementStyles.colCenter, { flex: 1.2, paddingHorizontal: 15 }]}>
+                          <Text style={ManagementStyles.tdTextSmall}>{item.tgl_lahir}</Text>
+                        </View>
+                        <View style={[ManagementStyles.colCenter, { flex: 0.8, paddingHorizontal: 15 }]}>
+                          <View style={[ManagementStyles.roleBadge, { backgroundColor: item.jk === 'Laki-laki' ? '#D6E0E9' : '#E9D6D6' }]}>
+                            <Text style={[ManagementStyles.roleBadgeText, { color: item.jk === 'Laki-laki' ? '#194580' : '#801919' }]}>
+                              {item.jk === 'Laki-laki' ? 'LK' : 'PR'}
+                            </Text>
+                          </View>
+                        </View>
+                        <View style={[{ flex: 1.5, paddingHorizontal: 15, justifyContent: 'center' }]}>
+                          <Text style={[ManagementStyles.tdTextSmall, { textAlign: 'left' }]} numberOfLines={2}>{item.alamat}</Text>
+                        </View>
+                        <View style={[ManagementStyles.colCenter, { flex: 1.2, paddingHorizontal: 15 }]}>
+                          <Text style={ManagementStyles.tdTextSmall} numberOfLines={1}>{item.pekerjaan}</Text>
+                        </View>
+                        <View style={[ManagementStyles.colCenter, { flex: 1.2, paddingHorizontal: 15 }]}>
+                          <Text style={ManagementStyles.tdTextSmall}>{item.nope}</Text>
+                        </View>
+                        <View style={[ManagementStyles.colCenter, { flex: 1.2, paddingHorizontal: 15 }]}>
+                          <Text style={ManagementStyles.tdTextSmall}>{item.alergi_obat || '-'}</Text>
+                        </View>
+                        <View style={[ManagementStyles.actionCell, { flex: 1.2, paddingHorizontal: 15 }]}>
+                          <TouchableOpacity onPress={() => navigation.navigate('UpdatePasien', { editItem: item })}>
+                            <MaterialCommunityIcons name="square-edit-outline" size={20} color="#EBC112" />
+                          </TouchableOpacity>
+                          <TouchableOpacity onPress={() => navigation.navigate('ReadPasien', { id: item.id_pasien })}>
+                            <MaterialCommunityIcons name="information-outline" size={20} color="#4CAF50" />
+                          </TouchableOpacity>
+                          <TouchableOpacity onPress={() => navigation.navigate('DeletePasien', { id: item.id_pasien, name: item.nama_pasien })}>
+                            <MaterialCommunityIcons name="trash-can-outline" size={20} color="#D32F2F" />
+                          </TouchableOpacity>
+                        </View>
+                      </View>
+                    );
+                  })
+                )}
+              </View>
+            </View>
           </View>
         </ScrollView>
       )}
@@ -165,42 +183,4 @@ export function TampilPasien() {
   );
 }
 
-const t = StyleSheet.create({
-  row: {
-    flexDirection: 'row',
-  },
-  cell: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    paddingVertical: 14,
-    paddingHorizontal: 6,
-  },
-  headerBg: {
-    backgroundColor: Colors.primary,
-  },
-  bodyBorder: {
-    borderBottomWidth: 1,
-    borderColor: '#EBEBEB',
-    backgroundColor: '#FFF',
-  },
-  hTxt: {
-    color: '#FFF',
-    fontWeight: 'bold',
-    fontSize: 13,
-    textAlign: 'center',
-  },
-  bTxt: {
-    color: '#222',
-    fontWeight: 'bold',
-    fontSize: 13,
-    textAlign: 'center',
-  },
-  badge: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderRadius: 15,
-  },
-});
+

@@ -74,39 +74,16 @@ export function PreviewKwitansi() {
                 margin: 0; 
                 padding: 0; 
                 background-color: #ffffff; 
-                width: 21cm; 
+                width: 21cm;
                 height: 11cm;
               }
               .receipt-container { 
                 background-color: white; 
-                padding: 20px 35px; 
-                border: 2px solid #000; 
+                padding: 0.5cm 1.5cm 1cm 1.5cm; 
+                border: 1.5px solid #000; 
                 box-sizing: border-box;
                 width: 100%;
-                height: 100%;
-                display: flex;
-                flex-direction: column;
-                justify-content: space-between;
-              }
-            <style>
-              @page { 
-                margin: 0; 
-                size: 21cm 11cm; 
-              }
-              body { 
-                margin: 0; 
-                padding: 0; 
-                background-color: #ffffff; 
-                width: 21cm; 
                 height: 11cm;
-              }
-              .receipt-container { 
-                background-color: white; 
-                padding: 15px 25px; 
-                border: 2px solid #000; 
-                box-sizing: border-box;
-                width: 100%;
-                height: 100%;
                 display: flex;
                 flex-direction: column;
               }
@@ -197,8 +174,8 @@ export function PreviewKwitansi() {
         </html>
       `;
 
-      const { uri } = await Print.printToFileAsync({ 
-        html: htmlContent, 
+      const { uri } = await Print.printToFileAsync({
+        html: htmlContent,
         width: 794, // 21cm @ 96dpi
         height: 415 // 11cm @ 96dpi
       });
@@ -217,8 +194,8 @@ export function PreviewKwitansi() {
     <AdminLayout noScroll={true} customRightTitle={isOrto ? "Kwitansi Orto" : "Kwitansi Umum"}>
       <ScrollView contentContainerStyle={[LayoutStyles.scrollContent, LayoutStyles.alignCenter]}>
 
-        
-        <View style={GlobalStyles.receiptContainer}>
+
+        <View style={[GlobalStyles.receiptContainer, GlobalStyles.kwitansiContainer]}>
           <View style={GlobalStyles.receiptHeaderContainer}>
             <View style={GlobalStyles.receiptLogoAligner}>
               <View style={GlobalStyles.receiptLogoCircle}>
@@ -302,7 +279,7 @@ export function PreviewKwitansi() {
           </View>
         </View>
 
-        
+
         <View style={[LayoutStyles.rowBetween, LayoutStyles.mt20, { width: '90%' }]}>
           <TouchableOpacity style={[GlobalStyles.btnBatal, LayoutStyles.flex1, LayoutStyles.mr10]} onPress={() => navigation.goBack()}>
             <Text style={GlobalStyles.btnBatalText}>Kembali</Text>

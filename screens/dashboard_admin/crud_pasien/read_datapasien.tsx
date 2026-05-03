@@ -279,7 +279,7 @@ export function ReadPasien() {
                     <View style={PatientDetailStyles.gridCell}>
                         <Text style={PatientDetailStyles.infoLabel}>Jenis Kelamin</Text>
                         <View style={[PatientDetailStyles.genderPill, data?.jk === 'Perempuan' ? PatientDetailStyles.genderPillPR : PatientDetailStyles.genderPillLK]}>
-                            <Text style={[PatientDetailStyles.genderPillText, { color: data?.jk === 'Perempuan' ? '#801919' : '#194580' }]}>
+                            <Text style={[PatientDetailStyles.genderPillText, data?.jk === 'Perempuan' ? PatientDetailStyles.textMaron : PatientDetailStyles.textNavy]}>
                                 {data?.jk || '-'}
                             </Text>
                         </View>
@@ -290,7 +290,7 @@ export function ReadPasien() {
                     </View>
                 </View>
 
-                <View style={[PatientDetailStyles.gridRow, { borderBottomWidth: 0 }]}>
+                <View style={[PatientDetailStyles.gridRow, LayoutStyles.border0]}>
                     <View style={[PatientDetailStyles.gridCell, PatientDetailStyles.gridCellLast]}>
                         <Text style={PatientDetailStyles.infoLabel}>Alamat</Text>
                         <Text style={PatientDetailStyles.infoValue}>{data?.alamat || '-'}</Text>
@@ -327,30 +327,30 @@ export function ReadPasien() {
                 </View>
             </View>
 
-            <View style={[PatientTableStyles.tableWrapper, { marginHorizontal: 0 }]}>
+            <View style={[PatientTableStyles.tableWrapper, LayoutStyles.mh0]}>
                 <ScrollView horizontal showsHorizontalScrollIndicator={true}>
-                    <View style={{ width: 1000 }}>
+                    <View style={LayoutStyles.w1000}>
                         <View style={PatientTableStyles.tableHeader}>
-                            <View style={[PatientTableStyles.thCell, { width: 100 }]}><Text style={PatientTableStyles.thText}>Tgl</Text></View>
-                            <View style={[PatientTableStyles.thCell, { width: 120 }]}><Text style={PatientTableStyles.thText}>Layanan</Text></View>
-                            <View style={[PatientTableStyles.thCell, { width: 80 }]}><Text style={PatientTableStyles.thText}>Gigi</Text></View>
-                            <View style={[PatientTableStyles.thCell, { width: 300 }]}><Text style={PatientTableStyles.thText}>Keluhan/Diagnosa</Text></View>
-                            <View style={[PatientTableStyles.thCell, { width: 180 }]}><Text style={PatientTableStyles.thText}>Perawatan</Text></View>
-                            <View style={[PatientTableStyles.thCell, { width: 200, borderRightWidth: 0 }]}><Text style={PatientTableStyles.thText}>Keterangan</Text></View>
+                            <View style={[PatientTableStyles.thCell, LayoutStyles.w100]}><Text style={PatientTableStyles.thText}>Tgl</Text></View>
+                            <View style={[PatientTableStyles.thCell, LayoutStyles.w120]}><Text style={PatientTableStyles.thText}>Layanan</Text></View>
+                            <View style={[PatientTableStyles.thCell, LayoutStyles.w80]}><Text style={PatientTableStyles.thText}>Gigi</Text></View>
+                            <View style={[PatientTableStyles.thCell, LayoutStyles.w300]}><Text style={PatientTableStyles.thText}>Keluhan/Diagnosa</Text></View>
+                            <View style={[PatientTableStyles.thCell, LayoutStyles.w180]}><Text style={PatientTableStyles.thText}>Perawatan</Text></View>
+                            <View style={[PatientTableStyles.thCell, LayoutStyles.w200, LayoutStyles.borderR0]}><Text style={PatientTableStyles.thText}>Keterangan</Text></View>
                         </View>
                         
                         <View style={PatientTableStyles.tableBody}>
                             {filteredRecords.length > 0 ? filteredRecords.map((item, index) => (
                                 <View key={item.id_record || index} style={PatientTableStyles.tableRow}>
-                                    <View style={[PatientTableStyles.tdCell, { width: 100 }]}><Text style={PatientTableStyles.tdText}>{formatTanggal(item.tanggal)}</Text></View>
-                                    <View style={[PatientTableStyles.tdCell, { width: 120 }]}>
+                                    <View style={[PatientTableStyles.tdCell, LayoutStyles.w100]}><Text style={PatientTableStyles.tdText}>{formatTanggal(item.tanggal)}</Text></View>
+                                    <View style={[PatientTableStyles.tdCell, LayoutStyles.w120]}>
                                         <View style={[PatientTableStyles.badgeContainer, { backgroundColor: item.layanan === 'Umum' ? '#E9D6D6' : '#D6E0E9' }]}>
                                             <Text style={[PatientTableStyles.badgeText, { color: item.layanan === 'Umum' ? '#801919' : '#194580' }]}>{item.layanan || '-'}</Text>
                                         </View>
                                     </View>
-                                    <View style={[PatientTableStyles.tdCell, { width: 80 }]}><Text style={PatientTableStyles.tdText}>{item.gigi || '-'}</Text></View>
-                                    <View style={[PatientTableStyles.tdCell, { width: 300 }]}><Text style={PatientTableStyles.tdText} numberOfLines={2}>{item.diagnosa || '-'}</Text></View>
-                                    <View style={[PatientTableStyles.tdCell, { width: 180 }]}>
+                                    <View style={[PatientTableStyles.tdCell, LayoutStyles.w80]}><Text style={PatientTableStyles.tdText}>{item.gigi || '-'}</Text></View>
+                                    <View style={[PatientTableStyles.tdCell, LayoutStyles.w300]}><Text style={PatientTableStyles.tdText} numberOfLines={2}>{item.diagnosa || '-'}</Text></View>
+                                    <View style={[PatientTableStyles.tdCell, LayoutStyles.w180]}>
                                         <Text style={PatientTableStyles.tdText} numberOfLines={2}>
                                             {item.id_tindakan ? item.id_tindakan.toString().split(',').map((id: string) => {
                                                 const t = tindakanList.find(x => x.id_tindakan.toString() === id.trim());
@@ -358,10 +358,10 @@ export function ReadPasien() {
                                             }).filter(Boolean).join(', ') : '-'}
                                         </Text>
                                     </View>
-                                    <View style={[PatientTableStyles.tdCell, { width: 200, borderRightWidth: 0 }]}><Text style={PatientTableStyles.tdText} numberOfLines={2}>{item.keterangan || '-'}</Text></View>
+                                    <View style={[PatientTableStyles.tdCell, LayoutStyles.w200, LayoutStyles.borderR0]}><Text style={PatientTableStyles.tdText} numberOfLines={2}>{item.keterangan || '-'}</Text></View>
                                 </View>
                             )) : (
-                                <View style={{ width: 1000, height: 100, justifyContent: 'center', alignItems: 'center' }}>
+                                <View style={[LayoutStyles.w1000, LayoutStyles.h100, LayoutStyles.justifyCenter, LayoutStyles.alignCenter]}>
                                     <Text style={GlobalStyles.emptyText}>Data riwayat tidak ditemukan</Text>
                                 </View>
                             )}
