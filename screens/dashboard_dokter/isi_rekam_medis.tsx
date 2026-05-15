@@ -39,6 +39,9 @@ export function IsiRekamMedis() {
     const [selectedGigi, setSelectedGigi] = useState<string[]>(
         record?.gigi && record.gigi !== '-' ? record.gigi.split(',') : []
     );
+    // Toggle: apakah nomor gigi perlu diisi?
+    const hasExistingGigi = record?.gigi && record.gigi !== '-';
+    const [includeGigi, setIncludeGigi] = useState<boolean>(!!hasExistingGigi);
 
 
 
@@ -48,10 +51,15 @@ export function IsiRekamMedis() {
 
     const fetchTindakan = async () => {
         try {
-            const { data, error } = await supabase
+            let query = supabase
                 .from('tb_tindakan')
-                .select('id_tindakan, nama_tindakan')
-                .order('nama_tindakan', { ascending: true });
+                .select('id_tindakan, nama_tindakan');
+
+            if (record?.layanan) {
+                query = query.eq('layanan', record.layanan);
+            }
+
+            const { data, error } = await query.order('nama_tindakan', { ascending: true });
 
             if (error) throw error;
             setTindakanList(data || []);
@@ -103,7 +111,7 @@ export function IsiRekamMedis() {
                 .update({
                     id_tindakan: selectedTindakanIds.join(','),
                     keterangan: keterangan,
-                    gigi: selectedGigi.join(','),
+                    gigi: includeGigi ? selectedGigi.join(',') : '-',
                     doctor_id: user?.id_users,
                     status: 'Selesai' 
                 })
@@ -170,28 +178,60 @@ export function IsiRekamMedis() {
                             onChangeText={setKeterangan}
                         />
 
-                        {/* Grid Gigi */}
-                        <Text style={CreateRecordStyles.fieldLabel}>Nomor Gigi</Text>
-                        <View style={CreateRecordStyles.gridContainer}>
-                            {Array.from({ length: 85 }, (_, i) => {
-                                const numStr = (i + 1).toString();
-                                const isChecked = selectedGigi.includes(numStr);
-                                return (
-                                    <TouchableOpacity 
-                                        key={numStr} 
-                                        style={CreateRecordStyles.checkboxWrapper16} 
-                                        onPress={() => toggleGigi(numStr)}
-                                    >
-                                        <View style={GlobalStyles.alignCenter}>
-                                            <View style={[CreateRecordStyles.checkbox, isChecked && CreateRecordStyles.checkboxChecked]}>
-                                                {isChecked && <MaterialCommunityIcons name="check" size={12} color="#FFF" />}
-                                            </View>
-                                            <Text style={CreateRecordStyles.checkboxLabel}>{numStr}</Text>
-                                        </View>
-                                    </TouchableOpacity>
-                                );
-                            })}
+                        {/* Toggle & Grid Gigi */}
+                        <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10 }}>
+                            <Text style={CreateRecordStyles.fieldLabel}>Nomor Gigi</Text>
+                            <TouchableOpacity
+                                onPress={() => {
+                                    const next = !includeGigi;
+                                    setIncludeGigi(next);
+                                    if (!next) setSelectedGigi([]);
+                                }}
+                                style={{
+                                    flexDirection: 'row',
+                                    alignItems: 'center',
+                                    gap: 6,
+                                    backgroundColor: includeGigi ? Colors.primary + '18' : '#F0F0F0',
+                                    borderRadius: 20,
+                                    paddingHorizontal: 12,
+                                    paddingVertical: 6,
+                                    borderWidth: 1.5,
+                                    borderColor: includeGigi ? Colors.primary : '#CCC',
+                                }}
+                            >
+                                <MaterialCommunityIcons
+                                    name={includeGigi ? 'toggle-switch' : 'toggle-switch-off-outline'}
+                                    size={26}
+                                    color={includeGigi ? Colors.primary : '#AAA'}
+                                />
+                                <Text style={{ fontSize: 13, fontWeight: '600', color: includeGigi ? Colors.primary : '#888' }}>
+                                    {includeGigi ? 'Iya' : 'Tidak'}
+                                </Text>
+                            </TouchableOpacity>
                         </View>
+
+                        {includeGigi && (
+                            <View style={CreateRecordStyles.gridContainer}>
+                                {Array.from({ length: 85 }, (_, i) => {
+                                    const numStr = (i + 1).toString();
+                                    const isChecked = selectedGigi.includes(numStr);
+                                    return (
+                                        <TouchableOpacity 
+                                            key={numStr} 
+                                            style={CreateRecordStyles.checkboxWrapper16} 
+                                            onPress={() => toggleGigi(numStr)}
+                                        >
+                                            <View style={GlobalStyles.alignCenter}>
+                                                <View style={[CreateRecordStyles.checkbox, isChecked && CreateRecordStyles.checkboxChecked]}>
+                                                    {isChecked && <MaterialCommunityIcons name="check" size={12} color="#FFF" />}
+                                                </View>
+                                                <Text style={CreateRecordStyles.checkboxLabel}>{numStr}</Text>
+                                            </View>
+                                        </TouchableOpacity>
+                                    );
+                                })}
+                            </View>
+                        )}
 
                         {/* Tombol Simpan */}
                         <View style={CreateRecordStyles.btnSimpanContainer}>

@@ -55,8 +55,8 @@ export function PreviewKwitansi() {
       `;
 
       const headerContentUmum = `
-        <div class="title-umum" style="font-size: 28px; margin-bottom: 5px;">GALERI ORTODENTAL</div>
-        <div class="address-text">Cipto Park Jl. Dr. Cipto Mangunkusumo No. 54 Cirebon</div>
+        <div class="title-umum" style="font-size: 32px; margin-bottom: 5px; font-family: 'Times New Roman', serif;">GALERI ORTODENTAL</div>
+        <div class="address-text" style="font-size: 15px; font-family: 'Times New Roman', serif;">Cipto Park Jl. Dr. Cipto Mangunkusumo No. 54 Cirebon</div>
       `;
 
       const logoUri = Image.resolveAssetSource(require('../../../assets/icon.png')).uri;
@@ -66,39 +66,47 @@ export function PreviewKwitansi() {
           <head>
             <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no" />
             <style>
+              * {
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+              }
               @page { 
-                margin: 0; 
+                margin: 0px !important;
+                padding: 0px !important;
                 size: 21cm 11cm; 
               }
+              html { 
+                margin: 0 !important; 
+                padding: 0 !important;
+              }
               body { 
-                margin: 0; 
-                padding: 0; 
+                margin: 0 !important; 
+                padding: 0 !important;
                 background-color: #ffffff; 
-                width: 21cm;
-                height: 11cm;
+                width: 100%;
+                height: 100%;
+                box-sizing: border-box;
               }
               .receipt-container { 
                 background-color: white; 
-                padding: 0.5cm 1.5cm 1cm 1.5cm; 
-                border: 1.5px solid #000; 
+                padding: 0; 
                 box-sizing: border-box;
                 width: 100%;
-                height: 11cm;
                 display: flex;
                 flex-direction: column;
               }
               .header-container { display: flex; align-items: center; justify-content: space-between; margin-bottom: 2px; }
-              .logo-aligner { width: 70px; text-align: center; }
-              .logo-circle { width: 70px; height: 70px; display: flex; align-items: center; justify-content: center; }
+              .logo-aligner { width: 85px; text-align: center; }
+              .logo-circle { width: 85px; height: 85px; display: flex; align-items: center; justify-content: center; }
               .header-text-container { flex: 1; text-align: center; color: #000; }
-              .title-umum { font-size: 19px; font-weight: bold; font-family: serif; margin: 0; }
-              .doctor-name { font-size: 17px; font-weight: 900; margin: 1px 0; font-family: sans-serif; }
-              .sip-text { font-size: 11px; font-weight: bold; margin-bottom: 1px; font-family: sans-serif; }
-              .address-text { font-size: 11px; margin: 0; font-family: sans-serif; }
+              .title-umum { font-size: 28px; font-weight: bold; font-family: 'Times New Roman', serif; margin: 0; }
+              .doctor-name { font-size: 24px; font-weight: 900; margin: 1px 0; font-family: 'Times New Roman', serif; }
+              .sip-text { font-size: 15px; font-weight: bold; margin-bottom: 1px; font-family: 'Times New Roman', serif; }
+              .address-text { font-size: 15px; margin: 0; font-family: 'Times New Roman', serif; }
               .double-line-container { margin-top: 5px; margin-bottom: 8px; }
               .line-thick { height: 3px; background-color: #000; margin-bottom: 2px; }
               .line-thin { height: 1px; background-color: #000; }
-              .receipt-title-box { text-align: center; margin-bottom: 10px; display: flex; flex-direction: row; justify-content: center; align-items: baseline; gap: 30px; }
+              .receipt-title-box { text-align: center; margin-bottom: 10px; display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 5px; }
               .receipt-title { font-size: 18px; font-weight: bold; font-family: serif; text-decoration: underline; margin: 0; }
               .receipt-no { font-size: 16px; font-family: serif; margin: 0; }
               .info-section { flex: 1; display: flex; flex-direction: column; gap: 8px; margin-top: 5px; }
@@ -120,13 +128,13 @@ export function PreviewKwitansi() {
               <div class="header-container">
                 <div class="logo-aligner">
                   <div class="logo-circle">
-                    <img src="${logoUri}" style="width: 60px; height: 60px; border-radius: 30px; object-fit: cover; border: 2px solid #C62828;" />
+                    <img src="${logoUri}" style="width: 85px; height: 85px; border-radius: 42px; object-fit: cover;" />
                   </div>
                 </div>
                 <div class="header-text-container">
                   ${isOrto ? headerContentOrto : headerContentUmum}
                 </div>
-                <div style="width: 70px;"></div>
+                <div style="width: 85px;"></div>
               </div>
     
               <div class="double-line-container">
@@ -177,7 +185,8 @@ export function PreviewKwitansi() {
       const { uri } = await Print.printToFileAsync({
         html: htmlContent,
         width: 794, // 21cm @ 96dpi
-        height: 415 // 11cm @ 96dpi
+        height: 415, // 11cm @ 96dpi
+        margins: { top: 0, right: 0, bottom: 0, left: 0 }
       });
       if (uri) {
         await Sharing.shareAsync(uri, { UTI: '.pdf', mimeType: 'application/pdf', dialogTitle: 'Ekspor Kwitansi' });

@@ -4,7 +4,7 @@ import {
   Text,
   TouchableOpacity,
   ActivityIndicator,
-  ScrollView,
+  FlatList,
   TextInput,
   StyleSheet,
   Platform,
@@ -120,74 +120,82 @@ export function ListPendingKwitansi() {
     );
   };
 
+  const listHeader = (
+    <>
+      <View style={styles.searchContainer}>
+        <View style={styles.searchWrapper}>
+          <Feather name="search" size={20} color="#999" />
+          <TextInput
+            style={styles.searchInput}
+            placeholder="Cari nama pasien..."
+            value={searchQuery}
+            onChangeText={setSearchQuery}
+          />
+        </View>
+      </View>
+
+      <View style={styles.dateSelectorContainer}>
+        <TouchableOpacity
+          style={styles.dateDisplay}
+          onPress={() => setShowPicker(true)}
+        >
+          <View style={styles.dateIconWrapper}>
+            <MaterialCommunityIcons name="calendar-month" size={24} color="#801919" />
+          </View>
+          <View style={styles.dateTextWrapper}>
+            <Text style={styles.dateLabelText}>Tanggal Antrean</Text>
+            <Text style={styles.dateValueText}>{formatDate(selectedDate)}</Text>
+          </View>
+          <MaterialCommunityIcons name="chevron-down" size={20} color="#999" />
+        </TouchableOpacity>
+
+        {showPicker && (
+          <DateTimePicker
+            value={new Date(selectedDate)}
+            mode="date"
+            display={Platform.OS === 'ios' ? 'spinner' : 'default'}
+            onChange={(event, date) => {
+              setShowPicker(false);
+              if (date) {
+                const formatted = date.toISOString().split('T')[0];
+                setSelectedDate(formatted);
+              }
+            }}
+          />
+        )}
+      </View>
+    </>
+  );
+
   return (
     <AdminLayout noScroll={true} customRightTitle="Antrean Pembayaran">
       <View style={styles.container}>
         <View style={styles.header}>
-            <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backBtn}>
-                <MaterialCommunityIcons name="arrow-left" size={24} color="#333" />
-            </TouchableOpacity>
-            <Text style={styles.headerTitle}>Pilih Pasien untuk Kwitansi</Text>
-        </View>
-
-        <View style={styles.searchContainer}>
-          <View style={styles.searchWrapper}>
-            <Feather name="search" size={20} color="#999" />
-            <TextInput
-              style={styles.searchInput}
-              placeholder="Cari nama pasien..."
-              value={searchQuery}
-              onChangeText={setSearchQuery}
-            />
-          </View>
-        </View>
-
-        <View style={styles.dateSelectorContainer}>
-          <TouchableOpacity
-            style={styles.dateDisplay}
-            onPress={() => setShowPicker(true)}
-          >
-            <View style={styles.dateIconWrapper}>
-              <MaterialCommunityIcons name="calendar-month" size={24} color="#801919" />
-            </View>
-            <View style={styles.dateTextWrapper}>
-              <Text style={styles.dateLabelText}>Tanggal Antrean</Text>
-              <Text style={styles.dateValueText}>{formatDate(selectedDate)}</Text>
-            </View>
-            <MaterialCommunityIcons name="chevron-down" size={20} color="#999" />
+          <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backBtn}>
+            <MaterialCommunityIcons name="arrow-left" size={24} color="#333" />
           </TouchableOpacity>
-
-          {showPicker && (
-            <DateTimePicker
-              value={new Date(selectedDate)}
-              mode="date"
-              display={Platform.OS === 'ios' ? 'spinner' : 'default'}
-              onChange={(event, date) => {
-                setShowPicker(false);
-                if (date) {
-                  const formatted = date.toISOString().split('T')[0];
-                  setSelectedDate(formatted);
-                }
-              }}
-            />
-          )}
+          <Text style={styles.headerTitle}>Pilih Pasien untuk Kwitansi</Text>
         </View>
 
-        <ScrollView 
+        {loading ? (
+          <ActivityIndicator size="large" color={Colors.primary} style={LayoutStyles.mt50} />
+        ) : (
+          <FlatList
             style={LayoutStyles.flex1}
+            data={filteredData}
+            keyExtractor={(item) => item.id_record.toString()}
+            renderItem={({ item }) => renderCard(item)}
+            ListHeaderComponent={listHeader}
             contentContainerStyle={{ paddingHorizontal: 20, paddingBottom: 30 }}
-        >
-          {loading ? (
-            <ActivityIndicator size="large" color={Colors.primary} style={LayoutStyles.mt50} />
-          ) : filteredData.length === 0 ? (
-            <View style={GlobalStyles.emptyContent}>
-              <MaterialCommunityIcons name="account-search-outline" size={60} color="#CCC" />
-              <Text style={GlobalStyles.emptyText}>Tidak ada antrean pembayaran.</Text>
-            </View>
-          ) : (
-            filteredData.map(item => renderCard(item))
-          )}
-        </ScrollView>
+            showsVerticalScrollIndicator={false}
+            ListEmptyComponent={
+              <View style={GlobalStyles.emptyContent}>
+                <MaterialCommunityIcons name="account-search-outline" size={60} color="#CCC" />
+                <Text style={GlobalStyles.emptyText}>Tidak ada antrean pembayaran.</Text>
+              </View>
+            }
+          />
+        )}
       </View>
     </AdminLayout>
   );

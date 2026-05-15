@@ -42,6 +42,8 @@ export function TampilRecordAdmin() {
   const [statusModalVisible, setStatusModalVisible] = useState(false);
   const [activeRecordId, setActiveRecordId] = useState<number | null>(null);
 
+  const activeRecordStatus = records.find(r => r.id_record === activeRecordId)?.status || '';
+
 
   const getLocalDate = () => {
     const d = new Date();
@@ -191,12 +193,17 @@ export function TampilRecordAdmin() {
                         <TouchableOpacity 
                           style={[DentalRecordStyles.badgeContainer, { backgroundColor: statusStyle.bg, borderWidth: 1, borderColor: statusStyle.text }]}
                           onPress={() => {
-                            setActiveRecordId(item.id_record);
-                            setStatusModalVisible(true);
+                            if (item.status === 'Menunggu' || item.status === 'Diproses') {
+                              setActiveRecordId(item.id_record);
+                              setStatusModalVisible(true);
+                            }
                           }}
+                          disabled={item.status === 'Selesai' || item.status === 'Batal'}
                         >
                           <Text style={[DentalRecordStyles.badgeText, { marginRight: 5, color: statusStyle.text }]}>{item.status}</Text>
-                          <MaterialCommunityIcons name="menu-down" size={16} color={statusStyle.text} />
+                          {(item.status === 'Menunggu' || item.status === 'Diproses') && (
+                            <MaterialCommunityIcons name="menu-down" size={16} color={statusStyle.text} />
+                          )}
                         </TouchableOpacity>
                       </View>
 
@@ -235,18 +242,36 @@ export function TampilRecordAdmin() {
                         </TouchableOpacity>
                     </View>
                     
-                    <TouchableOpacity 
-                        style={[DentalRecordStyles.modalOptionBtn, { 
-                            backgroundColor: Colors.primary,
-                            borderColor: Colors.primary,
-                            borderRadius: 15,
-                            paddingVertical: 15,
-                            width: '100%'
-                        }]}
-                        onPress={() => activeRecordId && updateStatus(activeRecordId, 'Batal')}
-                    >
-                        <Text style={[DentalRecordStyles.modalOptionText, { color: '#FFF', fontWeight: 'bold', fontSize: 16 }]}>Batal</Text>
-                    </TouchableOpacity>
+                    {activeRecordStatus === 'Menunggu' && (
+                        <TouchableOpacity 
+                            style={[DentalRecordStyles.modalOptionBtn, { 
+                                backgroundColor: '#D4A017',
+                                borderColor: '#D4A017',
+                                borderRadius: 15,
+                                paddingVertical: 15,
+                                width: '100%',
+                                marginBottom: 10,
+                            }]}
+                            onPress={() => activeRecordId && updateStatus(activeRecordId, 'Diproses')}
+                        >
+                            <Text style={[DentalRecordStyles.modalOptionText, { color: '#FFF', fontWeight: 'bold', fontSize: 16 }]}>Kirim ke Dokter (Diproses)</Text>
+                        </TouchableOpacity>
+                    )}
+
+                    {(activeRecordStatus === 'Menunggu' || activeRecordStatus === 'Diproses') && (
+                        <TouchableOpacity 
+                            style={[DentalRecordStyles.modalOptionBtn, { 
+                                backgroundColor: Colors.primary,
+                                borderColor: Colors.primary,
+                                borderRadius: 15,
+                                paddingVertical: 15,
+                                width: '100%'
+                            }]}
+                            onPress={() => activeRecordId && updateStatus(activeRecordId, 'Batal')}
+                        >
+                            <Text style={[DentalRecordStyles.modalOptionText, { color: '#FFF', fontWeight: 'bold', fontSize: 16 }]}>Batal</Text>
+                        </TouchableOpacity>
+                    )}
                 </View>
             </TouchableOpacity>
           </Modal>

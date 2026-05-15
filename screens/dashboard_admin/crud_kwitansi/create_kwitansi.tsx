@@ -169,6 +169,7 @@ export function CreateKwitansi() {
                 placeholder={placeholder || label}
                 placeholderTextColor={Colors.placeholder}
                 multiline={multiline}
+                scrollEnabled={false}
                 editable={editable}
                 keyboardType={keyboardType}
             />

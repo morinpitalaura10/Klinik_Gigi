@@ -100,23 +100,31 @@ export function ReadPasien() {
         `).join('');
 
         const headerDetailed = `
-            <div style="display: flex; align-items: center; justify-content: center; gap: 20px; position: relative;">
-                <img src="${logoUri}" style="width: 65px; height: 65px; border-radius: 32px; border: 2.5px solid #801919;" />
-                <div style="text-align: center;">
-                    <div style="font-size: 18px; font-weight: bold; font-family: sans-serif; letter-spacing: 0.5px;">PRAKTEK DOKTER GIGI SPESIALIS</div>
-                    <div style="font-size: 22px; font-weight: 900; margin: 2px 0; font-family: serif;">drg. INDRA RAFISUKMAWAN, Sp.Ort</div>
-                    <div style="font-size: 11px; font-weight: bold; margin-bottom: 2px;">SIP : 500.16.7/054-DPMPTSP/SIPTM/Drgs.2/IV/2025</div>
-                    <div style="font-size: 11px;">Cipto Park Jl. Dr. Cipto Mangunkusumo No. 54 Cirebon</div>
+            <div class="header-detailed">
+                <div class="logo-aligner">
+                    <div class="logo-circle">
+                        <img src="${logoUri}" style="width: 120px; height: 120px; border-radius: 60px;" />
+                    </div>
+                </div>
+                <div class="header-text-container">
+                    <div style="font-size: 32px; font-weight: bold; font-family: 'Times New Roman', serif; margin-bottom: 5px;">PRAKTEK DOKTER GIGI SPESIALIS</div>
+                    <div style="font-size: 28px; font-weight: 900; margin: 2px 0; font-family: 'Times New Roman', serif;">drg. INDRA RAFISUKMAWAN, Sp.Ort</div>
+                    <div style="font-size: 17px; font-weight: bold; margin-bottom: 2px; font-family: 'Times New Roman', serif;">SIP : 500.16.7/054-DPMPTSP/SIPTM/Drgs.2/IV/2025</div>
+                    <div style="font-size: 17px; margin: 0; font-family: 'Times New Roman', serif;">Cipto Park Jl. Dr. Cipto Mangunkusumo No. 54 Cirebon</div>
                 </div>
             </div>
         `;
 
         const headerSimple = `
-            <div style="display: flex; align-items: center; justify-content: center; gap: 20px;">
-                <img src="${logoUri}" style="width: 60px; height: 60px; border-radius: 30px; border: 2px solid #801919;" />
-                <div style="text-align: center;">
-                    <div style="font-size: 22px; font-weight: bold; font-family: sans-serif;">GALERI ORTODENTAL</div>
-                    <div style="font-size: 12px; margin-top: 4px;">Cipto Park Jl. Dr. Cipto Mangunkusumo No. 54 Cirebon</div>
+            <div class="header-detailed">
+                <div class="logo-aligner">
+                    <div class="logo-circle">
+                        <img src="${logoUri}" style="width: 120px; height: 120px; border-radius: 60px;" />
+                    </div>
+                </div>
+                <div class="header-text-container" style="display: flex; flex-direction: column; justify-content: center;">
+                    <div style="font-size: 36px; font-weight: bold; font-family: 'Times New Roman', serif; margin-bottom: 10px;">GALERI ORTODENTAL</div>
+                    <div style="font-size: 17px; margin: 0; font-family: 'Times New Roman', serif;">Cipto Park Jl. Dr. Cipto Mangunkusumo No. 54 Cirebon</div>
                 </div>
             </div>
         `;
@@ -128,83 +136,117 @@ export function ReadPasien() {
                 <head>
                     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no" />
                     <style>
-                        @page { margin: 0 !important; size: 16.5cm 21.5cm; }
+                        * {
+                            -webkit-print-color-adjust: exact;
+                            print-color-adjust: exact;
+                        }
+                        @page { 
+                            margin: 0px !important;
+                            padding: 0px !important;
+                            size: A4 portrait; 
+                        }
                         html, body { 
                             margin: 0 !important; 
-                            padding: 0 !important; 
+                            padding: 0 !important;
                             font-family: 'Times New Roman', serif; 
                             background-color: white; 
-                            width: 16.5cm;
-                            height: 21.5cm;
-                            overflow: hidden;
+                            width: 100%;
+                            height: 100%;
+                            box-sizing: border-box;
                         }
                         .container {
+                            padding: 0px 20px 20px 20px;
                             margin: 0 !important;
-                            padding: 5px 5px 15px 5px; /* Tiny padding just to not touch the physical edge too much */
-                            box-sizing: border-box;
                             width: 100%;
+                            box-sizing: border-box;
                         }
-                        .double-line { border-bottom: 3px solid #000; border-top: 1px solid #000; height: 2px; margin: 10px 0; }
-                        .doc-title { text-align: center; font-size: 18px; font-weight: bold; margin: 10px 0; text-transform: uppercase; }
+
+                        /* Header Styles */
+                        .header-detailed {
+                            display: flex; align-items: center; justify-content: space-between; margin-top: 5px;
+                        }
+                        .logo-aligner { width: 150px; text-align: center; }
+                        .logo-circle { width: 120px; height: 120px; display: flex; align-items: center; justify-content: center; margin: 0 auto; }
+                        .header-text-container { flex: 1; text-align: center; color: #000; }
+
+                        .double-line { border-bottom: 3px solid #000; border-top: 1px solid #000; height: 2px; margin: 15px 0; }
+                        
+                        .doc-title { text-align: center; font-size: 20px; font-weight: bold; margin: 25px 0; font-family: 'Times New Roman', serif; letter-spacing: 1px; }
                         
                         .patient-grid { 
                             display: grid; 
                             grid-template-columns: 1fr 1fr; 
-                            gap: 15px; 
-                            margin: 15px 0; 
+                            gap: 20px; 
+                            margin: 10px 40px 25px 40px; 
+                            font-family: 'Times New Roman', serif; 
                             font-size: 13px;
-                            border-bottom: 1px solid #ddd;
-                            padding-bottom: 15px;
+                            font-weight: bold;
                         }
-                        .p-row { display: flex; margin-bottom: 5px; }
-                        .p-label { width: 80px; font-weight: normal; color: #555; }
-                        .p-value { font-weight: bold; flex: 1; }
+                        .p-row { display: flex; margin-bottom: 12px; }
+                        .p-label { width: 80px; }
+                        .p-colon { width: 20px; text-align: center; }
+                        .p-value { flex: 1; }
                         
-                        .section-title { font-size: 14px; color: #801919; font-weight: bold; margin-bottom: 10px; margin-top: 5px; text-transform: uppercase; }
+                        .section-title { font-size: 15px; color: #801919; font-weight: bold; margin-bottom: 15px; margin-top: 25px; text-transform: uppercase; font-family: sans-serif; margin-left: 5px; }
                         
-                        table { width: 100%; border-collapse: collapse; margin-top: 5px; }
-                        th { background-color: #801919; color: white; padding: 10px 5px; font-size: 11px; font-weight: bold; text-align: center; border: 1px solid #601010; }
-                        td { padding: 8px 5px; border: 1px solid #ddd; text-align: center; font-size: 11px; }
-                        tr:nth-child(even) { background-color: #f9f9f9; }
+                        /* Table Box Shadow Style */
+                        .table-wrapper {
+                            margin: 0 5px;
+                            border-radius: 6px;
+                            box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+                            overflow: hidden;
+                            border: 1px solid #ccc;
+                            page-break-inside: avoid;
+                        }
+                        table { width: 100%; border-collapse: collapse; }
+                        thead { display: table-header-group; }
+                        tr { page-break-inside: avoid; }
+                        th { background-color: #801919; color: white; padding: 12px 5px; font-size: 11px; font-weight: bold; text-align: center; border: none; }
+                        td { padding: 12px 5px; border-bottom: 1px solid #eee; text-align: center; font-size: 11px; font-family: 'Times New Roman', serif; }
                     </style>
                 </head>
                 <body>
                     <div class="container">
                         ${activeHeader}
+
                         <div class="double-line"></div>
                         
                         <div class="doc-title">DENTAL RECORD</div>
                         
                         <div class="patient-grid">
                             <div>
-                                <div class="p-row"><div class="p-label">Nama</div><div class="p-value">${data.nama_pasien}</div></div>
-                                <div class="p-row"><div class="p-label">Tgl Lahir</div><div class="p-value">${formatTanggalFull(data.tgl_lahir)}</div></div>
-                                <div class="p-row"><div class="p-label">Alamat</div><div class="p-value">${data.alamat}</div></div>
+                                <div class="p-row"><div class="p-label">Nama</div><div class="p-colon">:</div><div class="p-value">${data.nama_pasien || '-'}</div></div>
+                                <div class="p-row"><div class="p-label">Tgl Lahir</div><div class="p-colon">:</div><div class="p-value">${formatTanggalFull(data.tgl_lahir)}</div></div>
+                                <div class="p-row"><div class="p-label">Alamat</div><div class="p-colon">:</div><div class="p-value">${data.alamat || '-'}</div></div>
                             </div>
                             <div>
-                                <div class="p-row"><div class="p-label">Pekerjaan</div><div class="p-value">${data.pekerjaan || '-'}</div></div>
-                                <div class="p-row"><div class="p-label">No. Hp</div><div class="p-value">${data.nope}</div></div>
-                                <div class="p-row"><div class="p-label">Alergi Obat</div><div class="p-value">${data.alergi_obat || '-'}</div></div>
+                                <div class="p-row"><div class="p-label">Pekerjaan</div><div class="p-colon">:</div><div class="p-value">${data.pekerjaan || '-'}</div></div>
+                                <div class="p-row"><div class="p-label">No. Hp</div><div class="p-colon">:</div><div class="p-value">${data.nope || '-'}</div></div>
+                                <div class="p-row"><div class="p-label">Alergi Obat</div><div class="p-colon">:</div><div class="p-value">${data.alergi_obat || '-'}</div></div>
                             </div>
                         </div>
 
-                        <div class="section-title">Riwayat Perawatan</div>
+                        <div class="double-line"></div>
 
-                        <table>
-                            <thead>
-                                <tr>
-                                    <th style="width: 60px;">Tanggal</th>
-                                    <th>Layanan</th>
-                                    <th>Gigi</th>
-                                    <th>Keluhan/Diagnosa</th>
-                                    <th>Perawatan</th>
-                                    <th>Ket</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                ${trs.length > 0 ? trs : '<tr><td colspan="6">Data riwayat tidak ditemukan</td></tr>'}
-                            </tbody>
-                        </table>
+                        <div class="section-title">RIWAYAT PERAWATAN</div>
+
+                        <div class="table-wrapper">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th style="width: 60px;">Tanggal</th>
+                                        <th>Layanan</th>
+                                        <th>Gigi</th>
+                                        <th>Keluhan/Diagnosa</th>
+                                        <th>Perawatan</th>
+                                        <th>Ket</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    ${trs.length > 0 ? trs : '<tr><td colspan="6" style="padding: 30px;">Data riwayat tidak ditemukan</td></tr>'}
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
                 </body>
             </html>
@@ -212,8 +254,8 @@ export function ReadPasien() {
 
         const { uri } = await Print.printToFileAsync({ 
             html: htmlContent,
-            width: 624, // 16.5cm
-            height: 813 // 21.5cm
+            width: 794,
+            height: 1123
         });
         await Sharing.shareAsync(uri, { UTI: '.pdf', mimeType: 'application/pdf', dialogTitle: 'Ekspor Riwayat Pasien' });
     } catch (e: any) {

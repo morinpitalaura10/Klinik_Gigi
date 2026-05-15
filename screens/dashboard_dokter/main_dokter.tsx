@@ -60,17 +60,10 @@ export default function MainDokter() {
             )
         `)
         .eq('tanggal', today)
-        .in('status', ['Menunggu', 'Diproses']);
+        .eq('status', 'Diproses');
 
-      if (user?.role === 'dokter' && user?.spesialisasi) {
-          const spec = user.spesialisasi.toLowerCase();
-          if (spec.includes('orto')) {
-              query = query.ilike('layanan', '%orto%');
-          } else if (spec.includes('umum')) {
-              query = query.ilike('layanan', '%umum%');
-          } else {
-              query = query.ilike('layanan', `%${user.spesialisasi}%`);
-          }
+      if (user?.role === 'dokter' && user?.id_users) {
+          query = query.eq('doctor_id', user.id_users);
       }
 
       const { data, error } = await query.order('id_record', { ascending: true });

@@ -23,6 +23,12 @@ interface Pasien {
     nama_pasien: string;
 }
 
+interface Dokter {
+    id_users: number;
+    nama_users: string;
+    tb_dokter?: { spesialisasi: string }[] | { spesialisasi: string };
+}
+
 export function CreateRecordAdmin() {
     const navigation = useNavigation<any>();
     const route = useRoute();
@@ -38,34 +44,54 @@ export function CreateRecordAdmin() {
     const [pasienSearch, setPasienSearch] = useState('');
     const [layanan, setLayanan] = useState(editItem?.layanan || '');
 
-    // Keluhan state (mapped to 'keluhan' column in DB)
-    const [diagnosa, setDiagnosa] = useState<string>(
-        editItem?.diagnosa || ''
-    );
+    // Dokter state
+    const [dokterList, setDokterList] = useState<Dokter[]>([]);
+    const [selectedDokter, setSelectedDokter] = useState<Dokter | null>(null);
+    const [dokterSearch, setDokterSearch] = useState('');
 
-    // Modals for dropdowns
+    // Keluhan state (mapped to 'diagnosa' column in DB)
+    const [diagnosa, setDiagnosa] = useState<string>(editItem?.diagnosa || '');
+
+    // Modals
     const [pasienModalVisible, setPasienModalVisible] = useState(false);
     const [layananModalVisible, setLayananModalVisible] = useState(false);
+    const [dokterModalVisible, setDokterModalVisible] = useState(false);
 
-    const layananOptions = ['Ortodental', 'Umum'];
+    // Layanan yang dipilih sementara (sebelum dokter dikonfirmasi)
+    const [pendingLayanan, setPendingLayanan] = useState('');
+
+    const layananOptions = [
+        { label: 'Umum', value: 'Umum', spesialisasi: 'umum' },
+        { label: 'Ortodental', value: 'Ortodental', spesialisasi: 'ortodonti' },
+    ];
 
     const fetchPasien = async () => {
         try {
             setFetchingPasien(true);
-            const { data, error } = await supabase
-                .from('tb_pasien')
-                .select('id_pasien, nama_pasien')
-                .order('nama_pasien', { ascending: true });
+            const [pasienRes, dokterRes] = await Promise.all([
+                supabase
+                    .from('tb_pasien')
+                    .select('id_pasien, nama_pasien')
+                    .order('nama_pasien', { ascending: true }),
+                supabase
+                    .from('tb_users')
+                    .select('id_users, nama_users, tb_dokter(spesialisasi)')
+                    .eq('role', 'dokter')
+                    .order('nama_users', { ascending: true }),
+            ]);
 
-            if (error) throw error;
-            setPasienList(data || []);
+            if (pasienRes.error) throw pasienRes.error;
+            if (dokterRes.error) throw dokterRes.error;
+
+            setPasienList(pasienRes.data || []);
+            setDokterList(dokterRes.data || []);
 
             if (editItem?.id_pasien) {
-                const p = data?.find(x => x.id_pasien === editItem.id_pasien);
+                const p = pasienRes.data?.find(x => x.id_pasien === editItem.id_pasien);
                 if (p) setSelectedPasienName(p.nama_pasien);
             }
         } catch (error: any) {
-            showAlert({ title: 'Error', message: 'Gagal memuat data pasien: ' + error.message, type: 'error' });
+            showAlert({ title: 'Error', message: 'Gagal memuat data: ' + error.message, type: 'error' });
         } finally {
             setFetchingPasien(false);
         }
@@ -76,6 +102,36 @@ export function CreateRecordAdmin() {
             fetchPasien();
         }, [])
     );
+
+    // Dapatkan spesialisasi dokter dari struktur data yang mungkin berbeda
+    const getDokterSpesialisasi = (dokter: Dokter): string => {
+        if (!dokter.tb_dokter) return '';
+        if (Array.isArray(dokter.tb_dokter)) {
+            return dokter.tb_dokter[0]?.spesialisasi || '';
+        }
+        return (dokter.tb_dokter as any)?.spesialisasi || '';
+    };
+
+    // Filter dokter berdasarkan spesialisasi layanan yang dipilih
+    const filteredDokterByLayanan = dokterList.filter(d => {
+        const spec = getDokterSpesialisasi(d).toLowerCase().trim();
+        const targetSpec = (layananOptions.find(l => l.value === pendingLayanan)?.spesialisasi || '').toLowerCase().trim();
+        return spec === targetSpec;
+    });
+
+    const handleLayananSelect = (opt: { label: string; value: string; spesialisasi: string }) => {
+        setPendingLayanan(opt.value);
+        setLayananModalVisible(false);
+        setDokterSearch('');
+        // Buka modal pilih dokter
+        setTimeout(() => setDokterModalVisible(true), 300);
+    };
+
+    const handleDokterSelect = (dokter: Dokter) => {
+        setSelectedDokter(dokter);
+        setLayanan(pendingLayanan);
+        setDokterModalVisible(false);
+    };
 
     const handleSave = async () => {
         if (!selectedPasienId) {
@@ -88,6 +144,11 @@ export function CreateRecordAdmin() {
             return;
         }
 
+        if (!selectedDokter && !editItem) {
+            showAlert({ title: 'Dokter Belum Dipilih', message: 'Harap pilih dokter yang menangani pasien.', type: 'warning' });
+            return;
+        }
+
         if (!diagnosa.trim()) {
             showAlert({ title: 'Keterangan Kosong', message: 'Harap isi bagian Keluhan/Diagnosis pasien.', type: 'warning' });
             return;
@@ -95,13 +156,18 @@ export function CreateRecordAdmin() {
 
         setLoading(true);
         try {
-            const recordData = {
+            const recordData: any = {
                 id_pasien: parseInt(selectedPasienId),
                 layanan: layanan,
                 diagnosa: diagnosa,
                 tanggal: new Date().toLocaleDateString('en-CA'),
-                status: editItem?.status || 'Menunggu'
+                status: editItem?.status || 'Menunggu',
             };
+
+            // Tambahkan doctor_id jika ada dokter terpilih
+            if (selectedDokter) {
+                recordData.doctor_id = selectedDokter.id_users;
+            }
 
             let error;
             if (editItem) {
@@ -175,6 +241,38 @@ export function CreateRecordAdmin() {
                             <MaterialCommunityIcons name="menu-down" size={24} color={Colors.primary} />
                         </TouchableOpacity>
 
+                        {/* Info dokter terpilih */}
+                        {selectedDokter && (
+                            <View style={{ 
+                                flexDirection: 'row', 
+                                alignItems: 'center', 
+                                backgroundColor: '#F0FDF4', 
+                                borderWidth: 1, 
+                                borderColor: '#BBF7D0', 
+                                borderRadius: 10, 
+                                paddingHorizontal: 12, 
+                                paddingVertical: 10, 
+                                marginBottom: 14,
+                                gap: 8
+                            }}>
+                                <MaterialCommunityIcons name="doctor" size={20} color="#16A34A" />
+                                <View style={{ flex: 1 }}>
+                                    <Text style={{ fontSize: 11, color: '#16A34A', fontWeight: '600' }}>Dokter yang Menangani</Text>
+                                    <Text style={{ fontSize: 14, color: '#14532D', fontWeight: 'bold' }}>
+                                        {selectedDokter.nama_users}
+                                    </Text>
+                                </View>
+                                <TouchableOpacity 
+                                    onPress={() => {
+                                        setSelectedDokter(null);
+                                        setLayanan('');
+                                    }}
+                                >
+                                    <MaterialCommunityIcons name="close-circle" size={20} color="#16A34A" />
+                                </TouchableOpacity>
+                            </View>
+                        )}
+
                         {/* Text Area Keluhan */}
                         <Text style={CreateRecordStyles.fieldLabel}>Keluhan/Diagnosis</Text>
                         <TextInput
@@ -244,18 +342,126 @@ export function CreateRecordAdmin() {
                 <TouchableOpacity style={GlobalStyles.selectionModalOverlay} activeOpacity={1} onPress={() => setLayananModalVisible(false)}>
                     <View style={GlobalStyles.selectionModalContent}>
                         <Text style={GlobalStyles.selectionModalTitle}>Pilih Layanan</Text>
+                        <Text style={{ fontSize: 13, color: '#888', marginBottom: 14, textAlign: 'center' }}>
+                            Setelah memilih layanan, Anda akan diminta memilih dokter yang menangani.
+                        </Text>
                         {layananOptions.map(opt => (
                             <TouchableOpacity
-                                key={opt}
-                                style={GlobalStyles.selectionOptionItem}
-                                onPress={() => {
-                                    setLayanan(opt);
-                                    setLayananModalVisible(false);
-                                }}
+                                key={opt.value}
+                                style={[GlobalStyles.selectionOptionItem, { 
+                                    flexDirection: 'row', 
+                                    alignItems: 'center', 
+                                    justifyContent: 'space-between',
+                                    paddingVertical: 16,
+                                    paddingHorizontal: 16,
+                                    borderRadius: 12,
+                                    marginBottom: 8,
+                                    backgroundColor: layanan === opt.value ? '#FFF0F0' : '#FAFAFA',
+                                    borderWidth: 1.5,
+                                    borderColor: layanan === opt.value ? Colors.primary : '#EEE',
+                                }]}
+                                onPress={() => handleLayananSelect(opt)}
                             >
-                                <Text style={GlobalStyles.tableRowText}>{opt}</Text>
+                                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
+                                    <MaterialCommunityIcons 
+                                        name={opt.value === 'Ortodental' ? 'tooth-outline' : 'stethoscope'} 
+                                        size={22} 
+                                        color={layanan === opt.value ? Colors.primary : '#666'} 
+                                    />
+                                    <View>
+                                        <Text style={[GlobalStyles.tableRowText, { fontWeight: '600', color: layanan === opt.value ? Colors.primary : '#333' }]}>
+                                            {opt.label}
+                                        </Text>
+                                        <Text style={{ fontSize: 11, color: '#999' }}>
+                                            {opt.value === 'Ortodental' ? 'Dokter Spesialis Ortodonti' : 'Dokter Gigi Umum'}
+                                        </Text>
+                                    </View>
+                                </View>
+                                <MaterialCommunityIcons name="chevron-right" size={20} color="#CCC" />
                             </TouchableOpacity>
                         ))}
+                    </View>
+                </TouchableOpacity>
+            </Modal>
+
+            {/* Modal Pilih Dokter (muncul setelah pilih layanan) */}
+            <Modal visible={dokterModalVisible} transparent animationType="slide" onRequestClose={() => setDokterModalVisible(false)}>
+                <TouchableOpacity style={GlobalStyles.selectionModalOverlay} activeOpacity={1} onPress={() => setDokterModalVisible(false)}>
+                    <View style={GlobalStyles.selectionModalContent}>
+                        {/* Header */}
+                        <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 6, gap: 8 }}>
+                            <MaterialCommunityIcons name="doctor" size={22} color={Colors.primary} />
+                            <Text style={GlobalStyles.selectionModalTitle}>
+                                Pilih Dokter {pendingLayanan}
+                            </Text>
+                        </View>
+                        <Text style={{ fontSize: 12, color: '#888', marginBottom: 14, textAlign: 'center' }}>
+                            Pilih dokter yang akan menangani pasien untuk layanan <Text style={{ fontWeight: '600', color: Colors.primary }}>{pendingLayanan}</Text>
+                        </Text>
+
+                        <View style={GlobalStyles.dropdownSearchContainer}>
+                            <MaterialCommunityIcons name="magnify" size={20} color="#999" />
+                            <TextInput
+                                style={GlobalStyles.dropdownSearchInput}
+                                placeholder="Cari nama dokter..."
+                                placeholderTextColor="#999"
+                                value={dokterSearch}
+                                onChangeText={setDokterSearch}
+                            />
+                        </View>
+
+                        <ScrollView style={GlobalStyles.modalScrollViewContent} keyboardShouldPersistTaps="handled">
+                            {filteredDokterByLayanan
+                                .filter(d => d.nama_users.toLowerCase().includes(dokterSearch.toLowerCase()))
+                                .length === 0 ? (
+                                <View style={{ alignItems: 'center', paddingVertical: 30 }}>
+                                    <MaterialCommunityIcons name="account-off-outline" size={48} color="#CCC" />
+                                    <Text style={{ color: '#999', marginTop: 8, textAlign: 'center' }}>
+                                        Tidak ada dokter {pendingLayanan} yang tersedia.
+                                    </Text>
+                                </View>
+                            ) : (
+                                filteredDokterByLayanan
+                                    .filter(d => d.nama_users.toLowerCase().includes(dokterSearch.toLowerCase()))
+                                    .map(dokter => (
+                                        <TouchableOpacity
+                                            key={dokter.id_users}
+                                            style={[GlobalStyles.selectionOptionItem, {
+                                                flexDirection: 'row',
+                                                alignItems: 'center',
+                                                gap: 12,
+                                                paddingVertical: 14,
+                                                paddingHorizontal: 14,
+                                                borderRadius: 12,
+                                                marginBottom: 8,
+                                                backgroundColor: selectedDokter?.id_users === dokter.id_users ? '#FFF0F0' : '#FAFAFA',
+                                                borderWidth: 1.5,
+                                                borderColor: selectedDokter?.id_users === dokter.id_users ? Colors.primary : '#EEE',
+                                            }]}
+                                            onPress={() => handleDokterSelect(dokter)}
+                                        >
+                                            <View style={{
+                                                width: 40, height: 40, borderRadius: 20,
+                                                backgroundColor: Colors.primary + '20',
+                                                justifyContent: 'center', alignItems: 'center'
+                                            }}>
+                                                <MaterialCommunityIcons name="account" size={22} color={Colors.primary} />
+                                            </View>
+                                            <View style={{ flex: 1 }}>
+                                                <Text style={{ fontSize: 14, fontWeight: '600', color: '#333' }}>
+                                                    {dokter.nama_users}
+                                                </Text>
+                                                <Text style={{ fontSize: 11, color: '#888', marginTop: 2 }}>
+                                                    Dokter {pendingLayanan}
+                                                </Text>
+                                            </View>
+                                            {selectedDokter?.id_users === dokter.id_users && (
+                                                <MaterialCommunityIcons name="check-circle" size={20} color={Colors.primary} />
+                                            )}
+                                        </TouchableOpacity>
+                                    ))
+                            )}
+                        </ScrollView>
                     </View>
                 </TouchableOpacity>
             </Modal>

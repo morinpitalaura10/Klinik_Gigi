@@ -29,7 +29,10 @@ export function CreateRujukan() {
     const [alamat, setAlamat] = useState('');
     const [keluhan_rujukan, setKeluhan_rujukan] = useState('');
     const [diagnosa, setDiagnosa] = useState('');
-    const [penandatangan, setPenandatangan] = useState('');
+    // penandatanganDisplay: teks yang tampil di form input (nama + role)
+    // penandatanganNama: nama bersih yang dikirim ke preview & DB
+    const [penandatanganDisplay, setPenandatanganDisplay] = useState('');
+    const [penandatanganNama, setPenandatanganNama] = useState('');
     const [penandatanganModalVisible, setPenandatanganModalVisible] = useState(false);
     const [recordModalVisible, setRecordModalVisible] = useState(false);
     
@@ -74,7 +77,19 @@ export function CreateRujukan() {
             if (recordsRes.error) throw recordsRes.error;
             if (usersRes.error) throw usersRes.error;
 
-            setAvailableRecords(recordsRes.data || []);
+            const allRecords = recordsRes.data || [];
+            
+            // Filter hanya record terbaru per pasien (karena di-order desc, ambil yang pertama muncul per id_pasien)
+            const uniqueRecords = [];
+            const seenPasienIds = new Set();
+            for (const rec of allRecords) {
+                if (!seenPasienIds.has(rec.id_pasien)) {
+                    uniqueRecords.push(rec);
+                    seenPasienIds.add(rec.id_pasien);
+                }
+            }
+
+            setAvailableRecords(uniqueRecords);
             setAvailableUsers(usersRes.data || []);
         } catch (error: any) {
             console.error('Fetch error:', error.message);
@@ -130,7 +145,7 @@ export function CreateRujukan() {
                 record_id: currentRecord.id_record,
                 tgl: tgl,
                 keluhan_rujukan: keluhan_rujukan,
-                user_klinik: penandatangan || 'Admin Galeri Ortodental'
+                user_klinik: penandatanganNama || 'Admin Galeri Ortodental'
             };
 
             const { data, error } = await supabase
@@ -153,7 +168,7 @@ export function CreateRujukan() {
                     keluhan_rujukan: keluhan_rujukan,
                     diagnosa: diagnosa
                 },
-                penandatangan: penandatangan,
+                penandatangan: penandatanganNama,
                 isOrto: currentRecord.layanan === 'Ortodental'
             };
 
@@ -231,8 +246,8 @@ export function CreateRujukan() {
                             style={CreateRecordStyles.inputDropdown}
                             onPress={() => setPenandatanganModalVisible(true)}
                         >
-                            <Text style={[CreateRecordStyles.inputText, !penandatangan && GlobalStyles.textLightGray]} numberOfLines={1}>
-                                {penandatangan || 'Pilih penandatangan'}
+                            <Text style={[CreateRecordStyles.inputText, !penandatanganDisplay && GlobalStyles.textLightGray]} numberOfLines={1}>
+                                {penandatanganDisplay || 'Pilih penandatangan'}
                             </Text>
                             <MaterialCommunityIcons name="menu-down" size={24} color={Colors.primary} />
                         </TouchableOpacity>
@@ -309,18 +324,22 @@ export function CreateRujukan() {
                                 const spec = u.tb_dokter?.[0]?.spesialisasi || u.tb_dokter?.spesialisasi;
                                 const capitalizedSpec = spec ? (spec.charAt(0).toUpperCase() + spec.slice(1)) : 'Dokter';
                                 const roleDisplay = u.role === 'dokter' ? capitalizedSpec : 'Admin';
-                                const formattedName = `${u.nama_users} (${roleDisplay})`;
+                                // Display di dropdown: nama + role (untuk membantu admin memilih)
+                                const displayLabel = `${u.nama_users} (${roleDisplay})`;
+                                // Nama bersih: hanya nama, tanpa role — untuk dokumen preview & DB
+                                const namaOnly = u.nama_users;
                                 
                                 return (
                                     <TouchableOpacity
                                         key={u.id_users}
                                         style={GlobalStyles.selectionOptionItem}
                                         onPress={() => {
-                                            setPenandatangan(formattedName);
+                                            setPenandatanganDisplay(displayLabel);
+                                            setPenandatanganNama(namaOnly);
                                             setPenandatanganModalVisible(false);
                                         }}
                                     >
-                                        <Text style={GlobalStyles.tableRowText}>{formattedName}</Text>
+                                        <Text style={GlobalStyles.tableRowText}>{displayLabel}</Text>
                                     </TouchableOpacity>
                                 );
                             })}

@@ -16,6 +16,8 @@ export function PreviewRujukan() {
 
   const isOrto = item.isOrto;
 
+  // Buang teks dalam kurung dari nama penandatangan, misal "Dr. Budi (Ortodonti)" → "Dr. Budi"
+  const stripRole = (nama: string) => (nama || '').replace(/\s*\(.*?\)/g, '').trim();
 
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
@@ -41,25 +43,24 @@ export function PreviewRujukan() {
             <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no" />
             <style>
               @page {
-                margin: 0;
-                size: 15cm 21cm; 
+                margin: 0px !important;
+                padding: 0px !important;
+                size: A4 portrait; 
               }
-              body {
-                margin: 0;
-                padding: 0.1cm;
+              html, body {
+                margin: 0 !important;
+                padding: 0 !important;
                 background-color: #ffffff;
-                width: 15cm;
-                height: 21cm;
+                width: 100%;
+                height: 100%;
                 box-sizing: border-box;
-                overflow: hidden;
               }
               .receipt-container {
                 background-color: white;
-                padding: 0.3cm 2cm 0.5cm 2cm;
-                border: 1.5px solid #000;
+                padding: 0;
+                margin: 0;
                 box-sizing: border-box;
                 width: 100%;
-                height: calc(21cm - 0.3cm);
                 display: flex;
                 flex-direction: column;
               }
@@ -75,25 +76,25 @@ export function PreviewRujukan() {
                 color: #000;
               }
               .title-umum {
-                font-size: 18px;
+                font-size: 28px;
                 font-weight: bold;
                 font-family: 'Times New Roman', serif;
                 margin: 0;
               }
               .doctor-name {
-                font-size: 16px;
+                font-size: 24px;
                 font-weight: 900;
                 margin: 2px 0;
                 font-family: 'Times New Roman', serif;
               }
               .sip-text {
-                font-size: 11px;
+                font-size: 15px;
                 font-weight: bold;
                 margin-bottom: 2px;
                 font-family: 'Times New Roman', serif;
               }
               .address-text {
-                font-size: 11px;
+                font-size: 15px;
                 margin: 0;
                 font-family: 'Times New Roman', serif;
               }
@@ -124,20 +125,20 @@ export function PreviewRujukan() {
               
               .content-body {
                   font-family: 'Times New Roman', serif;
-                  font-size: 14px;
-                  line-height: 1.6;
+                  font-size: 15px;
+                  line-height: 1.8;
                   flex: 1;
               }
               .bold { font-weight: bold; }
-              .mb-15 { margin-bottom: 15px; }
+              .mb-15 { margin-bottom: 25px; }
               
               .info-row {
                 display: flex;
-                margin-bottom: 8px;
+                margin-bottom: 20px;
                 align-items: flex-start;
               }
               .label {
-                width: 120px;
+                width: 150px;
               }
               .colon {
                 width: 20px;
@@ -156,19 +157,19 @@ export function PreviewRujukan() {
               }
               
               .footer {
-                margin-top: 20px;
+                margin-top: 50px;
               }
               .admin-sign {
                 text-align: center;
-                width: 200px;
+                width: 250px;
                 margin-left: auto;
               }
               .date-info {
-                font-size: 14px;
+                font-size: 15px;
                 font-family: 'Times New Roman', serif;
               }
               .sign-space {
-                  height: 60px;
+                  height: 90px;
               }
             </style>
           </head>
@@ -176,7 +177,7 @@ export function PreviewRujukan() {
             <div class="receipt-container">
               <div class="header-container">
                 <div>
-                   <img src="${logoUri}" style="width: 70px; height: 70px; border-radius: 35px; object-fit: cover; border: 2px solid #C62828;" />
+                   <img src="${logoUri}" style="width: 110px; height: 110px; border-radius: 55px; object-fit: cover;" />
                 </div>
                 <div class="header-text-container">
                   ${headerContent}
@@ -222,7 +223,7 @@ export function PreviewRujukan() {
                     <div class="label">Diagnosa Sementara</div><div class="colon">:</div><div class="value">${item.detail_medis?.diagnosa || ''}</div>
                 </div>
                 
-                <div style="margin-top: 30px; font-weight: bold; text-align: justify;">
+                <div style="margin-top: 60px; font-weight: bold; text-align: justify;">
                     Demikian agar pasien tersebut mendapatkan perawatan kesehatan selanjutnya.<br/>Terimakasih.
                 </div>
               </div>
@@ -232,7 +233,7 @@ export function PreviewRujukan() {
                     <div class="date-info" style="margin-bottom: 5px;">Cirebon, ${item.tgl ? formatDate(item.tgl) : ''}</div>
                     <div class="date-info bold">Hormat Kami</div>
                     <div class="sign-space"></div>
-                    <div class="date-info bold">${item.penandatangan || item.user_klinik || ''}</div>
+                    <div class="date-info bold">${stripRole(item.penandatangan || item.user_klinik || '')}</div>
                   </div>
               </div>
             </div>
@@ -242,8 +243,9 @@ export function PreviewRujukan() {
 
       const { uri } = await Print.printToFileAsync({
         html: htmlContent,
-        width: 567,  /* 15cm @ 96 DPI */
-        height: 794  /* 21cm @ 96 DPI */
+        width: 794,  /* A4 width @ 96 DPI */
+        height: 1123, /* A4 height @ 96 DPI */
+        margins: { top: 0, right: 0, bottom: 0, left: 0 }
       });
       if (uri) {
         await Sharing.shareAsync(uri, { UTI: '.pdf', mimeType: 'application/pdf', dialogTitle: 'Ekspor Rujukan' });
@@ -340,7 +342,7 @@ export function PreviewRujukan() {
               <Text style={GlobalStyles.receiptDateInfo}>Cirebon, {item.tgl ? formatDate(item.tgl) : '....................20..'}</Text>
               <Text style={GlobalStyles.rujukanDateInfoBold}>Hormat Kami</Text>
               <View style={GlobalStyles.receiptSignSpace} />
-              <Text style={[GlobalStyles.receiptDateInfo, LayoutStyles.textBold, GlobalStyles.textAlignCenter]}>{item.penandatangan || item.user_klinik || ''}</Text>
+              <Text style={[GlobalStyles.receiptDateInfo, LayoutStyles.textBold, GlobalStyles.textAlignCenter]}>{stripRole(item.penandatangan || item.user_klinik || '')}</Text>
             </View>
           </View>
         </View>

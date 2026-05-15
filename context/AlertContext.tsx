@@ -1,7 +1,7 @@
-import React, { createContext, useState, ReactNode, useContext } from 'react';
-import { Modal, View, Text, TouchableOpacity, StyleSheet, Animated } from 'react-native';
+import React, { createContext, useState, ReactNode, useContext, useEffect } from 'react';
+import { Modal, View, Text, TouchableOpacity, StyleSheet, TouchableWithoutFeedback } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-import { GlobalStyles, Colors, AlertStyles, LayoutStyles } from '../styles/GlobalStyles';
+import { Colors } from '../styles/GlobalStyles';
 
 type AlertType = 'success' | 'error' | 'info' | 'warning' | 'confirm';
 
@@ -57,17 +57,64 @@ export const AlertProvider = ({ children }: { children: ReactNode }) => {
     hideAlert();
   };
 
-  const getIcon = () => {
+  useEffect(() => {
+    let timer: NodeJS.Timeout;
+    if (visible && options?.type !== 'confirm') {
+      timer = setTimeout(() => {
+        handleConfirm();
+      }, 3000);
+    }
+    return () => {
+      if (timer) clearTimeout(timer);
+    };
+  }, [visible, options]);
+
+  const getThemeConfig = () => {
     switch (options?.type) {
-      case 'success': return { name: 'check-circle', color: '#4CAF50' };
-      case 'error': return { name: 'close-circle', color: '#F44336' };
-      case 'warning': return { name: 'alert-circle', color: '#FF9800' };
-      case 'confirm': return { name: 'help-circle', color: Colors.primary };
-      default: return { name: 'information-variant', color: '#2196F3' };
+      case 'success': 
+        return { 
+          iconName: 'check-decagram', 
+          iconColor: '#28A745', 
+          titleColor: '#1A4D2E', 
+          messageColor: '#1A4D2E', 
+          barColor: '#28A745' 
+        };
+      case 'error': 
+        return { 
+          iconName: 'close-octagon', 
+          iconColor: '#DC3545', 
+          titleColor: '#721C24', 
+          messageColor: '#721C24', 
+          barColor: '#DC3545' 
+        };
+      case 'warning': 
+        return { 
+          iconName: 'alert-decagram', 
+          iconColor: '#FFC107', 
+          titleColor: '#856404', 
+          messageColor: '#856404', 
+          barColor: '#FFC107' 
+        };
+      case 'confirm': 
+        return { 
+          iconName: 'help-circle', 
+          iconColor: Colors.primary, 
+          titleColor: Colors.primary, 
+          messageColor: '#555555', 
+          barColor: Colors.primary 
+        };
+      default: 
+        return { 
+          iconName: 'information', 
+          iconColor: '#17A2B8', 
+          titleColor: '#0C5460', 
+          messageColor: '#0C5460', 
+          barColor: '#17A2B8' 
+        };
     }
   };
 
-  const icon = getIcon();
+  const theme = getThemeConfig();
 
   return (
     <AlertContext.Provider value={{ showAlert, hideAlert }}>
@@ -78,47 +125,127 @@ export const AlertProvider = ({ children }: { children: ReactNode }) => {
         animationType="fade"
         onRequestClose={hideAlert}
       >
-        <View style={GlobalStyles.modalBackdrop}>
-          <View style={[GlobalStyles.modalBox, LayoutStyles.pb20]}>
-            <MaterialCommunityIcons 
-              name={icon.name as any} 
-              size={60} 
-              color={icon.color} 
-              style={AlertStyles.icon} 
-            />
-            
-            <Text style={GlobalStyles.modalText}>{options?.title}</Text>
-            <Text style={[GlobalStyles.modalText, AlertStyles.message]}>
-              {options?.message}
-            </Text>
+        <TouchableWithoutFeedback onPress={options?.type !== 'confirm' ? handleConfirm : undefined}>
+          <View style={styles.modalBackdrop}>
+            <TouchableWithoutFeedback>
+              <View style={styles.cardContainer}>
+                <View style={[styles.cardContent, options?.type === 'confirm' && { paddingBottom: 20 }]}>
+                  <MaterialCommunityIcons 
+                    name={theme.iconName as any} 
+                    size={72} 
+                    color={theme.iconColor} 
+                    style={styles.icon} 
+                  />
+                  <View style={styles.textContainer}>
+                    <Text style={[styles.title, { color: theme.titleColor }]}>
+                      {options?.title}
+                    </Text>
+                    <Text style={[styles.message, { color: theme.messageColor }]}>
+                      {options?.message}
+                    </Text>
+                  </View>
+                </View>
+                
+                {options?.type === 'confirm' && (
+                  <View style={styles.actionRow}>
+                    <TouchableOpacity 
+                      style={styles.btnCancel} 
+                      onPress={handleCancel}
+                    >
+                      <Text style={styles.btnCancelText}>{options?.cancelText || 'Batal'}</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity 
+                      style={[styles.btnConfirm, { backgroundColor: theme.iconColor }]} 
+                      onPress={handleConfirm}
+                    >
+                      <Text style={styles.btnConfirmText}>{options?.confirmText || 'OK'}</Text>
+                    </TouchableOpacity>
+                  </View>
+                )}
 
-            <View style={GlobalStyles.modalActionRow}>
-              {options?.type === 'confirm' && (
-                <TouchableOpacity 
-                   style={[GlobalStyles.btnModalBatal, AlertStyles.btnConfirm]} 
-                   onPress={handleCancel}
-                >
-                  <Text style={GlobalStyles.btnModalText}>{options.cancelText || 'Batal'}</Text>
-                </TouchableOpacity>
-              )}
-              
-              <TouchableOpacity 
-                style={[
-                  GlobalStyles.btnModalHapus, 
-                  AlertStyles.btnConfirm,
-                  { 
-                    backgroundColor: options?.type === 'error' ? '#F44336' : (options?.type === 'success' ? '#4CAF50' : Colors.primary),
-                  },
-                  options?.type === 'confirm' && AlertStyles.btnWithMargin
-                ]} 
-                onPress={handleConfirm}
-              >
-                <Text style={GlobalStyles.btnModalText}>{options?.confirmText || 'OK'}</Text>
-              </TouchableOpacity>
-            </View>
+                <View style={[styles.bottomBar, { backgroundColor: theme.barColor }]} />
+              </View>
+            </TouchableWithoutFeedback>
           </View>
-        </View>
+        </TouchableWithoutFeedback>
       </Modal>
     </AlertContext.Provider>
   );
 };
+
+const styles = StyleSheet.create({
+  modalBackdrop: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.4)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  cardContainer: {
+    width: '88%',
+    maxWidth: 400,
+    backgroundColor: '#FFFFFF',
+    borderRadius: 24,
+    overflow: 'hidden',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.2,
+    shadowRadius: 8,
+    elevation: 6,
+  },
+  cardContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: 24,
+    paddingBottom: 32,
+  },
+  icon: {
+    marginRight: 16,
+  },
+  textContainer: {
+    flex: 1,
+    justifyContent: 'center',
+  },
+  title: {
+    fontSize: 22,
+    fontWeight: 'bold',
+    marginBottom: 6,
+    lineHeight: 28,
+  },
+  message: {
+    fontSize: 16,
+    fontWeight: '500',
+    lineHeight: 22,
+  },
+  actionRow: {
+    flexDirection: 'row',
+    justifyContent: 'flex-end',
+    paddingHorizontal: 24,
+    paddingBottom: 24,
+    gap: 12,
+  },
+  btnCancel: {
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    borderRadius: 10,
+    backgroundColor: '#F0F0F0',
+  },
+  btnCancelText: {
+    color: '#555555',
+    fontWeight: 'bold',
+    fontSize: 15,
+  },
+  btnConfirm: {
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    borderRadius: 10,
+  },
+  btnConfirmText: {
+    color: '#FFFFFF',
+    fontWeight: 'bold',
+    fontSize: 15,
+  },
+  bottomBar: {
+    width: '100%',
+    height: 12,
+  },
+});
