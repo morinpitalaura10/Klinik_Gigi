@@ -2,6 +2,7 @@ import React from 'react';
 import { View, Text, ScrollView, TouchableOpacity, Alert, Image, ActivityIndicator } from 'react-native';
 import * as Print from 'expo-print';
 import * as Sharing from 'expo-sharing';
+import { getBase64Logo } from '../../../utils/imageUtils';
 import { GlobalStyles, LayoutStyles, Colors } from '../../../styles/GlobalStyles';
 import AdminLayout from '../../../components/templates/AdminLayout';
 import { useNavigation, useRoute } from '@react-navigation/native';
@@ -59,7 +60,7 @@ export function PreviewKwitansi() {
         <div class="address-text" style="font-size: 15px; font-family: 'Times New Roman', serif;">Cipto Park Jl. Dr. Cipto Mangunkusumo No. 54 Cirebon</div>
       `;
 
-      const logoUri = Image.resolveAssetSource(require('../../../assets/icon.png')).uri;
+      const logoUri = await getBase64Logo();
 
       const htmlContent = `
         <html>

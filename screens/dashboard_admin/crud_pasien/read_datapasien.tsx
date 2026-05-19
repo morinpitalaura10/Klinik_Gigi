@@ -7,6 +7,7 @@ import { useNavigation, useRoute } from '@react-navigation/native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import * as Print from 'expo-print';
 import * as Sharing from 'expo-sharing';
+import { getBase64Logo } from '../../../utils/imageUtils';
 import { useAlert } from '../../../context/AlertContext';
 import DropdownInput from '../../../components/molecules/DropdownInput';
 
@@ -82,7 +83,7 @@ export function ReadPasien() {
     if (isExporting || !data) return;
     setIsExporting(true);
     try {
-        const logoUri = (Image as any).resolveAssetSource(require('../../../assets/icon.png')).uri;
+        const logoUri = await getBase64Logo();
         const itemsToExport = filteredRecords;
         
         const trs = itemsToExport.map(r => `

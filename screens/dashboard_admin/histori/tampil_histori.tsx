@@ -18,6 +18,7 @@ import { useAlert } from '../../../context/AlertContext';
 import DropdownInput from '../../../components/molecules/DropdownInput';
 import * as Print from 'expo-print';
 import * as Sharing from 'expo-sharing';
+import { getBase64Logo } from '../../../utils/imageUtils';
 
 const BULAN_OPTIONS = [
     { label: 'Semua Bulan', value: '' },
@@ -194,7 +195,7 @@ export function TampilHistori() {
         if (isExporting || filtered.length === 0) return;
         setIsExporting(true);
         try {
-            const logoUri = (Image as any).resolveAssetSource(require('../../../assets/icon.png')).uri;
+            const logoUri = await getBase64Logo();
 
             const monthLabel = filterBulan ? BULAN_OPTIONS.find(o => o.value === filterBulan)?.label : 'Semua';
             const pelayananLabel = filterLayanan || 'Semua';

@@ -2,6 +2,7 @@ import React from 'react';
 import { View, Text, ScrollView, TouchableOpacity, Alert, Image, ActivityIndicator } from 'react-native';
 import * as Print from 'expo-print';
 import * as Sharing from 'expo-sharing';
+import { getBase64Logo } from '../../../utils/imageUtils';
 
 import { GlobalStyles, LayoutStyles, Colors } from '../../../styles/GlobalStyles';
 import AdminLayout from '../../../components/templates/AdminLayout';
@@ -28,7 +29,7 @@ export function PreviewRujukan() {
     if (isExporting) return;
     setIsExporting(true);
     try {
-      const logoUri = Image.resolveAssetSource(require('../../../assets/icon.png')).uri;
+      const logoUri = await getBase64Logo();
 
       const headerContent = `
         <div class="title-umum">PRAKTEK DOKTER GIGI SPESIALIS</div>
