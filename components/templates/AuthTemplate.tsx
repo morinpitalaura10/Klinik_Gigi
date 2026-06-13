@@ -22,27 +22,30 @@ export default function AuthTemplate({ children }: Props) {
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         style={AuthStyles.keyboardView}
       >
-        <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-          <View style={AuthStyles.container}>
-            
+        <View style={AuthStyles.container}>
+          
+          <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
             <View style={AuthStyles.topSection} />
+          </TouchableWithoutFeedback>
 
-            
+          
+          <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
             <View style={AuthStyles.archTop} />
+          </TouchableWithoutFeedback>
 
-            
-            <View style={AuthStyles.bottomFull}>
-              <ScrollView
-                style={AuthStyles.w100p}
-                contentContainerStyle={AuthStyles.formContent}
-                showsVerticalScrollIndicator={false}
-                keyboardShouldPersistTaps="handled"
-              >
-                {children}
-              </ScrollView>
-            </View>
+          
+          <View style={AuthStyles.bottomFull}>
+            <ScrollView
+              style={AuthStyles.w100p}
+              contentContainerStyle={AuthStyles.formContent}
+              showsVerticalScrollIndicator={false}
+              keyboardShouldPersistTaps="handled"
+              keyboardDismissMode="on-drag"
+            >
+              {children}
+            </ScrollView>
           </View>
-        </TouchableWithoutFeedback>
+        </View>
       </KeyboardAvoidingView>
     </SafeAreaView>
   );

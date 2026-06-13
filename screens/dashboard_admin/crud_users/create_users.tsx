@@ -18,6 +18,9 @@ import PrimaryButton from '../../../components/atoms/PrimaryButton';
 import { useNavigation } from '@react-navigation/native';
 import { useAlert } from '../../../context/AlertContext';
 
+const USERNAME_REGEX = /^[a-zA-Z0-9._]+$/; // huruf, angka, titik, underscore – tanpa spasi
+const PASSWORD_REGEX = /^(?=.*[A-Za-z])(?=.*\d).{8,}$/; // min 8 karakter, ada huruf dan angka
+
 export function CreateUser() {
   const navigation = useNavigation<any>();
   const { showAlert } = useAlert();
@@ -31,6 +34,17 @@ export function CreateUser() {
   const [spesialisasi, setSpesialisasi] = useState('');
 
   const [loading, setLoading] = useState(false);
+
+  // Derived validation states
+  const usernameError = us.length > 0 && !USERNAME_REGEX.test(us)
+    ? 'Username tidak boleh mengandung spasi atau karakter khusus.'
+    : '';
+  const passwordError = pw.length > 0 && !PASSWORD_REGEX.test(pw)
+    ? 'Password min. 8 karakter, harus ada huruf dan angka.'
+    : '';
+  const confirmPwError = confirmPw.length > 0 && pw !== confirmPw
+    ? 'Konfirmasi password tidak cocok.'
+    : '';
 
   const roleOptions = [
     { label: 'Admin', value: 'admin' },
@@ -51,8 +65,12 @@ export function CreateUser() {
       showAlert({ title: 'Username Kosong', message: 'Harap isi username untuk login.', type: 'warning' });
       return;
     }
-    if (!pw || pw.length < 6) {
-      showAlert({ title: 'Password Lemah', message: 'Password minimal harus 6 karakter.', type: 'warning' });
+    if (!USERNAME_REGEX.test(us)) {
+      showAlert({ title: 'Username Tidak Valid', message: 'Username tidak boleh mengandung spasi atau karakter khusus. Gunakan huruf, angka, titik, atau underscore.', type: 'warning' });
+      return;
+    }
+    if (!PASSWORD_REGEX.test(pw)) {
+      showAlert({ title: 'Password Lemah', message: 'Password minimal 8 karakter dan harus mengandung kombinasi huruf dan angka.', type: 'warning' });
       return;
     }
     if (pw !== confirmPw) {
@@ -145,8 +163,19 @@ export function CreateUser() {
                   onChangeText={setUs}
                   autoCapitalize="none"
                   hideLabel={true}
-                  style={CreateRecordStyles.inputDropdown}
+                  style={[
+                    CreateRecordStyles.inputDropdown,
+                    usernameError ? { borderColor: '#EF4444', borderWidth: 1.5 } :
+                    (us.length > 0 && !usernameError) ? { borderColor: '#22C55E', borderWidth: 1.5 } : {}
+                  ]}
                 />
+                {usernameError ? (
+                  <Text style={styles.hintError}>* {usernameError}</Text>
+                ) : us.length > 0 ? (
+                  <Text style={styles.hintSuccess}>✓ Username valid</Text>
+                ) : (
+                  <Text style={styles.hintError}>* Huruf, angka, titik, atau underscore. Tanpa spasi.</Text>
+                )}
               </View>
               <View style={LayoutStyles.flex1}>
                 <Text style={CreateRecordStyles.fieldLabel}>Role</Text>
@@ -184,8 +213,19 @@ export function CreateUser() {
               value={pw}
               onChangeText={setPw}
               hideLabel={true}
-              innerContainerStyle={CreateRecordStyles.inputDropdown}
+              innerContainerStyle={[
+                CreateRecordStyles.inputDropdown,
+                passwordError ? { borderColor: '#EF4444', borderWidth: 1.5 } :
+                (pw.length > 0 && !passwordError) ? { borderColor: '#22C55E', borderWidth: 1.5 } : {}
+              ]}
             />
+            {passwordError ? (
+              <Text style={styles.hintError}>* {passwordError}</Text>
+            ) : pw.length > 0 ? (
+              <Text style={styles.hintSuccess}>✓ Password kuat</Text>
+            ) : (
+              <Text style={styles.hintError}>* Min. 8 karakter, kombinasi huruf dan angka.</Text>
+            )}
 
             <Text style={CreateRecordStyles.fieldLabel}>Konfirmasi Password</Text>
             <PasswordInput
@@ -194,8 +234,17 @@ export function CreateUser() {
               value={confirmPw}
               onChangeText={setConfirmPw}
               hideLabel={true}
-              innerContainerStyle={CreateRecordStyles.inputDropdown}
+              innerContainerStyle={[
+                CreateRecordStyles.inputDropdown,
+                confirmPwError ? { borderColor: '#EF4444', borderWidth: 1.5 } :
+                (confirmPw.length > 0 && !confirmPwError) ? { borderColor: '#22C55E', borderWidth: 1.5 } : {}
+              ]}
             />
+            {confirmPwError ? (
+              <Text style={styles.hintError}>* {confirmPwError}</Text>
+            ) : confirmPw.length > 0 ? (
+              <Text style={styles.hintSuccess}>✓ Password cocok</Text>
+            ) : null}
 
             <Text style={CreateRecordStyles.fieldLabel}>Email</Text>
             <LabeledInput
@@ -226,3 +275,24 @@ export function CreateUser() {
     </AdminLayout>
   );
 }
+
+import { StyleSheet } from 'react-native';
+
+const styles = StyleSheet.create({
+  hintError: {
+    fontSize: 11,
+    color: '#EF4444',
+    marginTop: 3,
+    marginBottom: 4,
+    marginLeft: 2,
+    fontWeight: '600',
+  },
+  hintSuccess: {
+    fontSize: 11,
+    color: '#16A34A',
+    marginTop: 3,
+    marginBottom: 4,
+    marginLeft: 2,
+    fontWeight: '700',
+  },
+});

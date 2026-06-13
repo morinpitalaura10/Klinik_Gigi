@@ -10,7 +10,7 @@ import {
 } from 'react-native';
 import { MaterialCommunityIcons, Feather } from '@expo/vector-icons';
 import { supabase } from '../../../utils/supabase';
-import { Colors, GlobalStyles, LayoutStyles, ManagementStyles } from '../../../styles/GlobalStyles';
+import { Colors, GlobalStyles, LayoutStyles, ManagementStyles, PatientTableStyles } from '../../../styles/GlobalStyles';
 import AdminLayout from '../../../components/templates/AdminLayout';
 import { useFocusEffect, useNavigation } from '@react-navigation/native';
 
@@ -76,10 +76,11 @@ export function TampilTindakan() {
                 <Text style={ManagementStyles.subtitle}>Kelola daftar tindakan & perawatan klinik</Text>
               </View>
               <TouchableOpacity
-                style={ManagementStyles.btnBlue}
+                style={PatientTableStyles.btnNewPatient}
                 onPress={() => navigation.navigate('CreateTindakan')}
               >
-                <Text style={ManagementStyles.btnBlueText}>+Tindakan Baru</Text>
+                <MaterialCommunityIcons name="plus" size={20} color="#FFF" />
+                <Text style={PatientTableStyles.btnNewPatientText}>Tindakan Baru</Text>
               </TouchableOpacity>
             </View>
 

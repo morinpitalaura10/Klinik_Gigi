@@ -5,7 +5,8 @@ import {
   FlatList, 
   TouchableOpacity, 
   ActivityIndicator,
-  ScrollView
+  ScrollView,
+  RefreshControl
 } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { supabase } from '../../utils/supabase';
@@ -47,9 +48,9 @@ export default function MainDokter() {
   
   const today = new Date().toLocaleDateString('en-CA');
 
-  const fetchQueue = async () => {
+  const fetchQueue = async (isSilent = false) => {
     try {
-      setLoading(true);
+      if (!isSilent) setLoading(true);
       let query = supabase
         .from('tb_rekam_medis')
         .select(`
@@ -78,10 +79,35 @@ export default function MainDokter() {
     }
   };
 
+  const onRefresh = useCallback(() => {
+    setRefreshing(true);
+    fetchQueue(true);
+  }, [user?.id_users, today]);
+
   useFocusEffect(
     useCallback(() => {
       fetchQueue();
-    }, [])
+
+      const channel = supabase
+        .channel('tb_rekam_medis_changes')
+        .on(
+          'postgres_changes',
+          {
+            event: '*',
+            schema: 'public',
+            table: 'tb_rekam_medis',
+          },
+          (payload) => {
+            console.log('Realtime change in tb_rekam_medis:', payload);
+            fetchQueue(true);
+          }
+        )
+        .subscribe();
+
+      return () => {
+        supabase.removeChannel(channel);
+      };
+    }, [user?.id_users, today])
   );
 
   const getFormattedDate = () => {
@@ -117,6 +143,13 @@ export default function MainDokter() {
         style={DoctorDashboardStyles.mainContainer}
         contentContainerStyle={GlobalStyles.pb40}
         showsVerticalScrollIndicator={false}
+        refreshControl={
+          <RefreshControl 
+            refreshing={refreshing} 
+            onRefresh={onRefresh} 
+            colors={[Colors.primary]} 
+          />
+        }
       >
         <View style={DoctorDashboardStyles.doctorInfoContainer}>
             <Text style={DoctorDashboardStyles.doctorName}>

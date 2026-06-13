@@ -27,6 +27,7 @@ interface Props {
   hideLabel?: boolean;
   containerStyle?: any;
   buttonStyle?: any;
+  isActive?: boolean;
 }
 
 export default function DropdownInput({ 
@@ -38,7 +39,8 @@ export default function DropdownInput({
   disabled = false,
   hideLabel = false,
   containerStyle,
-  buttonStyle
+  buttonStyle,
+  isActive = false
 }: Props) {
   const [modalVisible, setModalVisible] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
@@ -60,19 +62,28 @@ export default function DropdownInput({
       {!hideLabel && <TextLabel style={GlobalStyles.inputLabel}>{label}</TextLabel>}
       
       <TouchableOpacity 
-        style={[GlobalStyles.pickerButton, buttonStyle, disabled && GlobalStyles.disabledInput]} 
+        style={[
+          GlobalStyles.pickerButton, 
+          buttonStyle, 
+          disabled && GlobalStyles.disabledInput,
+          isActive && { backgroundColor: '#F0FDF4', borderColor: '#22C55E', borderWidth: 1.5 }
+        ]} 
         onPress={() => !disabled && setModalVisible(true)}
         activeOpacity={disabled ? 1 : 0.7}
       >
         <View style={[LayoutStyles.flex1, GlobalStyles.justifyCenter]}>
           <Text 
-            style={[GlobalStyles.pickerText, !selectedOption && GlobalStyles.pickerPlaceholder]}
+            style={[
+              GlobalStyles.pickerText, 
+              !selectedOption && GlobalStyles.pickerPlaceholder,
+              isActive && { color: '#166534', fontWeight: '600' }
+            ]}
             numberOfLines={1}
           >
             {selectedOption ? selectedOption.label : placeholder}
           </Text>
         </View>
-        <MaterialCommunityIcons name="menu-down" size={24} color={disabled ? '#888' : '#801919'} />
+        <MaterialCommunityIcons name="menu-down" size={24} color={disabled ? '#888' : isActive ? '#166534' : '#801919'} />
       </TouchableOpacity>
 
       <Modal

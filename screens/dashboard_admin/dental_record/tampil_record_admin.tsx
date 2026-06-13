@@ -52,9 +52,9 @@ export function TampilRecordAdmin() {
 
   const [selectedDate] = useState(getLocalDate());
 
-  const fetchRecords = async () => {
+  const fetchRecords = async (isSilent = false) => {
     try {
-      setLoading(true);
+      if (!isSilent) setLoading(true);
       const { data, error } = await supabase
         .from('tb_rekam_medis')
         .select(`
@@ -80,6 +80,26 @@ export function TampilRecordAdmin() {
   useFocusEffect(
     useCallback(() => {
       fetchRecords();
+
+      const channel = supabase
+        .channel('admin_tb_rekam_medis_changes')
+        .on(
+          'postgres_changes',
+          {
+            event: '*',
+            schema: 'public',
+            table: 'tb_rekam_medis',
+          },
+          (payload) => {
+            console.log('Realtime change in tb_rekam_medis for Admin:', payload);
+            fetchRecords(true);
+          }
+        )
+        .subscribe();
+
+      return () => {
+        supabase.removeChannel(channel);
+      };
     }, [selectedDate])
   );
 
@@ -208,13 +228,17 @@ export function TampilRecordAdmin() {
                       </View>
 
                       <View style={[DentalRecordStyles.colAksi, { alignItems: 'center' }]}>
-                        <TouchableOpacity
-                          style={DentalRecordStyles.btnEditAction}
-                          onPress={() => navigation.navigate('CreateRecordAdmin', { editItem: item })}
-                        >
-                          <Feather name="edit" size={14} color="#FFF" />
-                          <Text style={DentalRecordStyles.btnEditActionText}>Edit</Text>
-                        </TouchableOpacity>
+                        {item.status !== 'Selesai' && item.status !== 'Batal' ? (
+                          <TouchableOpacity
+                            style={DentalRecordStyles.btnEditAction}
+                            onPress={() => navigation.navigate('CreateRecordAdmin', { editItem: item })}
+                          >
+                            <Feather name="edit" size={14} color="#FFF" />
+                            <Text style={DentalRecordStyles.btnEditActionText}>Edit</Text>
+                          </TouchableOpacity>
+                        ) : (
+                          <Text style={{ color: '#AAA', fontSize: 14 }}>-</Text>
+                        )}
                       </View>
                     </View>
                   );
